@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Button, Text, ActivityIndicator } from 'react-native-paper';
+import { View, StyleSheet, Pressable } from 'react-native';
+import { Text, ActivityIndicator } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -8,6 +9,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../navigation/types';
 import { uploadDocument, PickedFile } from '../api/documents';
 import { extractErrorMessage } from '../api/client';
+import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Upload'>;
 
@@ -65,39 +67,49 @@ export default function UploadScreen({ navigation }: Props) {
     mutation.mutate(file);
   };
 
+  if (mutation.isPending) {
+    return (
+      <View style={styles.loadingPage}>
+        <View style={styles.loadingIconWrap}>
+          <ActivityIndicator animating size="large" color={GOLD} />
+        </View>
+        <Text style={styles.loadingTitle}>Analyzing your document</Text>
+        <Text style={styles.loadingSubtitle}>{statusText}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text variant="headlineSmall" style={styles.title}>
-        Upload a Document
-      </Text>
+      <View style={styles.heroIconWrap}>
+        <MaterialCommunityIcons name="file-search-outline" size={36} color={GOLD} />
+      </View>
+      <Text style={styles.title}>Upload a Document</Text>
       <Text style={styles.subtitle}>
-        Supported: PDF, DOCX. (Image/camera scan support requires OCR, coming soon.)
+        We'll explain it in plain English and flag anything risky before you sign.
       </Text>
 
-      <Button
-        mode="contained"
-        style={styles.button}
-        onPress={pickAndUploadFile}
-        disabled={mutation.isPending}
-      >
-        Choose PDF / DOCX
-      </Button>
-
-      <Button
-        mode="outlined"
-        style={styles.button}
-        onPress={pickAndUploadImage}
-        disabled={mutation.isPending}
-      >
-        Scan with Camera (JPG/PNG)
-      </Button>
-
-      {mutation.isPending && (
-        <View style={styles.loadingBox}>
-          <ActivityIndicator animating size="large" />
-          <Text style={styles.statusText}>{statusText}</Text>
+      <Pressable style={[styles.optionCard, cardShadow]} onPress={pickAndUploadFile}>
+        <View style={[styles.optionIcon, { backgroundColor: NAVY }]}>
+          <MaterialCommunityIcons name="file-pdf-box" size={24} color={GOLD} />
         </View>
-      )}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.optionTitle}>Choose PDF / DOCX</Text>
+          <Text style={styles.optionSub}>From your files</Text>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={22} color={TEXT_MUTED} />
+      </Pressable>
+
+      <Pressable style={[styles.optionCard, cardShadow]} onPress={pickAndUploadImage}>
+        <View style={[styles.optionIcon, { backgroundColor: '#FFF7E0' }]}>
+          <MaterialCommunityIcons name="camera-outline" size={24} color={NAVY} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.optionTitle}>Scan with Camera</Text>
+          <Text style={styles.optionSub}>JPG / PNG · Read instantly by AI</Text>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={22} color={TEXT_MUTED} />
+      </Pressable>
 
       {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
@@ -105,11 +117,55 @@ export default function UploadScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24 },
-  title: { marginBottom: 4 },
-  subtitle: { color: '#666', marginBottom: 24 },
-  button: { marginBottom: 12, paddingVertical: 4 },
-  loadingBox: { marginTop: 24, alignItems: 'center' },
-  statusText: { marginTop: 12, textAlign: 'center', color: '#444' },
-  errorText: { color: '#DC2626', marginTop: 16 },
+  container: { flex: 1, padding: 24, backgroundColor: '#F4F5F9' },
+  heroIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: NAVY,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  title: { textAlign: 'center', fontSize: 20, fontWeight: '700', color: NAVY, marginBottom: 6 },
+  subtitle: { textAlign: 'center', color: TEXT_MUTED, marginBottom: 28, paddingHorizontal: 8 },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+    gap: 14,
+  },
+  optionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionTitle: { fontWeight: '700', color: NAVY, fontSize: 15 },
+  optionSub: { color: TEXT_MUTED, fontSize: 12, marginTop: 2 },
+  errorText: { color: '#DC2626', marginTop: 16, textAlign: 'center' },
+  loadingPage: {
+    flex: 1,
+    backgroundColor: NAVY,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+  },
+  loadingIconWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: 'rgba(212,175,55,0.14)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  loadingTitle: { color: 'white', fontSize: 18, fontWeight: '700', marginBottom: 8 },
+  loadingSubtitle: { color: '#B7C0D1', textAlign: 'center' },
 });

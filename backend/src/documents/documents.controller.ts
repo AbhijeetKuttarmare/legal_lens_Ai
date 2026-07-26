@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -38,5 +39,13 @@ export class DocumentsController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.documentsService.uploadAndAnalyze(user.userId, file);
+  }
+
+  @Delete(':id')
+  remove(
+    @CurrentUser() user: { userId: string },
+    @Param('id') id: string,
+  ) {
+    return this.documentsService.deleteDocument(user.userId, id);
   }
 }

@@ -22,11 +22,5 @@ export async function extractText(
     return result.value;
   }
 
-  if (mimeType === 'image/jpeg' || mimeType === 'image/png') {
-    throw new Error(
-      'Image OCR is not enabled in this build yet. Please upload a PDF or DOCX for now.',
-    );
-  }
-
   throw new Error(`Unsupported file type: ${mimeType}`);
 }

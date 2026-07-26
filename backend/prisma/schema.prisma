@@ -37,12 +37,22 @@ enum RiskLevel {
   HIGH
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 model User {
   id           String    @id @default(uuid())
   email        String?   @unique
   passwordHash String?
   phone        String?   @unique
   name         String?
+  firstName    String?
+  lastName     String?
+  gender       Gender?
+  dob          DateTime?
   plan         PlanTier  @default(FREE)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -51,7 +61,7 @@ model User {
 
 model Document {
   id            String         @id @default(uuid())
-  user          User           @relation(fields: [userId], references: [id])
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
   fileName      String
   fileType      String
@@ -70,7 +80,7 @@ model Document {
 
 model Summary {
   id          String   @id @default(uuid())
-  document    Document @relation(fields: [documentId], references: [id])
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   documentId  String   @unique
   documentType String
   summaryText String   @db.Text
@@ -79,7 +89,7 @@ model Summary {
 
 model ClauseAnalysis {
   id         String   @id @default(uuid())
-  document   Document @relation(fields: [documentId], references: [id])
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   documentId String   @unique
   clauses    Json
   createdAt  DateTime @default(now())
@@ -87,7 +97,7 @@ model ClauseAnalysis {
 
 model RiskAnalysis {
   id         String    @id @default(uuid())
-  document   Document  @relation(fields: [documentId], references: [id])
+  document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
   documentId String    @unique
   score      Int
   level      RiskLevel
@@ -98,7 +108,7 @@ model RiskAnalysis {
 
 model ChatMessage {
   id         String   @id @default(uuid())
-  document   Document @relation(fields: [documentId], references: [id])
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
   documentId String
   role       String
   content    String   @db.Text

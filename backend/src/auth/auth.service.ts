@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { OtpService } from '../otp/otp.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { toSafeUser } from '../users/user.presenter';
 
 @Injectable()
 export class AuthService {
@@ -18,21 +19,7 @@ export class AuthService {
     private readonly otp: OtpService,
   ) {}
 
-  private toSafeUser(user: {
-    id: string;
-    email: string | null;
-    phone: string | null;
-    name: string | null;
-    plan: string;
-  }) {
-    return {
-      id: user.id,
-      email: user.email,
-      phone: user.phone,
-      name: user.name,
-      plan: user.plan,
-    };
-  }
+  private toSafeUser = toSafeUser;
 
   private signToken(userId: string) {
     return this.jwt.sign({ sub: userId });

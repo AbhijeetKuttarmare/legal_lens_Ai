@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
-import { ActivityIndicator, IconButton, Text, TextInput } from 'react-native-paper';
+import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
+import { ActivityIndicator, Text, TextInput } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../navigation/types';
 import { askQuestion, getChatHistory } from '../api/chat';
 import { ChatMessage } from '../api/types';
+import { NAVY, GOLD, TEXT_MUTED } from '../theme/theme';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Chat'>;
 
@@ -40,21 +42,25 @@ export default function ChatScreen({ route }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={styles.page}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={80}
     >
       <FlatList
         style={styles.list}
+        contentContainerStyle={{ paddingVertical: 12 }}
         data={messages || []}
         keyExtractor={(item: ChatMessage) => item.id}
         ListEmptyComponent={
           <View style={styles.suggestions}>
-            <Text style={{ color: '#666', marginBottom: 8 }}>Try asking:</Text>
+            <View style={styles.assistantIconWrap}>
+              <MaterialCommunityIcons name="robot-outline" size={22} color={NAVY} />
+            </View>
+            <Text style={styles.suggestionsLabel}>Try asking:</Text>
             {SUGGESTED_QUESTIONS.map((q) => (
-              <Text key={q} style={styles.suggestionChip} onPress={() => send(q)}>
-                {q}
-              </Text>
+              <Pressable key={q} style={styles.suggestionChip} onPress={() => send(q)}>
+                <Text style={styles.suggestionChipText}>{q}</Text>
+              </Pressable>
             ))}
           </View>
         }
@@ -65,41 +71,74 @@ export default function ChatScreen({ route }: Props) {
               item.role === 'user' ? styles.userBubble : styles.assistantBubble,
             ]}
           >
-            <Text style={item.role === 'user' ? { color: 'white' } : undefined}>
+            <Text style={item.role === 'user' ? styles.userText : styles.assistantText}>
               {item.content}
             </Text>
           </View>
         )}
       />
-      {mutation.isPending && <ActivityIndicator style={{ marginBottom: 8 }} />}
+      {mutation.isPending && (
+        <ActivityIndicator style={{ marginBottom: 8 }} color={NAVY} />
+      )}
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
           mode="outlined"
+          outlineStyle={styles.inputOutline}
           placeholder="Ask about this document..."
           value={question}
           onChangeText={setQuestion}
           onSubmitEditing={() => send(question)}
         />
-        <IconButton icon="send" onPress={() => send(question)} disabled={mutation.isPending} />
+        <Pressable
+          style={[styles.sendButton, (mutation.isPending || !question.trim()) && { opacity: 0.5 }]}
+          onPress={() => send(question)}
+          disabled={mutation.isPending || !question.trim()}
+        >
+          <MaterialCommunityIcons name="send" size={20} color={NAVY} />
+        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  list: { flex: 1, padding: 12 },
-  suggestions: { padding: 12 },
-  suggestionChip: {
-    backgroundColor: '#EEF2FF',
-    color: '#1E3A8A',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 8,
+  page: { flex: 1, backgroundColor: '#F4F5F9' },
+  list: { flex: 1, paddingHorizontal: 14 },
+  suggestions: { padding: 12, alignItems: 'center', marginTop: 20 },
+  assistantIconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#EEF1F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
-  bubble: { padding: 12, borderRadius: 12, marginBottom: 10, maxWidth: '85%' },
-  userBubble: { backgroundColor: '#1E3A8A', alignSelf: 'flex-end' },
-  assistantBubble: { backgroundColor: '#F1F5F9', alignSelf: 'flex-start' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', padding: 8 },
-  input: { flex: 1 },
+  suggestionsLabel: { color: TEXT_MUTED, marginBottom: 12 },
+  suggestionChip: {
+    backgroundColor: 'white',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 10,
+    width: '100%',
+  },
+  suggestionChipText: { color: NAVY, fontWeight: '600', textAlign: 'center' },
+  bubble: { padding: 13, borderRadius: 16, marginBottom: 10, maxWidth: '85%' },
+  userBubble: { backgroundColor: NAVY, alignSelf: 'flex-end', borderBottomRightRadius: 4 },
+  assistantBubble: { backgroundColor: 'white', alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
+  userText: { color: 'white' },
+  assistantText: { color: '#1F2937' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 8 },
+  input: { flex: 1, backgroundColor: 'white' },
+  inputOutline: { borderRadius: 24 },
+  sendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: GOLD,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

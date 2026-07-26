@@ -1,7 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import * as fs from 'fs';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
+import { DocumentAnalysis } from '../ai/ai.types';
 import { extractText } from './text-extraction.util';
+
+const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png'];
+
+const PLAN_DOCUMENT_LIMITS: Record<string, number> = {
+  FREE: 1,
+  PRO: Infinity,
+  ENTERPRISE: Infinity,
+};
 
 @Injectable()
 export class DocumentsService {
@@ -33,6 +43,17 @@ export class DocumentsService {
     userId: string,
     file: Express.Multer.File,
   ) {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const limit = PLAN_DOCUMENT_LIMITS[user.plan] ?? 1;
+    const existingCount = await this.prisma.document.count({
+      where: { userId, status: { not: 'FAILED' } },
+    });
+    if (existingCount >= limit) {
+      throw new ForbiddenException(
+        `Your ${user.plan} plan allows ${limit} document${limit === 1 ? '' : 's'}. Upgrade to upload more.`,
+      );
+    }
+
     const document = await this.prisma.document.create({
       data: {
         userId,
@@ -44,8 +65,16 @@ export class DocumentsService {
     });
 
     try {
-      const text = await extractText(file.path, file.mimetype);
-      const analysis = await this.ai.analyzeDocument(text);
+      let text: string;
+      let analysis: DocumentAnalysis;
+      if (IMAGE_MIME_TYPES.includes(file.mimetype)) {
+        const result = await this.ai.analyzeDocumentFromImage(file.path, file.mimetype);
+        analysis = result.analysis;
+        text = result.extractedText;
+      } else {
+        text = await extractText(file.path, file.mimetype);
+        analysis = await this.ai.analyzeDocument(text);
+      }
 
       await this.prisma.$transaction([
         this.prisma.document.update({
@@ -88,5 +117,17 @@ export class DocumentsService {
     }
 
     return this.getFullReport(userId, document.id);
+  }
+
+  async deleteDocument(userId: string, documentId: string) {
+    const document = await this.prisma.document.findFirst({
+      where: { id: documentId, userId },
+    });
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+    await this.prisma.document.delete({ where: { id: documentId } });
+    fs.unlink(document.storagePath, () => {});
+    return { success: true };
   }
 }

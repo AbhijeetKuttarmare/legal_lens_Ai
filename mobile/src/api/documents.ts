@@ -11,6 +11,10 @@ export async function getDocumentReport(id: string): Promise<DocumentReport> {
   return data;
 }
 
+export async function deleteDocument(id: string): Promise<void> {
+  await apiClient.delete(`/documents/${id}`);
+}
+
 export interface PickedFile {
   uri: string;
   name: string;

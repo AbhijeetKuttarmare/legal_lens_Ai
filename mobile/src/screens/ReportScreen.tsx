@@ -1,16 +1,29 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { ActivityIndicator, Button, Card, Chip, Text } from 'react-native-paper';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { MainStackParamList } from '../navigation/types';
+import { NavigationProp } from '@react-navigation/native';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
+import { MainStackParamList, RootNavigationParamList } from '../navigation/types';
 import { getDocumentReport } from '../api/documents';
-import { riskColor } from '../theme/theme';
+import { riskColor, NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppSelector } from '../store/hooks';
+import { buildReportHtml } from '../utils/reportHtml';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Report'>;
 
+const severityIcon = { high: 'alert-circle', medium: 'alert', low: 'information' } as const;
+
 export default function ReportScreen({ route, navigation }: Props) {
   const { documentId } = route.params;
+  const nav = navigation as unknown as NavigationProp<RootNavigationParamList>;
+  const user = useAppSelector((s) => s.auth.user);
+  const isPremium = user?.plan === 'ENTERPRISE';
+  const [exporting, setExporting] = useState(false);
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['document', documentId],
     queryFn: () => getDocumentReport(documentId),
@@ -18,10 +31,48 @@ export default function ReportScreen({ route, navigation }: Props) {
       query.state.data?.status === 'PROCESSING' ? 2000 : false,
   });
 
+  const onExport = async () => {
+    if (!isPremium) {
+      Alert.alert(
+        'Premium feature',
+        'Exporting and downloading reports is available on the Premium plan.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          {
+            text: 'View Plans',
+            onPress: () => nav.navigate('Tabs', { screen: 'Subscription' } as never),
+          },
+        ],
+      );
+      return;
+    }
+    if (!report) return;
+    setExporting(true);
+    try {
+      const html = buildReportHtml(report);
+      const { uri } = await Print.printToFileAsync({ html });
+      const destUri = `${FileSystem.documentDirectory}LegalLensAI-Report-${documentId}.pdf`;
+      await FileSystem.copyAsync({ from: uri, to: destUri });
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(destUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'Export Report',
+        });
+      } else {
+        Alert.alert('Export ready', `PDF saved to ${destUri}`);
+      }
+    } catch {
+      Alert.alert('Export failed', 'Could not generate the PDF. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={NAVY} />
       </View>
     );
   }
@@ -36,9 +87,9 @@ export default function ReportScreen({ route, navigation }: Props) {
 
   if (report.status === 'PROCESSING') {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 16 }}>Still analyzing this document...</Text>
+      <View style={styles.centerDark}>
+        <ActivityIndicator size="large" color={GOLD} />
+        <Text style={styles.processingText}>Still analyzing this document...</Text>
       </View>
     );
   }
@@ -46,8 +97,9 @@ export default function ReportScreen({ route, navigation }: Props) {
   if (report.status === 'FAILED') {
     return (
       <View style={styles.center}>
-        <Text style={{ color: '#DC2626' }}>
-          Analysis failed for this document. Check that OPENAI_API_KEY is set on the backend.
+        <MaterialCommunityIcons name="alert-circle-outline" size={36} color="#DC2626" />
+        <Text style={{ color: '#DC2626', textAlign: 'center', marginTop: 12 }}>
+          Analysis failed for this document. Check that ANTHROPIC_API_KEY is set on the backend.
         </Text>
       </View>
     );
@@ -56,95 +108,209 @@ export default function ReportScreen({ route, navigation }: Props) {
   const risk = report.riskAnalysis;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Text variant="labelLarge" style={{ color: '#666' }}>
-        Document Type
-      </Text>
-      <Text variant="headlineSmall" style={{ marginBottom: 16 }}>
-        {report.documentType?.replace(/_/g, ' ') || 'Document'}
-      </Text>
+    <ScrollView style={styles.page} contentContainerStyle={{ paddingBottom: 40 }}>
+      <View style={styles.header}>
+        <Text style={styles.docTypeLabel}>Document Type</Text>
+        <Text style={styles.docTypeValue}>
+          {report.documentType?.replace(/_/g, ' ') || 'Document'}
+        </Text>
+        {risk && (
+          <View style={styles.scoreRow}>
+            <View style={[styles.scoreRing, { borderColor: riskColor(risk.level) }]}>
+              <Text style={[styles.scoreNumber, { color: riskColor(risk.level) }]}>
+                {risk.score}
+              </Text>
+            </View>
+            <View>
+              <Text style={styles.scoreLevel}>{risk.level} RISK</Text>
+              <Text style={styles.scoreSub}>out of 100</Text>
+            </View>
+          </View>
+        )}
+      </View>
 
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text variant="titleMedium">Summary</Text>
-          <Text style={{ marginTop: 8 }}>{report.summary?.summaryText}</Text>
-        </Card.Content>
-      </Card>
+      <View style={styles.body}>
+        <View style={[styles.card, cardShadow]}>
+          <View style={styles.cardTitleRow}>
+            <MaterialCommunityIcons name="text-box-outline" size={18} color={NAVY} />
+            <Text style={styles.cardTitle}>Summary</Text>
+          </View>
+          <Text style={styles.summaryText}>{report.summary?.summaryText}</Text>
+        </View>
 
-      {risk && (
-        <Card style={styles.card}>
-          <Card.Content>
-            <View style={styles.rowBetween}>
-              <Text variant="titleMedium">Risk Score</Text>
-              <Chip style={{ backgroundColor: riskColor(risk.level) }} textStyle={{ color: 'white' }}>
-                {risk.score}/100 · {risk.level}
-              </Chip>
+        {!!risk?.flags?.length && (
+          <View style={[styles.card, cardShadow]}>
+            <View style={styles.cardTitleRow}>
+              <MaterialCommunityIcons name="shield-alert-outline" size={18} color={NAVY} />
+              <Text style={styles.cardTitle}>Risk Flags</Text>
             </View>
             {risk.flags.map((flag, idx) => (
-              <Text key={idx} style={styles.riskFlag}>
-                ⚠️ {flag.title} — {flag.detail}
-              </Text>
-            ))}
-          </Card.Content>
-        </Card>
-      )}
-
-      {!!report.clauseAnalysis?.clauses?.length && (
-        <>
-          <Text variant="titleMedium" style={{ marginTop: 8, marginBottom: 8 }}>
-            Clause Cards
-          </Text>
-          <View style={styles.clauseGrid}>
-            {report.clauseAnalysis.clauses.map((clause, idx) => (
-              <Card key={idx} style={styles.clauseCard}>
-                <Card.Content>
-                  <Text variant="labelMedium" style={{ color: '#666' }}>
-                    {clause.label}
-                  </Text>
-                  <Text variant="titleSmall">{clause.value}</Text>
-                </Card.Content>
-              </Card>
+              <View key={idx} style={styles.flagRow}>
+                <MaterialCommunityIcons
+                  name={severityIcon[flag.severity]}
+                  size={18}
+                  color={riskColor(
+                    flag.severity === 'high' ? 'HIGH' : flag.severity === 'medium' ? 'MEDIUM' : 'LOW',
+                  )}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.flagTitle}>{flag.title}</Text>
+                  <Text style={styles.flagDetail}>{flag.detail}</Text>
+                </View>
+              </View>
             ))}
           </View>
-        </>
-      )}
+        )}
 
-      {!!risk?.suggestions?.length && (
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text variant="titleMedium">Before Signing, Ask:</Text>
+        {!!report.clauseAnalysis?.clauses?.length && (
+          <>
+            <Text style={styles.sectionTitle}>Clause Cards</Text>
+            <View style={styles.clauseGrid}>
+              {report.clauseAnalysis.clauses.map((clause, idx) => (
+                <View key={idx} style={[styles.clauseCard, cardShadow]}>
+                  <Text style={styles.clauseLabel}>{clause.label}</Text>
+                  <Text style={styles.clauseValue}>{clause.value}</Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {!!risk?.suggestions?.length && (
+          <View style={[styles.card, cardShadow]}>
+            <View style={styles.cardTitleRow}>
+              <MaterialCommunityIcons name="lightbulb-on-outline" size={18} color={NAVY} />
+              <Text style={styles.cardTitle}>Before Signing, Ask</Text>
+            </View>
             {risk.suggestions.map((s, idx) => (
-              <Text key={idx} style={{ marginTop: 6 }}>
-                • {s}
-              </Text>
+              <View key={idx} style={styles.suggestionRow}>
+                <View style={styles.suggestionBullet}>
+                  <Text style={styles.suggestionBulletText}>{idx + 1}</Text>
+                </View>
+                <Text style={styles.suggestionText}>{s}</Text>
+              </View>
             ))}
-          </Card.Content>
-        </Card>
-      )}
+          </View>
+        )}
 
-      <Button
-        mode="contained"
-        style={{ marginTop: 16 }}
-        onPress={() => navigation.navigate('Chat', { documentId, fileName: report.fileName })}
-      >
-        Ask AI About This Document
-      </Button>
+        <Pressable
+          style={[styles.chatButton, cardShadow]}
+          onPress={() => navigation.navigate('Chat', { documentId, fileName: report.fileName })}
+        >
+          <MaterialCommunityIcons name="chat-processing-outline" size={20} color={NAVY} />
+          <Text style={styles.chatButtonText}>Ask AI About This Document</Text>
+        </Pressable>
 
-      <Text style={styles.disclaimer}>
-        This is an informational explanation, not professional legal advice. Consult a
-        qualified lawyer for important decisions.
-      </Text>
+        <Pressable
+          style={[styles.exportButton, cardShadow]}
+          onPress={onExport}
+          disabled={exporting}
+        >
+          {exporting ? (
+            <ActivityIndicator size="small" color={NAVY} />
+          ) : (
+            <MaterialCommunityIcons
+              name={isPremium ? 'download-outline' : 'lock-outline'}
+              size={20}
+              color={NAVY}
+            />
+          )}
+          <Text style={styles.exportButtonText}>
+            {isPremium ? 'Export / Download Report' : 'Export Report (Premium)'}
+          </Text>
+        </Pressable>
+
+        <Text style={styles.disclaimer}>
+          This is an informational explanation, not professional legal advice. Consult a
+          qualified lawyer for important decisions.
+        </Text>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  page: { flex: 1, backgroundColor: '#F4F5F9' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  card: { marginBottom: 16 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  riskFlag: { marginTop: 8 },
+  centerDark: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: NAVY,
+  },
+  processingText: { color: 'white', marginTop: 16 },
+  header: {
+    backgroundColor: NAVY,
+    paddingTop: 24,
+    paddingBottom: 28,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+  },
+  docTypeLabel: { color: '#B7C0D1', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
+  docTypeValue: { color: 'white', fontSize: 22, fontWeight: '700', marginTop: 4, marginBottom: 20 },
+  scoreRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  scoreRing: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 3,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreNumber: { fontSize: 18, fontWeight: '800' },
+  scoreLevel: { color: 'white', fontWeight: '700', letterSpacing: 0.5 },
+  scoreSub: { color: '#B7C0D1', fontSize: 12, marginTop: 2 },
+  body: { padding: 20 },
+  card: { backgroundColor: 'white', borderRadius: 16, padding: 16, marginBottom: 16 },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
+  cardTitle: { fontWeight: '700', color: NAVY, fontSize: 15 },
+  summaryText: { color: '#374151', lineHeight: 21 },
+  flagRow: { flexDirection: 'row', gap: 10, marginTop: 10, alignItems: 'flex-start' },
+  flagTitle: { fontWeight: '700', color: NAVY, fontSize: 13.5 },
+  flagDetail: { color: TEXT_MUTED, fontSize: 12.5, marginTop: 2 },
+  sectionTitle: { fontWeight: '700', fontSize: 16, color: NAVY, marginBottom: 10 },
   clauseGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
-  clauseCard: { width: '47%' },
-  disclaimer: { color: '#888', fontSize: 12, marginTop: 20, textAlign: 'center' },
+  clauseCard: { width: '47%', backgroundColor: 'white', borderRadius: 14, padding: 14 },
+  clauseLabel: { color: TEXT_MUTED, fontSize: 11.5, textTransform: 'uppercase', letterSpacing: 0.3 },
+  clauseValue: { color: NAVY, fontWeight: '700', fontSize: 15, marginTop: 4 },
+  suggestionRow: { flexDirection: 'row', gap: 10, marginTop: 10, alignItems: 'flex-start' },
+  suggestionBullet: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: GOLD,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  suggestionBulletText: { color: NAVY, fontSize: 11, fontWeight: '800' },
+  suggestionText: { flex: 1, color: '#374151' },
+  chatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: GOLD,
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  chatButtonText: { color: NAVY, fontWeight: '700', fontSize: 15 },
+  exportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: 'white',
+    borderRadius: 14,
+    paddingVertical: 14,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  exportButtonText: { color: NAVY, fontWeight: '700', fontSize: 15 },
+  disclaimer: { color: '#9CA3AF', fontSize: 11.5, marginTop: 18, textAlign: 'center' },
 });

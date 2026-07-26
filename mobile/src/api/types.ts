@@ -3,7 +3,12 @@ export interface AuthUser {
   email: string | null;
   phone: string | null;
   name: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  gender: 'MALE' | 'FEMALE' | 'OTHER' | null;
+  dob: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+  profileComplete: boolean;
 }
 
 export interface AuthResponse {

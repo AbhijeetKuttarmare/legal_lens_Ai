@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { DocumentsModule } from './documents/documents.module';
 import { ChatModule } from './chat/chat.module';
 import { AiModule } from './ai/ai.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AiModule } from './ai/ai.module';
     PrismaModule,
     AuthModule,
     AiModule,
+    UsersModule,
     DocumentsModule,
     ChatModule,
   ],
