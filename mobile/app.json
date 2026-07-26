@@ -2,6 +2,7 @@
   "expo": {
     "name": "LegalLens AI",
     "slug": "legallens-ai",
+    "owner": "rakshandakumar2027s-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/Logo.png",
@@ -12,9 +13,12 @@
       "backgroundColor": "#0B1220"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.legallensai.app"
     },
     "android": {
+      "package": "com.legallensai.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#0B1220",
         "foregroundImage": "./assets/Logo.png",
@@ -27,6 +31,11 @@
     },
     "plugins": [
       "expo-sharing"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "54d685ed-25f8-43ab-95ce-41fe99793a8d"
+      }
+    }
   }
 }

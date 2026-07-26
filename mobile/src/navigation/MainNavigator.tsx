@@ -9,6 +9,7 @@ import EditProfileScreen from '../screens/EditProfileScreen';
 import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import TermsScreen from '../screens/TermsScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
+import CheckoutScreen from '../screens/CheckoutScreen';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -38,6 +39,11 @@ export default function MainNavigator() {
         name="HelpSupport"
         component={HelpSupportScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={({ route }) => ({ title: `Upgrade to ${route.params.planName}` })}
       />
     </Stack.Navigator>
   );

@@ -7,6 +7,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { ChatModule } from './chat/chat.module';
 import { AiModule } from './ai/ai.module';
 import { UsersModule } from './users/users.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     DocumentsModule,
     ChatModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
 })

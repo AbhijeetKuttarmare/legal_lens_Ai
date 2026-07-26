@@ -75,10 +75,11 @@ export default function SubscriptionScreen({ navigation }: Props) {
 
   const onSelectPlan = (plan: Plan) => {
     if (plan.id === currentPlan) return;
-    Alert.alert(
-      'Coming soon',
-      `Upgrading to ${plan.name} isn't wired up to a payment provider yet.`,
-    );
+    if (plan.id === 'FREE') {
+      comingSoon('Downgrade', 'Downgrading to Free isn\'t available yet. Contact support for help.');
+      return;
+    }
+    navigation.navigate('Checkout', { plan: plan.id, planName: plan.name });
   };
 
   return (
