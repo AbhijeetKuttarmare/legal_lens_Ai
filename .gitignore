@@ -1,0 +1,12 @@
+.claude/
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.log
+uploads/
+.expo/
+*.pyc
+.DS_Store
+Thumbs.db

@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlanTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum DocumentType {
+  RENTAL_AGREEMENT
+  EMPLOYMENT_CONTRACT
+  NDA
+  PROPERTY_AGREEMENT
+  LOAN_AGREEMENT
+  MSA
+  PARTNERSHIP_AGREEMENT
+  OTHER
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String?   @unique
+  passwordHash String?
+  phone        String?   @unique
+  name         String?
+  plan         PlanTier  @default(FREE)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  documents    Document[]
+}
+
+model Document {
+  id            String         @id @default(uuid())
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String
+  fileName      String
+  fileType      String
+  storagePath   String
+  status        DocumentStatus @default(UPLOADED)
+  documentType  DocumentType?
+  extractedText String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  summary        Summary?
+  clauseAnalysis ClauseAnalysis?
+  riskAnalysis   RiskAnalysis?
+  chatMessages   ChatMessage[]
+}
+
+model Summary {
+  id          String   @id @default(uuid())
+  document    Document @relation(fields: [documentId], references: [id])
+  documentId  String   @unique
+  documentType String
+  summaryText String   @db.Text
+  createdAt   DateTime @default(now())
+}
+
+model ClauseAnalysis {
+  id         String   @id @default(uuid())
+  document   Document @relation(fields: [documentId], references: [id])
+  documentId String   @unique
+  clauses    Json
+  createdAt  DateTime @default(now())
+}
+
+model RiskAnalysis {
+  id         String    @id @default(uuid())
+  document   Document  @relation(fields: [documentId], references: [id])
+  documentId String    @unique
+  score      Int
+  level      RiskLevel
+  flags      Json
+  suggestions Json
+  createdAt  DateTime  @default(now())
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  document   Document @relation(fields: [documentId], references: [id])
+  documentId String
+  role       String
+  content    String   @db.Text
+  createdAt  DateTime @default(now())
+}
