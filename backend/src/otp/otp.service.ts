@@ -25,7 +25,24 @@ export class OtpService {
     return `91${tenDigitPhone}`;
   }
 
+  // Google Play reviewers can't receive real SMS OTPs sent to an arbitrary
+  // number. This lets us hand reviewers one fixed phone/code pair that bypasses
+  // the real 2Factor.in flow, without affecting real users' sign-in.
+  private isReviewBypass(tenDigitPhone: string): boolean {
+    return Boolean(
+      process.env.REVIEW_TEST_PHONE && tenDigitPhone === process.env.REVIEW_TEST_PHONE,
+    );
+  }
+
   async sendOtp(tenDigitPhone: string): Promise<void> {
+    if (this.isReviewBypass(tenDigitPhone)) {
+      this.sessions.set(tenDigitPhone, {
+        sessionId: 'review-bypass',
+        expiresAt: Date.now() + SESSION_TTL_MS,
+      });
+      return;
+    }
+
     const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/${this.fullNumber(tenDigitPhone)}/AUTOGEN`;
     const res = await fetch(url);
     const data = (await res.json()) as { Status: string; Details: string };
@@ -46,6 +63,14 @@ export class OtpService {
     const session = this.sessions.get(tenDigitPhone);
     if (!session || session.expiresAt < Date.now()) {
       throw new BadRequestException('OTP expired or not requested. Please request a new OTP.');
+    }
+
+    if (this.isReviewBypass(tenDigitPhone)) {
+      if (code === process.env.REVIEW_TEST_OTP) {
+        this.sessions.delete(tenDigitPhone);
+        return true;
+      }
+      return false;
     }
 
     const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/VERIFY/${session.sessionId}/${code}`;
