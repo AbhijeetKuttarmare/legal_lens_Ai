@@ -9,7 +9,7 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, transform: true }),
   );
   app.setGlobalPrefix('api', {
-    exclude: ['privacy-policy', 'terms-of-service'],
+    exclude: ['privacy-policy', 'terms-of-service', 'delete-account'],
   });
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   await app.listen(port, '0.0.0.0');

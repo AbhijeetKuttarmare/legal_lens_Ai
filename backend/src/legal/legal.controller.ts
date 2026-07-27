@@ -132,6 +132,25 @@ const TERMS_SECTIONS = [
   },
 ];
 
+const DELETE_ACCOUNT_SECTIONS = [
+  {
+    heading: 'How to delete your LegalLens AI account',
+    body: 'Open the LegalLens AI app and sign in with your phone number. Go to the Profile tab, scroll to the bottom, and tap "Delete Account." Confirm twice when prompted. Your account is deleted immediately — this cannot be undone.',
+  },
+  {
+    heading: "Can't access the app?",
+    body: 'If you no longer have access to the app or your phone number, email support@legallensai.app from the email address associated with your request (or include your registered phone number) and ask us to delete your account. We will process the request within 7 days.',
+  },
+  {
+    heading: 'What gets deleted',
+    body: 'Deleting your account permanently and immediately removes: your profile information (name, phone number, gender, date of birth), all documents you uploaded, all AI-generated summaries, risk analyses and clause extractions for those documents, and your chat history. None of this data is retained after deletion.',
+  },
+  {
+    heading: 'Deleting individual documents without deleting your account',
+    body: 'You do not need to delete your whole account to remove specific documents. Open the Documents tab, tap the three-dot menu on any document, and choose Delete — this removes just that document and its analysis, immediately, while keeping your account active.',
+  },
+];
+
 @Controller()
 export class LegalController {
   @Get('privacy-policy')
@@ -144,5 +163,11 @@ export class LegalController {
   @Header('Content-Type', 'text/html')
   termsOfService() {
     return page('Terms of Service', 'July 2026', TERMS_SECTIONS);
+  }
+
+  @Get('delete-account')
+  @Header('Content-Type', 'text/html')
+  deleteAccount() {
+    return page('Delete Account', 'July 2026', DELETE_ACCOUNT_SECTIONS);
   }
 }
