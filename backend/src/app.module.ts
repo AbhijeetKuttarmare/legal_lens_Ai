@@ -8,6 +8,7 @@ import { ChatModule } from './chat/chat.module';
 import { AiModule } from './ai/ai.module';
 import { UsersModule } from './users/users.module';
 import { PaymentsModule } from './payments/payments.module';
+import { LegalModule } from './legal/legal.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PaymentsModule } from './payments/payments.module';
     DocumentsModule,
     ChatModule,
     PaymentsModule,
+    LegalModule,
   ],
   controllers: [AppController],
 })
