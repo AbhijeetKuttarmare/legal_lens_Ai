@@ -30,8 +30,15 @@
       "favicon": "./assets/icon-glyph.png"
     },
     "plugins": [
-      "expo-sharing"
+      "expo-sharing",
+      "expo-updates"
     ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/54d685ed-25f8-43ab-95ce-41fe99793a8d"
+    },
     "extra": {
       "eas": {
         "projectId": "54d685ed-25f8-43ab-95ce-41fe99793a8d"
