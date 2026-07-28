@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -37,8 +38,9 @@ export class DocumentsController {
   upload(
     @CurrentUser() user: { userId: string },
     @UploadedFile() file: Express.Multer.File,
+    @Body('language') language?: string,
   ) {
-    return this.documentsService.uploadAndAnalyze(user.userId, file);
+    return this.documentsService.uploadAndAnalyze(user.userId, file, language);
   }
 
   @Delete(':id')

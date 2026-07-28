@@ -39,6 +39,7 @@ export interface DocumentSummary {
 }
 
 export interface DocumentReport extends DocumentSummary {
+  language: string;
   extractedText: string | null;
   clauseAnalysis?: { clauses: ClauseItem[] } | null;
   riskAnalysis?: {

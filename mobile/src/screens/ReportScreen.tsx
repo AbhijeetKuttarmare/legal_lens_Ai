@@ -195,7 +195,13 @@ export default function ReportScreen({ route, navigation }: Props) {
 
         <Pressable
           style={[styles.chatButton, cardShadow]}
-          onPress={() => navigation.navigate('Chat', { documentId, fileName: report.fileName })}
+          onPress={() =>
+            navigation.navigate('Chat', {
+              documentId,
+              fileName: report.fileName,
+              language: report.language,
+            })
+          }
         >
           <MaterialCommunityIcons name="chat-processing-outline" size={20} color={NAVY} />
           <Text style={styles.chatButtonText}>Ask AI About This Document</Text>

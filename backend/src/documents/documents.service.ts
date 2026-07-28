@@ -42,6 +42,7 @@ export class DocumentsService {
   async uploadAndAnalyze(
     userId: string,
     file: Express.Multer.File,
+    language = 'en',
   ) {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
     const limit = PLAN_DOCUMENT_LIMITS[user.plan] ?? 1;
@@ -61,6 +62,7 @@ export class DocumentsService {
         fileType: file.mimetype,
         storagePath: file.path,
         status: 'PROCESSING',
+        language,
       },
     });
 
@@ -68,12 +70,12 @@ export class DocumentsService {
       let text: string;
       let analysis: DocumentAnalysis;
       if (IMAGE_MIME_TYPES.includes(file.mimetype)) {
-        const result = await this.ai.analyzeDocumentFromImage(file.path, file.mimetype);
+        const result = await this.ai.analyzeDocumentFromImage(file.path, file.mimetype, language);
         analysis = result.analysis;
         text = result.extractedText;
       } else {
         text = await extractText(file.path, file.mimetype);
-        analysis = await this.ai.analyzeDocument(text);
+        analysis = await this.ai.analyzeDocument(text, language);
       }
 
       await this.prisma.$transaction([

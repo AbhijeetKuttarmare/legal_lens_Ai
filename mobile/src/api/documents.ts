@@ -21,13 +21,14 @@ export interface PickedFile {
   mimeType: string;
 }
 
-export async function uploadDocument(file: PickedFile): Promise<DocumentReport> {
+export async function uploadDocument(file: PickedFile, language = 'en'): Promise<DocumentReport> {
   const form = new FormData();
   form.append('file', {
     uri: file.uri,
     name: file.name,
     type: file.mimeType,
   } as unknown as Blob);
+  form.append('language', language);
 
   const { data } = await apiClient.post<DocumentReport>(
     '/documents/upload',

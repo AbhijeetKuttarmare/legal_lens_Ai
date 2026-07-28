@@ -1,25 +1,43 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, Alert } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { MainStackParamList } from '../navigation/types';
+import { NavigationProp } from '@react-navigation/native';
+import axios from 'axios';
+import { MainStackParamList, RootNavigationParamList } from '../navigation/types';
 import { uploadDocument, PickedFile } from '../api/documents';
 import { extractErrorMessage } from '../api/client';
 import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Upload'>;
 
+const LANGUAGES: { code: string; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'ta', label: 'தமிழ்' },
+  { code: 'te', label: 'తెలుగు' },
+  { code: 'bn', label: 'বাংলা' },
+  { code: 'mr', label: 'मराठी' },
+  { code: 'gu', label: 'ગુજરાતી' },
+  { code: 'kn', label: 'ಕನ್ನಡ' },
+  { code: 'ml', label: 'മലയാളം' },
+  { code: 'pa', label: 'ਪੰਜਾਬੀ' },
+  { code: 'ur', label: 'اردو' },
+];
+
 export default function UploadScreen({ navigation }: Props) {
+  const nav = navigation as unknown as NavigationProp<RootNavigationParamList>;
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [statusText, setStatusText] = useState('');
+  const [language, setLanguage] = useState('en');
 
   const mutation = useMutation({
-    mutationFn: uploadDocument,
+    mutationFn: (file: PickedFile) => uploadDocument(file, language),
     onMutate: () => {
       setError(null);
       setStatusText('Extracting text and analyzing with AI. This can take up to a minute...');
@@ -28,7 +46,18 @@ export default function UploadScreen({ navigation }: Props) {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
       navigation.replace('Report', { documentId: report.id });
     },
-    onError: (e) => setError(extractErrorMessage(e)),
+    onError: (e) => {
+      if (axios.isAxiosError(e) && e.response?.status === 403) {
+        Alert.alert('Free plan limit reached', extractErrorMessage(e), [
+          {
+            text: 'OK',
+            onPress: () => nav.navigate('Tabs', { screen: 'Subscription' } as never),
+          },
+        ]);
+        return;
+      }
+      setError(extractErrorMessage(e));
+    },
     onSettled: () => setStatusText(''),
   });
 
@@ -86,8 +115,26 @@ export default function UploadScreen({ navigation }: Props) {
       </View>
       <Text style={styles.title}>Upload a Document</Text>
       <Text style={styles.subtitle}>
-        We'll explain it in plain English and flag anything risky before you sign.
+        We'll explain it in plain language and flag anything risky before you sign.
       </Text>
+
+      <Text style={styles.languageLabel}>Explain the analysis in:</Text>
+      <View style={styles.languageRow}>
+        {LANGUAGES.map((lang) => {
+          const active = language === lang.code;
+          return (
+            <Pressable
+              key={lang.code}
+              style={[styles.languageChip, active && styles.languageChipActive]}
+              onPress={() => setLanguage(lang.code)}
+            >
+              <Text style={[styles.languageChipText, active && styles.languageChipTextActive]}>
+                {lang.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
       <Pressable style={[styles.optionCard, cardShadow]} onPress={pickAndUploadFile}>
         <View style={[styles.optionIcon, { backgroundColor: NAVY }]}>
@@ -130,7 +177,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: { textAlign: 'center', fontSize: 20, fontWeight: '700', color: NAVY, marginBottom: 6 },
-  subtitle: { textAlign: 'center', color: TEXT_MUTED, marginBottom: 28, paddingHorizontal: 8 },
+  subtitle: { textAlign: 'center', color: TEXT_MUTED, marginBottom: 20, paddingHorizontal: 8 },
+  languageLabel: { color: NAVY, fontWeight: '700', fontSize: 12.5, marginBottom: 10 },
+  languageRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 22,
+  },
+  languageChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 18,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  languageChipActive: { backgroundColor: NAVY, borderColor: NAVY },
+  languageChipText: { fontSize: 12.5, fontWeight: '600', color: NAVY },
+  languageChipTextActive: { color: GOLD },
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',

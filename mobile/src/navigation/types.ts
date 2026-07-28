@@ -16,7 +16,7 @@ export type MainStackParamList = {
   Tabs: undefined;
   Upload: undefined;
   Report: { documentId: string };
-  Chat: { documentId: string; fileName: string };
+  Chat: { documentId: string; fileName: string; language?: string };
   EditProfile: undefined;
   PrivacyPolicy: undefined;
   Terms: undefined;

@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.legallensai.app",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#0B1220",
         "foregroundImage": "./assets/icon-adaptive-foreground.png",
@@ -31,6 +31,11 @@
     },
     "plugins": [
       "expo-sharing"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "54d685ed-25f8-43ab-95ce-41fe99793a8d"
+      }
+    }
   }
 }

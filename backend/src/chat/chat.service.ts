@@ -33,6 +33,7 @@ export class ChatService {
         content: m.content,
       })),
       question,
+      document.language,
     );
 
     await this.prisma.chatMessage.createMany({
