@@ -1,4 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -19,11 +20,15 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  // Each request here costs real money via 2Factor SMS — cap it hard,
+  // independent of the general 30/min default applied everywhere else.
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('otp/request')
   requestOtp(@Body() dto: RequestOtpDto) {
     return this.authService.requestOtp(dto.phone);
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('otp/verify')
   verifyOtp(@Body() dto: VerifyOtpDto) {
     return this.authService.verifyOtp(dto.phone, dto.code);

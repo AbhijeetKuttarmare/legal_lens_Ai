@@ -116,6 +116,11 @@ export default function CheckoutScreen({ route, navigation }: Props) {
         source={{ html }}
         onMessage={onMessage}
         style={{ flex: 1 }}
+        androidLayerType="software"
+        onError={(e) => setError(`Checkout failed to load: ${e.nativeEvent.description}`)}
+        onRenderProcessGone={() =>
+          setError('The checkout page crashed. Please go back and try again.')
+        }
       />
       {stage === 'verifying' && (
         <View style={[StyleSheet.absoluteFill, styles.overlay]}>

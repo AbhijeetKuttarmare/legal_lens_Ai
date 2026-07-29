@@ -28,7 +28,9 @@ export class PaymentsService {
     const order = await this.client.orders.create({
       amount,
       currency: 'INR',
-      receipt: `${dto.plan}_${userId}_${Date.now()}`,
+      // Razorpay caps receipt at 56 chars; a full plan name + UUID + timestamp
+      // can exceed that (e.g. "ENTERPRISE_<uuid>_<ts>"), so keep it short.
+      receipt: `${dto.plan}_${Date.now()}`,
       notes: { userId, plan: dto.plan },
     });
 
@@ -38,6 +40,37 @@ export class PaymentsService {
       currency: order.currency,
       keyId: process.env.RAZORPAY_KEY_ID,
     };
+  }
+
+  // Server-side safety net: Razorpay calls this directly once a payment is
+  // captured, so the plan still upgrades even if the mobile app never
+  // reaches /payments/verify (crash, closed app, lost network, etc).
+  async handleWebhook(rawBody: Buffer, signature: string) {
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!secret) {
+      throw new BadRequestException('Webhook secret not configured');
+    }
+
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(rawBody)
+      .digest('hex');
+
+    if (expectedSignature !== signature) {
+      throw new BadRequestException('Invalid webhook signature');
+    }
+
+    const event = JSON.parse(rawBody.toString('utf8'));
+    const payment = event?.payload?.payment?.entity;
+
+    if (event?.event === 'payment.captured' && payment?.notes?.userId && payment?.notes?.plan) {
+      await this.prisma.user.update({
+        where: { id: payment.notes.userId },
+        data: { plan: payment.notes.plan },
+      });
+    }
+
+    return { received: true };
   }
 
   async verifyPayment(userId: string, dto: VerifyPaymentDto) {

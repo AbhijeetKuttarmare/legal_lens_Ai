@@ -115,8 +115,14 @@ export class DocumentsService {
         where: { id: document.id },
         data: { status: 'FAILED' },
       });
+      fs.unlink(file.path, () => {});
       throw err;
     }
+
+    // The original file is never read again after analysis — its text and
+    // structured output are already durably stored above. Deleting it now
+    // avoids relying on Render's ephemeral disk to hold onto anything.
+    fs.unlink(file.path, () => {});
 
     return this.getFullReport(userId, document.id);
   }

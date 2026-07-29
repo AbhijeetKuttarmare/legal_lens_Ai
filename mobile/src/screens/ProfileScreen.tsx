@@ -227,7 +227,6 @@ export default function ProfileScreen({ navigation }: Props) {
               <Text style={styles.rowLabel}>{row.label}</Text>
               <Text style={styles.rowValue}>{row.value}</Text>
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={20} color={TEXT_MUTED} />
           </Pressable>
         ))}
       </View>
