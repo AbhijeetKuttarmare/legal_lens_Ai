@@ -62,8 +62,9 @@ export default function ReportScreen({ route, navigation }: Props) {
       } else {
         Alert.alert('Export ready', `PDF saved to ${destUri}`);
       }
-    } catch {
-      Alert.alert('Export failed', 'Could not generate the PDF. Please try again.');
+    } catch (e) {
+      const detail = e instanceof Error ? e.message : String(e);
+      Alert.alert('Export failed', `Could not generate the PDF. Please try again.\n\n${detail}`);
     } finally {
       setExporting(false);
     }
