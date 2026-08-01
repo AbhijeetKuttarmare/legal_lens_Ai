@@ -34,6 +34,16 @@ export class PaymentsService {
       notes: { userId, plan: dto.plan },
     });
 
+    await this.prisma.payment.create({
+      data: {
+        userId,
+        plan: dto.plan,
+        amount,
+        currency: 'INR',
+        razorpayOrderId: order.id,
+      },
+    });
+
     return {
       orderId: order.id,
       amount: order.amount,
@@ -68,6 +78,15 @@ export class PaymentsService {
         where: { id: payment.notes.userId },
         data: { plan: payment.notes.plan },
       });
+
+      if (payment.order_id) {
+        await this.prisma.payment
+          .update({
+            where: { razorpayOrderId: payment.order_id },
+            data: { status: 'PAID', razorpayPaymentId: payment.id },
+          })
+          .catch(() => undefined); // order row may predate this tracking table
+      }
     }
 
     return { received: true };
@@ -87,6 +106,13 @@ export class PaymentsService {
       where: { id: userId },
       data: { plan: dto.plan },
     });
+
+    await this.prisma.payment
+      .update({
+        where: { razorpayOrderId: dto.razorpayOrderId },
+        data: { status: 'PAID', razorpayPaymentId: dto.razorpayPaymentId },
+      })
+      .catch(() => undefined); // order row may predate this tracking table
 
     return toSafeUser(user);
   }

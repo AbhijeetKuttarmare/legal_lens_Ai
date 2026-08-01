@@ -1,4 +1,5 @@
 import { Controller, Get, Header } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 
 const PAGE_STYLE = `
   body { font-family: -apple-system, Helvetica, Arial, sans-serif; background:#F4F5F9; color:#111827; margin:0; padding:0; }
@@ -152,6 +153,7 @@ const DELETE_ACCOUNT_SECTIONS = [
 ];
 
 @Controller()
+@SkipThrottle()
 export class LegalController {
   @Get('privacy-policy')
   @Header('Content-Type', 'text/html')

@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.legallensai.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#0B1220",
         "foregroundImage": "./assets/icon-adaptive-foreground.png",
@@ -30,19 +30,18 @@
       "favicon": "./assets/icon-glyph.png"
     },
     "plugins": [
-      "expo-sharing",
-      "expo-updates"
+      "expo-sharing"
     ],
+    "extra": {
+      "eas": {
+        "projectId": "54d685ed-25f8-43ab-95ce-41fe99793a8d"
+      }
+    },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/54d685ed-25f8-43ab-95ce-41fe99793a8d"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "54d685ed-25f8-43ab-95ce-41fe99793a8d"
-      }
     }
   }
 }

@@ -2,12 +2,15 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/all-exceptions.filter';
+import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true, rawBody: true });
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, transform: true }),
   );
+  app.useGlobalFilters(new AllExceptionsFilter(app.get(PrismaService)));
   app.setGlobalPrefix('api', {
     exclude: ['privacy-policy', 'terms-of-service', 'delete-account'],
   });

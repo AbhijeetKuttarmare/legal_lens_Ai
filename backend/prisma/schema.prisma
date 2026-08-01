@@ -43,6 +43,12 @@ enum Gender {
   OTHER
 }
 
+enum PaymentStatus {
+  CREATED
+  PAID
+  FAILED
+}
+
 model User {
   id           String    @id @default(uuid())
   email        String?   @unique
@@ -54,9 +60,13 @@ model User {
   gender       Gender?
   dob          DateTime?
   plan         PlanTier  @default(FREE)
+  isAdmin      Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   documents    Document[]
+  payments     Payment[]
+  reviews      Review[]
+  auditLogs    AuditLog[]
 }
 
 model Document {
@@ -113,5 +123,50 @@ model ChatMessage {
   documentId String
   role       String
   content    String   @db.Text
+  createdAt  DateTime @default(now())
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  plan              PlanTier
+  amount            Int
+  currency          String        @default("INR")
+  status            PaymentStatus @default(CREATED)
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  rating    Int
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId    String
+  adminLabel String
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
+model ErrorLog {
+  id         String   @id @default(uuid())
+  message    String   @db.Text
+  stack      String?  @db.Text
+  path       String?
+  method     String?
+  statusCode Int?
   createdAt  DateTime @default(now())
 }

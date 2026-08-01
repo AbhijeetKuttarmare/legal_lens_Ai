@@ -11,6 +11,8 @@ import { AiModule } from './ai/ai.module';
 import { UsersModule } from './users/users.module';
 import { PaymentsModule } from './payments/payments.module';
 import { LegalModule } from './legal/legal.module';
+import { AdminModule } from './admin/admin.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { LegalModule } from './legal/legal.module';
     ChatModule,
     PaymentsModule,
     LegalModule,
+    AdminModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
