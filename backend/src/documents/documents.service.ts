@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import * as fs from 'fs';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
@@ -90,6 +90,11 @@ export class DocumentsService {
         text = result.extractedText;
       } else {
         text = await extractText(file.path, file.mimetype);
+        if (!text.trim()) {
+          throw new BadRequestException(
+            "We couldn't find any readable text in this document. Try a clearer scan, or upload it as a photo instead.",
+          );
+        }
         analysis = await this.ai.analyzeDocument(text, language);
       }
 
