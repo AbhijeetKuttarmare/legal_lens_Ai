@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { toSafeUser } from '../users/user.presenter';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 // Amounts in paise, matching the prices shown on the Subscription screen.
 const PLAN_AMOUNTS: Record<string, number> = {
@@ -16,7 +17,10 @@ const PLAN_AMOUNTS: Record<string, number> = {
 export class PaymentsService {
   private client: Razorpay;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLog: AuditLogService,
+  ) {
     this.client = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -24,6 +28,7 @@ export class PaymentsService {
   }
 
   async createOrder(userId: string, dto: CreateOrderDto) {
+    const requester = await this.prisma.user.findUnique({ where: { id: userId } });
     const amount = PLAN_AMOUNTS[dto.plan];
     const order = await this.client.orders.create({
       amount,
@@ -42,6 +47,16 @@ export class PaymentsService {
         currency: 'INR',
         razorpayOrderId: order.id,
       },
+    });
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: userId,
+      actorLabel: requester?.name || requester?.email || requester?.phone || userId,
+      action: 'CREATE_PAYMENT_ORDER',
+      targetType: 'Payment',
+      targetId: order.id,
+      metadata: { plan: dto.plan, amount },
     });
 
     return {
@@ -87,6 +102,16 @@ export class PaymentsService {
           })
           .catch(() => undefined); // order row may predate this tracking table
       }
+
+      this.auditLog.record({
+        actorType: 'SYSTEM',
+        actorId: payment.notes.userId,
+        actorLabel: 'Razorpay webhook',
+        action: 'PAYMENT_CAPTURED_WEBHOOK',
+        targetType: 'Payment',
+        targetId: payment.order_id ?? payment.id,
+        metadata: { plan: payment.notes.plan },
+      });
     }
 
     return { received: true };
@@ -113,6 +138,16 @@ export class PaymentsService {
         data: { status: 'PAID', razorpayPaymentId: dto.razorpayPaymentId },
       })
       .catch(() => undefined); // order row may predate this tracking table
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: userId,
+      actorLabel: user.name || user.email || user.phone || userId,
+      action: 'PAYMENT_VERIFIED',
+      targetType: 'Payment',
+      targetId: dto.razorpayOrderId,
+      metadata: { plan: dto.plan },
+    });
 
     return toSafeUser(user);
   }

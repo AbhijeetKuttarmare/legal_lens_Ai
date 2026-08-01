@@ -1,28 +1,18 @@
 import { useEffect, useState } from 'react';
-import { AdminAuditLogEntry, ApiError, fetchAuditLog } from '../api';
+import { AdminOtpLogEntry, ApiError, fetchOtpLog } from '../api';
 import Pagination from '../components/Pagination';
 
 const PAGE_SIZE = 25;
 
-function actionLabel(action: string) {
-  return action.replace(/_/g, ' ');
-}
-
-function actorBadgeClass(actorType: AdminAuditLogEntry['actorType']) {
-  if (actorType === 'ADMIN') return 'badge-admin';
-  if (actorType === 'SYSTEM') return 'badge-enterprise';
-  return 'badge-pro';
-}
-
-export default function AuditLog() {
-  const [entries, setEntries] = useState<AdminAuditLogEntry[] | null>(null);
+export default function OtpLog() {
+  const [entries, setEntries] = useState<AdminOtpLogEntry[] | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAuditLog({ page, pageSize: PAGE_SIZE, search })
+    fetchOtpLog({ page, pageSize: PAGE_SIZE, search })
       .then((res) => {
         setEntries(res.data);
         setTotal(res.total);
@@ -31,7 +21,7 @@ export default function AuditLog() {
         if (err instanceof ApiError && err.status === 403) {
           setError("Your account doesn't have admin access.");
         } else {
-          setError('Failed to load audit log.');
+          setError('Failed to load OTP log.');
         }
       });
   }, [page, search]);
@@ -41,22 +31,33 @@ export default function AuditLog() {
     return (
       <div className="page-loading">
         <span className="spinner" />
-        Loading audit log…
+        Loading OTP log…
       </div>
     );
   }
 
   return (
     <div>
+      <div className="stat-row">
+        <div className="stat-card">
+          <div className="value">{total}</div>
+          <div className="label">Total OTP events</div>
+        </div>
+        <div className="stat-card">
+          <div className="value">{entries.filter((e) => !e.success).length}</div>
+          <div className="label">Failed (this page)</div>
+        </div>
+      </div>
+
       <div className="panel">
         <div className="panel-header">
-          <h3>Activity log</h3>
+          <h3>OTP requests &amp; verifications</h3>
           <span className="hint">{total} total</span>
         </div>
         <div className="panel-toolbar">
           <input
             className="search-input"
-            placeholder="Search by actor, action or target…"
+            placeholder="Search by phone number…"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -64,37 +65,30 @@ export default function AuditLog() {
             }}
           />
         </div>
+        <div style={{ padding: '10px 20px 0', fontSize: 12, color: 'var(--text-muted)' }}>
+          Codes are never stored — only who requested/verified an OTP, when, and whether it succeeded.
+        </div>
         {entries.length === 0 ? (
-          <div className="empty-state">
-            {search
-              ? 'No activity matches.'
-              : 'No activity yet — admin actions, document uploads, payments, reviews, signups and profile changes will show up here.'}
-          </div>
+          <div className="empty-state">{search ? 'No OTP events match.' : 'No OTP activity yet.'}</div>
         ) : (
           <table>
             <thead>
               <tr>
-                <th>Actor</th>
-                <th>Action</th>
-                <th>Target</th>
+                <th>Phone</th>
+                <th>Event</th>
+                <th>Result</th>
                 <th>Date</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((e) => (
                 <tr key={e.id}>
+                  <td className="mono">{e.phone}</td>
+                  <td>{e.action === 'REQUESTED' ? 'Requested' : 'Verified'}</td>
                   <td>
-                    <span className={`badge ${actorBadgeClass(e.actorType)}`} style={{ marginRight: 6 }}>
-                      {e.actorType}
+                    <span className={`badge ${e.success ? 'badge-ready' : 'badge-failed'}`}>
+                      {e.success ? 'Success' : 'Failed'}
                     </span>
-                    {e.actorLabel}
-                  </td>
-                  <td>{actionLabel(e.action)}</td>
-                  <td>
-                    {e.targetType}
-                    {e.metadata && typeof e.metadata === 'object' && 'targetLabel' in e.metadata
-                      ? ` — ${(e.metadata as { targetLabel?: string }).targetLabel}`
-                      : ''}
                   </td>
                   <td>{new Date(e.createdAt).toLocaleString()}</td>
                 </tr>

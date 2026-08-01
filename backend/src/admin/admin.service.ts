@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
@@ -17,7 +18,10 @@ function clampPage(page?: number) {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLog: AuditLogService,
+  ) {}
 
   async listUsers(params: { page?: number; pageSize?: number; search?: string }) {
     const page = clampPage(params.page);
@@ -189,7 +193,7 @@ export class AdminService {
     const where: Prisma.AuditLogWhereInput = search
       ? {
           OR: [
-            { adminLabel: { contains: search, mode: 'insensitive' } },
+            { actorLabel: { contains: search, mode: 'insensitive' } },
             { action: { contains: search, mode: 'insensitive' } },
             { targetType: { contains: search, mode: 'insensitive' } },
           ],
@@ -290,15 +294,14 @@ export class AdminService {
       select: { id: true, isAdmin: true, name: true, email: true, phone: true },
     });
 
-    await this.prisma.auditLog.create({
-      data: {
-        adminId: adminUserId,
-        adminLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
-        action: updated.isAdmin ? 'GRANT_ADMIN' : 'REVOKE_ADMIN',
-        targetType: 'User',
-        targetId: targetUserId,
-        metadata: { targetLabel: updated.name || updated.email || updated.phone },
-      },
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action: updated.isAdmin ? 'GRANT_ADMIN' : 'REVOKE_ADMIN',
+      targetType: 'User',
+      targetId: targetUserId,
+      metadata: { targetLabel: updated.name || updated.email || updated.phone },
     });
 
     return updated;
@@ -363,20 +366,39 @@ export class AdminService {
     const action =
       normalized === null ? 'CLEAR_TRIAL_LIMIT' : normalized === -1 ? 'GRANT_UNLIMITED_TRIAL' : 'SET_TRIAL_LIMIT';
 
-    await this.prisma.auditLog.create({
-      data: {
-        adminId: adminUserId,
-        adminLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
-        action,
-        targetType: 'User',
-        targetId: targetUserId,
-        metadata: {
-          targetLabel: updated.name || updated.email || updated.phone,
-          trialDocumentLimit: normalized,
-        },
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action,
+      targetType: 'User',
+      targetId: targetUserId,
+      metadata: {
+        targetLabel: updated.name || updated.email || updated.phone,
+        trialDocumentLimit: normalized,
       },
     });
 
     return updated;
+  }
+
+  async listOtpLog(params: { page?: number; pageSize?: number; search?: string }) {
+    const page = clampPage(params.page);
+    const pageSize = clampPageSize(params.pageSize);
+    const search = params.search?.trim();
+
+    const where: Prisma.OtpLogWhereInput = search ? { phone: { contains: search } } : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.otpLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.otpLog.count({ where }),
+    ]);
+
+    return { data, total, page, pageSize };
   }
 }

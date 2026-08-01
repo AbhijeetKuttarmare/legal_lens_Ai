@@ -10,6 +10,7 @@ import Subscriptions from './pages/Subscriptions';
 import Payments from './pages/Payments';
 import Reviews from './pages/Reviews';
 import AuditLog from './pages/AuditLog';
+import OtpLog from './pages/OtpLog';
 import ExceptionLog from './pages/ExceptionLog';
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="/payments" element={<Payments />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/audit-log" element={<AuditLog />} />
+        <Route path="/otp-log" element={<OtpLog />} />
         <Route path="/exceptions" element={<ExceptionLog />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Route>

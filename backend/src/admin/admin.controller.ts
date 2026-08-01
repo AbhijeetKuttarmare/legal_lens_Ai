@@ -63,4 +63,9 @@ export class AdminController {
   ) {
     return this.adminService.setTrialLimit(admin.userId, targetUserId, dto.trialDocumentLimit);
   }
+
+  @Get('otp-log')
+  listOtpLog(@Query() query: ListQueryDto) {
+    return this.adminService.listOtpLog(query);
+  }
 }

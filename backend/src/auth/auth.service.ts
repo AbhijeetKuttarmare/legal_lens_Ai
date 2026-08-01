@@ -10,6 +10,7 @@ import { OtpService } from '../otp/otp.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { toSafeUser } from '../users/user.presenter';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly otp: OtpService,
+    private readonly auditLog: AuditLogService,
   ) {}
 
   private toSafeUser = toSafeUser;
@@ -36,6 +38,17 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: { email: dto.email, passwordHash, name: dto.name },
     });
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: user.id,
+      actorLabel: user.name || user.email || user.id,
+      action: 'CREATE_USER',
+      targetType: 'User',
+      targetId: user.id,
+      metadata: { method: 'email' },
+    });
+
     return {
       accessToken: this.signToken(user.id),
       user: this.toSafeUser(user),
@@ -70,11 +83,24 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
 
+    const existing = await this.prisma.user.findUnique({ where: { phone } });
     const user = await this.prisma.user.upsert({
       where: { phone },
       update: {},
       create: { phone },
     });
+
+    if (!existing) {
+      this.auditLog.record({
+        actorType: 'USER',
+        actorId: user.id,
+        actorLabel: user.name || user.phone || user.id,
+        action: 'CREATE_USER',
+        targetType: 'User',
+        targetId: user.id,
+        metadata: { method: 'phone_otp' },
+      });
+    }
 
     return {
       accessToken: this.signToken(user.id),

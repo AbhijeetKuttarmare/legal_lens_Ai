@@ -3,10 +3,14 @@ import * as fs from 'fs';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { toSafeUser } from './user.presenter';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditLog: AuditLogService,
+  ) {}
 
   async me(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -27,10 +31,21 @@ export class UsersService {
         name: `${dto.firstName} ${dto.lastName}`,
       },
     });
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: userId,
+      actorLabel: user.name || user.email || user.phone || userId,
+      action: 'UPDATE_PROFILE',
+      targetType: 'User',
+      targetId: userId,
+    });
+
     return toSafeUser(user);
   }
 
   async deleteAccount(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     const documents = await this.prisma.document.findMany({
       where: { userId },
       select: { storagePath: true },
@@ -39,6 +54,16 @@ export class UsersService {
     for (const doc of documents) {
       fs.unlink(doc.storagePath, () => {});
     }
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: null, // the User row is gone; keep the label as the only record
+      actorLabel: user?.name || user?.email || user?.phone || userId,
+      action: 'DELETE_ACCOUNT',
+      targetType: 'User',
+      targetId: userId,
+    });
+
     return { success: true };
   }
 }

@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
 import { DocumentAnalysis } from '../ai/ai.types';
 import { extractText } from './text-extraction.util';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png'];
 
@@ -18,6 +19,7 @@ export class DocumentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ai: AiService,
+    private readonly auditLog: AuditLogService,
   ) {}
 
   async listForUser(userId: string) {
@@ -67,6 +69,16 @@ export class DocumentsService {
         status: 'PROCESSING',
         language,
       },
+    });
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: userId,
+      actorLabel: user.name || user.email || user.phone || userId,
+      action: 'CREATE_DOCUMENT',
+      targetType: 'Document',
+      targetId: document.id,
+      metadata: { fileName: file.originalname },
     });
 
     try {
@@ -133,12 +145,24 @@ export class DocumentsService {
   async deleteDocument(userId: string, documentId: string) {
     const document = await this.prisma.document.findFirst({
       where: { id: documentId, userId },
+      include: { user: true },
     });
     if (!document) {
       throw new NotFoundException('Document not found');
     }
     await this.prisma.document.delete({ where: { id: documentId } });
     fs.unlink(document.storagePath, () => {});
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: userId,
+      actorLabel: document.user.name || document.user.email || document.user.phone || userId,
+      action: 'DELETE_DOCUMENT',
+      targetType: 'Document',
+      targetId: documentId,
+      metadata: { fileName: document.fileName },
+    });
+
     return { success: true };
   }
 }

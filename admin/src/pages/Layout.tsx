@@ -7,6 +7,7 @@ import {
   DocumentIcon,
   GridIcon,
   LogoutIcon,
+  PhoneIcon,
   StarIcon,
   TagIcon,
   UsersIcon,
@@ -19,7 +20,8 @@ const PAGE_TITLES: Record<string, { title: string; crumb: string }> = {
   '/subscriptions': { title: 'Subscriptions', crumb: 'Plans & trial access' },
   '/payments': { title: 'Payments & Revenue', crumb: 'Razorpay transactions' },
   '/reviews': { title: 'Reviews', crumb: 'In-app user feedback' },
-  '/audit-log': { title: 'Audit Log', crumb: 'Admin actions' },
+  '/audit-log': { title: 'Audit Log', crumb: 'Admin, user & system activity' },
+  '/otp-log': { title: 'OTP Log', crumb: 'Sign-in requests & verifications' },
   '/exceptions': { title: 'Exception Log', crumb: 'Server errors' },
 };
 
@@ -82,6 +84,10 @@ export default function Layout() {
             <NavLink to="/audit-log" className={({ isActive }) => (isActive ? 'active' : '')}>
               <ClipboardIcon />
               Audit Log
+            </NavLink>
+            <NavLink to="/otp-log" className={({ isActive }) => (isActive ? 'active' : '')}>
+              <PhoneIcon />
+              OTP Log
             </NavLink>
             <NavLink to="/exceptions" className={({ isActive }) => (isActive ? 'active' : '')}>
               <AlertIcon />

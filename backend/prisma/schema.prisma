@@ -154,9 +154,12 @@ model Review {
 
 model AuditLog {
   id         String   @id @default(uuid())
-  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminId    String
-  adminLabel String
+  // 'ADMIN' = action taken from the admin panel, 'USER' = end-user triggered
+  // (upload, review, profile edit...), 'SYSTEM' = backend-triggered (webhook).
+  actorType  String   @default("ADMIN")
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actorId    String?
+  actorLabel String
   action     String
   targetType String
   targetId   String?
@@ -172,4 +175,13 @@ model ErrorLog {
   method     String?
   statusCode Int?
   createdAt  DateTime @default(now())
+}
+
+model OtpLog {
+  id        String   @id @default(uuid())
+  phone     String
+  // 'REQUESTED' | 'VERIFIED' — never stores the actual OTP code.
+  action    String
+  success   Boolean
+  createdAt DateTime @default(now())
 }

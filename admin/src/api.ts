@@ -190,8 +190,9 @@ export function fetchReviews(params: { page?: number; pageSize?: number; search?
 
 export interface AdminAuditLogEntry {
   id: string;
-  adminId: string;
-  adminLabel: string;
+  actorType: 'ADMIN' | 'USER' | 'SYSTEM';
+  actorId: string | null;
+  actorLabel: string;
   action: string;
   targetType: string;
   targetId: string | null;
@@ -201,6 +202,18 @@ export interface AdminAuditLogEntry {
 
 export function fetchAuditLog(params: { page?: number; pageSize?: number; search?: string } = {}) {
   return request<Paginated<AdminAuditLogEntry>>(`/admin/audit-log${toQuery(params)}`);
+}
+
+export interface AdminOtpLogEntry {
+  id: string;
+  phone: string;
+  action: 'REQUESTED' | 'VERIFIED';
+  success: boolean;
+  createdAt: string;
+}
+
+export function fetchOtpLog(params: { page?: number; pageSize?: number; search?: string } = {}) {
+  return request<Paginated<AdminOtpLogEntry>>(`/admin/otp-log${toQuery(params)}`);
 }
 
 export interface AdminErrorLog {
