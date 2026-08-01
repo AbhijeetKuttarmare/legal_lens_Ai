@@ -73,6 +73,18 @@ export function AlertIcon({ className }: IconProps) {
   );
 }
 
+export function TagIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path
+        d="M11.5 3.5H5.5a2 2 0 0 0-2 2v6l9.6 9.6a2 2 0 0 0 2.8 0l5.7-5.7a2 2 0 0 0 0-2.8L11.5 3.5Z"
+        strokeLinejoin="round"
+      />
+      <circle cx="8" cy="8" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function LogoutIcon({ className }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

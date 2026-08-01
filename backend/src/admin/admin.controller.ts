@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { ListQueryDto } from './dto/list-query.dto';
+import { SetTrialLimitDto } from './dto/set-trial-limit.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 
 @Controller('admin')
@@ -47,5 +48,19 @@ export class AdminController {
   @Patch('users/:id/toggle-admin')
   toggleAdmin(@CurrentUser() admin: { userId: string }, @Param('id') targetUserId: string) {
     return this.adminService.toggleAdminStatus(admin.userId, targetUserId);
+  }
+
+  @Get('subscriptions')
+  listSubscriptions(@Query() query: ListQueryDto) {
+    return this.adminService.listSubscriptions(query);
+  }
+
+  @Patch('users/:id/trial')
+  setTrialLimit(
+    @CurrentUser() admin: { userId: string },
+    @Param('id') targetUserId: string,
+    @Body() dto: SetTrialLimitDto,
+  ) {
+    return this.adminService.setTrialLimit(admin.userId, targetUserId, dto.trialDocumentLimit);
   }
 }

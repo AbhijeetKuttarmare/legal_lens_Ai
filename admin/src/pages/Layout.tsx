@@ -8,6 +8,7 @@ import {
   GridIcon,
   LogoutIcon,
   StarIcon,
+  TagIcon,
   UsersIcon,
 } from '../icons';
 
@@ -15,6 +16,7 @@ const PAGE_TITLES: Record<string, { title: string; crumb: string }> = {
   '/dashboard': { title: 'Dashboard', crumb: 'Overview' },
   '/users': { title: 'Users', crumb: 'All registered accounts' },
   '/documents': { title: 'Documents', crumb: 'All uploaded documents' },
+  '/subscriptions': { title: 'Subscriptions', crumb: 'Plans & trial access' },
   '/payments': { title: 'Payments & Revenue', crumb: 'Razorpay transactions' },
   '/reviews': { title: 'Reviews', crumb: 'In-app user feedback' },
   '/audit-log': { title: 'Audit Log', crumb: 'Admin actions' },
@@ -64,6 +66,10 @@ export default function Layout() {
             <NavLink to="/documents" className={({ isActive }) => (isActive ? 'active' : '')}>
               <DocumentIcon />
               Documents
+            </NavLink>
+            <NavLink to="/subscriptions" className={({ isActive }) => (isActive ? 'active' : '')}>
+              <TagIcon />
+              Subscriptions
             </NavLink>
             <NavLink to="/payments" className={({ isActive }) => (isActive ? 'active' : '')}>
               <CreditCardIcon />

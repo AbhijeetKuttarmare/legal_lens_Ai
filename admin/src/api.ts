@@ -122,6 +122,29 @@ export function toggleAdmin(userId: string) {
   });
 }
 
+export interface AdminSubscription {
+  id: string;
+  email: string | null;
+  phone: string | null;
+  name: string | null;
+  plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+  trialDocumentLimit: number | null;
+  createdAt: string;
+  _count: { documents: number };
+}
+
+export function fetchSubscriptions(params: { page?: number; pageSize?: number; search?: string } = {}) {
+  return request<Paginated<AdminSubscription>>(`/admin/subscriptions${toQuery(params)}`);
+}
+
+// trialDocumentLimit: null clears the override, -1 grants unlimited, N sets an exact cap
+export function setTrialLimit(userId: string, trialDocumentLimit: number | null) {
+  return request<{ id: string; trialDocumentLimit: number | null }>(`/admin/users/${userId}/trial`, {
+    method: 'PATCH',
+    body: JSON.stringify({ trialDocumentLimit }),
+  });
+}
+
 export interface AdminDocument {
   id: string;
   fileName: string;

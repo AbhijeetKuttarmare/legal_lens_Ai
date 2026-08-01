@@ -45,7 +45,10 @@ export class DocumentsService {
     language = 'en',
   ) {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
-    const limit = PLAN_DOCUMENT_LIMITS[user.plan] ?? 1;
+    const limit =
+      user.trialDocumentLimit === -1
+        ? Infinity
+        : (user.trialDocumentLimit ?? PLAN_DOCUMENT_LIMITS[user.plan] ?? 1);
     const existingCount = await this.prisma.document.count({
       where: { userId, status: { not: 'FAILED' } },
     });

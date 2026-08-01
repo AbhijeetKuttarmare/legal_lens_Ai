@@ -303,4 +303,80 @@ export class AdminService {
 
     return updated;
   }
+
+  async listSubscriptions(params: { page?: number; pageSize?: number; search?: string }) {
+    const page = clampPage(params.page);
+    const pageSize = clampPageSize(params.pageSize);
+    const search = params.search?.trim();
+
+    const where: Prisma.UserWhereInput = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+            { phone: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          name: true,
+          plan: true,
+          trialDocumentLimit: true,
+          createdAt: true,
+          _count: { select: { documents: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return { data, total, page, pageSize };
+  }
+
+  async setTrialLimit(adminUserId: string, targetUserId: string, trialDocumentLimit: number | null | undefined) {
+    const normalized = trialDocumentLimit === undefined ? null : trialDocumentLimit;
+
+    const [admin, target] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: adminUserId } }),
+      this.prisma.user.findUnique({ where: { id: targetUserId } }),
+    ]);
+
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: targetUserId },
+      data: { trialDocumentLimit: normalized },
+      select: { id: true, trialDocumentLimit: true, name: true, email: true, phone: true },
+    });
+
+    const action =
+      normalized === null ? 'CLEAR_TRIAL_LIMIT' : normalized === -1 ? 'GRANT_UNLIMITED_TRIAL' : 'SET_TRIAL_LIMIT';
+
+    await this.prisma.auditLog.create({
+      data: {
+        adminId: adminUserId,
+        adminLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+        action,
+        targetType: 'User',
+        targetId: targetUserId,
+        metadata: {
+          targetLabel: updated.name || updated.email || updated.phone,
+          trialDocumentLimit: normalized,
+        },
+      },
+    });
+
+    return updated;
+  }
 }

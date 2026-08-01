@@ -6,6 +6,7 @@ import Layout from './pages/Layout';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Documents from './pages/Documents';
+import Subscriptions from './pages/Subscriptions';
 import Payments from './pages/Payments';
 import Reviews from './pages/Reviews';
 import AuditLog from './pages/AuditLog';
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/users" element={<Users />} />
         <Route path="/documents" element={<Documents />} />
+        <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/audit-log" element={<AuditLog />} />
