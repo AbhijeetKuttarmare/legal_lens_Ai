@@ -28,6 +28,12 @@ export class OtpService {
     return `91${tenDigitPhone}`;
   }
 
+  // Name of the DLT-approved SMS template registered with 2Factor.in
+  // (Sender ID: LENSAA). Must match the template name exactly as approved.
+  private get templateName(): string {
+    return process.env.TWOFACTOR_OTP_TEMPLATE || 'legal lense ai';
+  }
+
   // Never stores the actual OTP digits — metadata only, for admin visibility.
   private logOtp(phone: string, action: 'REQUESTED' | 'VERIFIED', success: boolean) {
     this.prisma.otpLog.create({ data: { phone, action, success } }).catch(() => undefined);
@@ -52,7 +58,7 @@ export class OtpService {
       return;
     }
 
-    const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/${this.fullNumber(tenDigitPhone)}/AUTOGEN`;
+    const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/${this.fullNumber(tenDigitPhone)}/AUTOGEN2/${encodeURIComponent(this.templateName)}`;
     const res = await fetch(url);
     const data = (await res.json()) as { Status: string; Details: string };
 

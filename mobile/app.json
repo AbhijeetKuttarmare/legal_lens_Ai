@@ -14,7 +14,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.legallensai.app"
+      "bundleIdentifier": "com.legallensai.app",
+      "buildNumber": "2",
+      "infoPlist": {
+        "NSCameraUsageDescription": "LegalLens AI needs camera access so you can scan a physical document for AI analysis.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.legallensai.app",

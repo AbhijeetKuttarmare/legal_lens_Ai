@@ -18,6 +18,9 @@
       "channel": "preview",
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "credentialsSource": "remote"
       }
     },
     "production": {
@@ -26,10 +29,17 @@
       "channel": "production",
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {
+        "credentialsSource": "remote"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6798802017"
+      }
+    }
   }
 }

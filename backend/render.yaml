@@ -22,6 +22,8 @@ services:
         value: claude-sonnet-5
       - key: TWOFACTOR_API_KEY
         sync: false
+      - key: TWOFACTOR_OTP_TEMPLATE
+        value: legal lense ai
       - key: UPLOAD_DIR
         value: ./uploads
       - key: RAZORPAY_KEY_ID
