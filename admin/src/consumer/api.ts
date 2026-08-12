@@ -155,10 +155,15 @@ export function listTemplateTypes() {
   return request<TemplateTypeOption[]>('/templates/types');
 }
 
-export function generateTemplate(templateType: string, fields: Record<string, string>, language = 'en') {
+export function generateTemplate(
+  templateType: string,
+  fields: Record<string, string>,
+  consentAccepted: boolean,
+  language = 'en',
+) {
   return request<{ templateType: string; content: string }>('/templates/generate', {
     method: 'POST',
-    body: JSON.stringify({ templateType, fields, language }),
+    body: JSON.stringify({ templateType, fields, consentAccepted, language }),
   });
 }
 

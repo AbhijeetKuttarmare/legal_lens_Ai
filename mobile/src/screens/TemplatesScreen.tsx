@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
-import { ActivityIndicator, Text, TextInput, Button } from 'react-native-paper';
+import { ActivityIndicator, Text, TextInput, Button, Checkbox } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -36,6 +36,7 @@ export default function TemplatesScreen() {
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   useEffect(() => {
     listTemplateTypes()
@@ -48,15 +49,16 @@ export default function TemplatesScreen() {
     setFields({});
     setContent(null);
     setError(null);
+    setConsent(false);
   };
 
   const onGenerate = async () => {
-    if (!selectedType) return;
+    if (!selectedType || !consent) return;
     setError(null);
     setContent(null);
     setLoading(true);
     try {
-      const res = await generateTemplate(selectedType, fields);
+      const res = await generateTemplate(selectedType, fields, consent);
       setContent(res.content);
     } catch (e) {
       setError(extractErrorMessage(e));
@@ -145,6 +147,13 @@ export default function TemplatesScreen() {
               onChangeText={(v) => setFields((f) => ({ ...f, [label]: v }))}
             />
           ))}
+          <Pressable style={styles.consentRow} onPress={() => setConsent((c) => !c)}>
+            <Checkbox status={consent ? 'checked' : 'unchecked'} color={NAVY} onPress={() => setConsent((c) => !c)} />
+            <Text style={styles.consentText}>
+              I understand this is an AI-generated draft, not legal advice, and I will have it reviewed by a
+              qualified lawyer before signing or using it.
+            </Text>
+          </Pressable>
           <Button
             mode="contained"
             buttonColor={GOLD}
@@ -152,7 +161,7 @@ export default function TemplatesScreen() {
             style={styles.generateButton}
             onPress={onGenerate}
             loading={loading}
-            disabled={loading}
+            disabled={loading || !consent}
           >
             Generate Draft
           </Button>
@@ -214,6 +223,8 @@ const styles = StyleSheet.create({
   formCard: { backgroundColor: 'white', borderRadius: 16, padding: 18 },
   backLink: { color: NAVY, fontWeight: '600', fontSize: 12.5, marginBottom: 14 },
   input: { marginBottom: 12, backgroundColor: 'white' },
+  consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 4, marginBottom: 6 },
+  consentText: { flex: 1, color: TEXT_MUTED, fontSize: 12, lineHeight: 17, marginTop: 10 },
   generateButton: { marginTop: 6, borderRadius: 10 },
   contentText: { color: '#1F2937', fontSize: 13, lineHeight: 20, marginBottom: 18 },
 });

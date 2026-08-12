@@ -15,39 +15,43 @@ const SECTIONS = [
     body: 'LegalLens AI is an informational tool, not a law firm, and does not provide legal advice. AI-generated summaries and risk flags may be incomplete or inaccurate. Always consult a qualified lawyer before signing or relying on any document.',
   },
   {
-    heading: '4. Eligibility & Account',
+    heading: '4. AI-Generated Document Templates',
+    body: 'The Templates feature uses AI to generate DRAFT documents (such as rental agreements, NDAs, and freelance contracts) based on details you provide. These drafts are a starting point only — not legal advice, not reviewed by a lawyer, and not guaranteed to be complete, accurate, or suitable for your situation or jurisdiction. You must have any generated document reviewed by a qualified lawyer before signing or relying on it, and you are solely responsible for how you use it.',
+  },
+  {
+    heading: '5. Eligibility & Account',
     body: 'You must be at least 18 years old to use LegalLens AI. You sign in using your phone number and a one-time password (OTP). You are responsible for keeping access to your phone number secure, since it is your account\'s identity.',
   },
   {
-    heading: '5. Subscription Plans',
+    heading: '6. Subscription Plans',
     body: 'LegalLens AI offers Free, Pro, and Premium plans with different document limits and features, as shown on the Subscription screen. Plan prices and features may change; we will make reasonable efforts to notify you of material changes.',
   },
   {
-    heading: '6. Acceptable Use',
+    heading: '7. Acceptable Use',
     body: 'You agree not to upload documents you do not have the right to share, use the app for any unlawful purpose, or attempt to disrupt or reverse-engineer the service.',
   },
   {
-    heading: '7. Your Content',
+    heading: '8. Your Content',
     body: 'You retain ownership of the documents you upload. You grant us a limited license to process that content solely to provide the analysis and chat features of the app.',
   },
   {
-    heading: '8. Termination',
+    heading: '9. Termination',
     body: 'You may stop using the app or delete your account at any time from Profile > Delete Account, which permanently removes your data. We may suspend accounts that violate these terms.',
   },
   {
-    heading: '9. Limitation of Liability',
-    body: 'LegalLens AI is provided "as is" without warranties of any kind. To the maximum extent permitted by law, we are not liable for decisions made based on AI-generated output.',
+    heading: '10. Limitation of Liability',
+    body: 'LegalLens AI is provided "as is" without warranties of any kind. To the maximum extent permitted by law, we are not liable for decisions made based on AI-generated output, including generated document templates.',
   },
   {
-    heading: '10. Governing Law',
+    heading: '11. Governing Law',
     body: 'These terms are governed by the laws of India, without regard to conflict-of-law principles.',
   },
   {
-    heading: '11. Changes to These Terms',
+    heading: '12. Changes to These Terms',
     body: 'We may update these terms from time to time. Continued use of the app after changes means you accept the updated terms.',
   },
   {
-    heading: '12. Contact Us',
+    heading: '13. Contact Us',
     body: 'Questions about these terms can be sent to support@legallensai.app.',
   },
 ];

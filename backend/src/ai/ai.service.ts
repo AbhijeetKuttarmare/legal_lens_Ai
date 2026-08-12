@@ -54,11 +54,26 @@ function analysisSystemPrompt(language?: string): string {
 const CHAT_SYSTEM_PROMPT_BASE = `You are LegalLens AI, a friendly document explainer. Answer the user's question using ONLY the provided document text as context. Explain in simple, plain language. If the answer isn't in the document, say so clearly.
 Always end your answer with this exact disclaimer on its own line: "This is an informational explanation, not professional legal advice. Consult a qualified lawyer for important decisions."`;
 
-function chatSystemPrompt(documentText: string, language?: string): string {
+// Split into two blocks so the (large, static-per-conversation) document text
+// can carry its own cache_control marker. Every chat turn on the same
+// document resends this same prefix — without caching, that's the full
+// document cost paid again on every single message. With caching, only the
+// first message in a conversation pays full price; every message after that
+// reads the cached prefix at a fraction of the cost. The tiny instructions
+// block above it is left uncached since caching it separately isn't worth
+// the extra cache-write overhead for something this small.
+function chatSystemBlocks(documentText: string, language?: string): Anthropic.TextBlockParam[] {
   const name = languageName(language);
   const languageLine =
     name === 'English' ? '' : `\n\nRespond in ${name}, including the disclaimer line.`;
-  return `${CHAT_SYSTEM_PROMPT_BASE}${languageLine}\n\nDocument text:\n${documentText}`;
+  return [
+    { type: 'text', text: `${CHAT_SYSTEM_PROMPT_BASE}${languageLine}` },
+    {
+      type: 'text',
+      text: `Document text:\n${documentText}`,
+      cache_control: { type: 'ephemeral' },
+    },
+  ];
 }
 
 const ANALYSIS_SCHEMA = {
@@ -414,7 +429,7 @@ export class AiService {
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 1024,
-        system: chatSystemPrompt(truncated, language),
+        system: chatSystemBlocks(truncated, language),
         messages: [...history, { role: 'user', content: question }],
       });
 

@@ -17,6 +17,7 @@ export default function Templates() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   useEffect(() => {
     listTemplateTypes()
@@ -29,15 +30,16 @@ export default function Templates() {
     setFields({});
     setContent(null);
     setError(null);
+    setConsent(false);
   }
 
   async function onGenerate() {
-    if (!selectedType) return;
+    if (!selectedType || !consent) return;
     setError(null);
     setContent(null);
     setLoading(true);
     try {
-      const res = await generateTemplate(selectedType, fields);
+      const res = await generateTemplate(selectedType, fields, consent);
       setContent(res.content);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not generate this document.');
@@ -114,7 +116,19 @@ export default function Templates() {
               onChange={(e) => setFields((f) => ({ ...f, [label]: e.target.value }))}
             />
           ))}
-          <button className="cw-btn cw-btn-gold" onClick={onGenerate} disabled={loading}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, marginBottom: 16, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              style={{ marginTop: 3, flexShrink: 0 }}
+            />
+            <span style={{ fontSize: 12.5, color: '#4B5563', lineHeight: 1.5 }}>
+              I understand this is an AI-generated draft, not legal advice, and I will have it reviewed by a
+              qualified lawyer before signing or using it.
+            </span>
+          </label>
+          <button className="cw-btn cw-btn-gold" onClick={onGenerate} disabled={loading || !consent}>
             {loading ? 'Generating…' : 'Generate Draft'}
           </button>
         </div>

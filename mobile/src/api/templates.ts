@@ -9,11 +9,13 @@ export async function listTemplateTypes(): Promise<TemplateTypeOption[]> {
 export async function generateTemplate(
   templateType: string,
   fields: Record<string, string>,
+  consentAccepted: boolean,
   language = 'en',
 ): Promise<{ templateType: string; content: string }> {
   const { data } = await apiClient.post<{ templateType: string; content: string }>('/templates/generate', {
     templateType,
     fields,
+    consentAccepted,
     language,
   });
   return data;
