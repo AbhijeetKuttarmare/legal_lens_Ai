@@ -15,8 +15,6 @@ const FIELD_SETS: Record<string, string[]> = {
   FREELANCE_CONTRACT_US: ['Client Name', 'Contractor Name', 'Scope of Work', 'Payment Amount', 'Payment Terms', 'Start Date', 'Governing State'],
   EMPLOYMENT_OFFER_LETTER: ['Company Name', 'Candidate Name', 'Job Title', 'Annual CTC', 'Joining Date', 'Probation Period', 'Reporting Manager'],
   CONSULTING_AGREEMENT: ['Client Name', 'Consultant Name', 'Scope of Services', 'Fees', 'Payment Terms', 'Start Date', 'Term'],
-  NON_COMPETE_AGREEMENT: ['Company Name', 'Employee Name', 'Restricted Activities', 'Geographic Scope', 'Duration', 'Effective Date'],
-  POWER_OF_ATTORNEY: ['Principal Name', 'Agent Name', 'Scope of Authority', 'Effective Date', 'Expiry Date'],
 };
 
 export default function Templates() {
@@ -98,7 +96,8 @@ export default function Templates() {
           <AlertIcon style={{ width: 16, height: 16, flexShrink: 0, marginTop: 1 }} />
           <span>
             <strong>Draft only — not legal advice.</strong> Every generated document must be reviewed by a qualified
-            lawyer before you sign or use it.
+            lawyer before you sign or use it. Each template is drafted for the country shown in its name — laws
+            vary by state/region within that country too, so confirm it fits your specific situation.
           </span>
         </div>
       )}

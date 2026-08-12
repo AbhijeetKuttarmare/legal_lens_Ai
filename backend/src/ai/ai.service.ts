@@ -211,8 +211,6 @@ export const TEMPLATE_TYPES: Record<string, string> = {
   FREELANCE_CONTRACT_US: 'Independent Contractor Agreement (US)',
   EMPLOYMENT_OFFER_LETTER: 'Employment Offer Letter (India)',
   CONSULTING_AGREEMENT: 'Consulting Agreement (India)',
-  NON_COMPETE_AGREEMENT: 'Non-Compete Agreement (India)',
-  POWER_OF_ATTORNEY: 'General Power of Attorney (India)',
 };
 
 // Legal-system guidance per template, so jurisdiction-specific templates
@@ -227,8 +225,6 @@ const JURISDICTION_NOTES: Record<string, string> = {
   FREELANCE_CONTRACT_US: 'under general US independent-contractor conventions, including a clear 1099/non-employee status clause',
   EMPLOYMENT_OFFER_LETTER: 'under Indian employment conventions, including CTC structure, notice period, and probation clauses',
   CONSULTING_AGREEMENT: 'under Indian contract law conventions, covering scope of services, fees, IP ownership, and termination',
-  NON_COMPETE_AGREEMENT: 'under Indian contract law conventions, noting that post-employment non-compete clauses have limited enforceability under Section 27 of the Indian Contract Act and should be reviewed by a lawyer',
-  POWER_OF_ATTORNEY: 'under Indian conventions for a General Power of Attorney, including scope of authority and notarization/registration guidance',
 };
 
 function templateSystemPrompt(templateType: string, templateLabel: string, language?: string): string {

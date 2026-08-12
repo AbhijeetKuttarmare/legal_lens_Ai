@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
 import Razorpay from 'razorpay';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,12 +24,16 @@ const CREDIT_PACKS: Record<string, { credits: number; amount: number }> = {
 
 @Injectable()
 export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
   private client: Razorpay;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
   ) {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      this.logger.error('RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET are not set — all payment endpoints will fail.');
+    }
     this.client = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -39,14 +43,21 @@ export class PaymentsService {
   async createOrder(userId: string, dto: CreateOrderDto) {
     const requester = await this.prisma.user.findUnique({ where: { id: userId } });
     const amount = PLAN_AMOUNTS[dto.plan];
-    const order = await this.client.orders.create({
-      amount,
-      currency: 'INR',
-      // Razorpay caps receipt at 56 chars; a full plan name + UUID + timestamp
-      // can exceed that (e.g. "ENTERPRISE_<uuid>_<ts>"), so keep it short.
-      receipt: `${dto.plan}_${Date.now()}`,
-      notes: { userId, plan: dto.plan },
-    });
+
+    let order: any;
+    try {
+      order = await this.client.orders.create({
+        amount,
+        currency: 'INR',
+        // Razorpay caps receipt at 56 chars; a full plan name + UUID + timestamp
+        // can exceed that (e.g. "ENTERPRISE_<uuid>_<ts>"), so keep it short.
+        receipt: `${dto.plan}_${Date.now()}`,
+        notes: { userId, plan: dto.plan },
+      });
+    } catch (err) {
+      this.logger.error(`Razorpay order creation failed: ${(err as Error).message}`, (err as Error).stack);
+      throw new BadRequestException(`Could not start checkout: ${(err as Error).message}`);
+    }
 
     await this.prisma.payment.create({
       data: {
@@ -79,22 +90,34 @@ export class PaymentsService {
   async createCreditOrder(userId: string, dto: CreateCreditOrderDto) {
     const requester = await this.prisma.user.findUnique({ where: { id: userId } });
     const pack = CREDIT_PACKS[dto.pack];
-    const order = await this.client.orders.create({
-      amount: pack.amount,
-      currency: 'INR',
-      receipt: `${dto.pack}_${Date.now()}`,
-      notes: { userId, creditPack: dto.pack },
-    });
 
-    await this.prisma.creditOrder.create({
-      data: {
-        userId,
-        credits: pack.credits,
+    let order: any;
+    try {
+      order = await this.client.orders.create({
         amount: pack.amount,
         currency: 'INR',
-        razorpayOrderId: order.id,
-      },
-    });
+        receipt: `${dto.pack}_${Date.now()}`,
+        notes: { userId, creditPack: dto.pack },
+      });
+    } catch (err) {
+      this.logger.error(`Razorpay credit order creation failed: ${(err as Error).message}`, (err as Error).stack);
+      throw new BadRequestException(`Could not start checkout: ${(err as Error).message}`);
+    }
+
+    try {
+      await this.prisma.creditOrder.create({
+        data: {
+          userId,
+          credits: pack.credits,
+          amount: pack.amount,
+          currency: 'INR',
+          razorpayOrderId: order.id,
+        },
+      });
+    } catch (err) {
+      this.logger.error(`CreditOrder DB write failed: ${(err as Error).message}`, (err as Error).stack);
+      throw new BadRequestException(`Could not start checkout: ${(err as Error).message}`);
+    }
 
     this.auditLog.record({
       actorType: 'USER',

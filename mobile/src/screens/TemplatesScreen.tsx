@@ -63,15 +63,6 @@ const FIELD_SETS: Record<string, string[]> = {
     'Reporting Manager',
   ],
   CONSULTING_AGREEMENT: ['Client Name', 'Consultant Name', 'Scope of Services', 'Fees', 'Payment Terms', 'Start Date', 'Term'],
-  NON_COMPETE_AGREEMENT: [
-    'Company Name',
-    'Employee Name',
-    'Restricted Activities',
-    'Geographic Scope',
-    'Duration',
-    'Effective Date',
-  ],
-  POWER_OF_ATTORNEY: ['Principal Name', 'Agent Name', 'Scope of Authority', 'Effective Date', 'Expiry Date'],
 };
 
 function escapeHtml(s: string): string {
@@ -175,7 +166,9 @@ export default function TemplatesScreen() {
         <MaterialCommunityIcons name="alert-outline" size={18} color="#92400E" />
         <Text style={styles.warningText}>
           <Text style={{ fontWeight: '700' }}>Draft only — not legal advice. </Text>
-          Every generated document must be reviewed by a qualified lawyer before you sign or use it.
+          Every generated document must be reviewed by a qualified lawyer before you sign or use it. Each template is
+          drafted for the country shown in its name — laws vary by state/region within that country too, so confirm
+          it fits your specific situation.
         </Text>
       </View>
 
