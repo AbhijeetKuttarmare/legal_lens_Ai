@@ -24,7 +24,7 @@ import { setAuthenticated } from '../store/authSlice';
 const LOGO = require('../../assets/icon-glyph.png');
 
 const NAVY = '#0B1220';
-const GOLD = '#D4AF37';
+const GOLD = '#B08D57';
 
 type Step = 'phone' | 'otp';
 

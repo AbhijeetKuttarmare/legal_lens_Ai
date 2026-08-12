@@ -2,9 +2,9 @@
   --site-navy: #0B1220;
   --site-navy-800: #101c33;
   --site-navy-700: #16223B;
-  --site-gold: #D4AF37;
-  --site-gold-soft: rgba(212, 175, 55, 0.14);
-  --site-bg: #F4F5F9;
+  --site-gold: #B08D57;
+  --site-gold-soft: rgba(176, 141, 87, 0.14);
+  --site-bg: #F8FAFC;
   --site-text: #111827;
   --site-text-muted: #5B6472;
   --site-border: #E5E8EF;
@@ -364,14 +364,28 @@
   box-shadow: 0 10px 24px rgba(11, 18, 32, 0.25);
 }
 
+/* Primary action button. Kept the "gold" class name to avoid touching every
+   call site, but it's solid navy now — bronze is reserved for accents only,
+   not large fills, to read as enterprise-grade rather than consumer/retail. */
 .btn-gold {
-  background: var(--site-gold);
-  color: var(--site-navy);
+  background: var(--site-navy);
+  color: white;
 }
 
 .btn-gold:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(212, 175, 55, 0.35);
+  background: var(--site-navy-800);
+  box-shadow: 0 10px 24px rgba(11, 18, 32, 0.3);
+}
+
+.btn-white {
+  background: white;
+  color: var(--site-navy);
+}
+
+.btn-white:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.2);
 }
 
 .btn-ghost {

@@ -4,10 +4,7 @@ import { getStoredUser, listDocuments } from '../api';
 import type { DocumentSummary } from '../types';
 import { AlertIcon, CameraIcon, ChatIcon, ClipboardIcon, CreditCardIcon, DocumentIcon } from '../../icons';
 
-function fileIcon(fileType: string) {
-  if (fileType === 'application/pdf') return { bg: '#FEE2E2', color: '#DC2626' };
-  if (fileType.includes('wordprocessingml')) return { bg: '#DBEAFE', color: '#2563EB' };
-  if (fileType.startsWith('image/')) return { bg: '#DCFCE7', color: '#16A34A' };
+function fileIcon(_fileType: string) {
   return { bg: '#EEF1F6', color: '#0B1220' };
 }
 
@@ -34,9 +31,9 @@ export default function Home() {
   return (
     <div className="cw-container">
       <div className="cw-hero">
-        <h1>Hello, {user?.firstName || 'there'} 👋</h1>
+        <h1>Welcome back, {user?.firstName || 'there'}</h1>
         <p>Upload any legal document and get AI-powered insights in seconds.</p>
-        <button className="cw-btn cw-btn-gold" onClick={() => navigate('/app/upload')}>
+        <button className="cw-btn cw-btn-outline" onClick={() => navigate('/app/upload')}>
           Analyze a Document
         </button>
         <div className="cw-hero-caption">Supports PDF, DOCX · Max 20MB</div>
@@ -78,7 +75,7 @@ export default function Home() {
         <div id="recent" className="cw-section-title">
           Recent Documents
         </div>
-        <Link to="/app/documents" style={{ color: '#D4AF37', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>
+        <Link to="/app/documents" style={{ color: '#B08D57', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>
           See all
         </Link>
       </div>

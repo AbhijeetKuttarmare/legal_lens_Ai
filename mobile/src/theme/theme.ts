@@ -2,9 +2,9 @@ import { MD3LightTheme } from 'react-native-paper';
 
 export const NAVY = '#0B1220';
 export const NAVY_SOFT = '#152238';
-export const GOLD = '#D4AF37';
-export const GOLD_SOFT = '#F1E3B8';
-export const BG = '#F4F5F9';
+export const GOLD = '#B08D57';
+export const GOLD_SOFT = '#E8DCC8';
+export const BG = '#F8FAFC';
 export const TEXT_MUTED = '#6B7280';
 export const BORDER = '#E7E9EF';
 

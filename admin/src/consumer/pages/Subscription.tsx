@@ -111,14 +111,14 @@ export default function Subscription() {
               className="cw-card"
               style={{
                 margin: 0,
-                border: highlight ? '2px solid #D4AF37' : '1px solid #E5E7EB',
+                border: highlight ? '2px solid #B08D57' : '1px solid #E5E7EB',
                 background: highlight ? '#0B1220' : 'white',
                 color: highlight ? 'white' : '#111827',
                 display: 'flex',
                 flexDirection: 'column',
               }}
             >
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: highlight ? '#D4AF37' : '#0B1220' }}>{plan.name}</div>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: highlight ? '#B08D57' : '#0B1220' }}>{plan.name}</div>
               <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 18 }}>
                 {plan.price}
                 <span style={{ fontSize: 13, fontWeight: 500, color: highlight ? '#8D97A8' : '#6B7280' }}>{plan.period}</span>
@@ -126,7 +126,7 @@ export default function Subscription() {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                 {plan.features.map((f) => (
                   <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: highlight ? '#C6CCDA' : '#6B7280' }}>
-                    <CheckIcon style={{ width: 15, height: 15, color: '#D4AF37', flexShrink: 0 }} />
+                    <CheckIcon style={{ width: 15, height: 15, color: '#B08D57', flexShrink: 0 }} />
                     {f}
                   </div>
                 ))}
@@ -141,7 +141,7 @@ export default function Subscription() {
                 </button>
               ) : (
                 <button
-                  className={highlight ? 'cw-btn cw-btn-gold' : 'cw-btn cw-btn-navy'}
+                  className={highlight ? 'cw-btn cw-btn-outline' : 'cw-btn cw-btn-navy'}
                   disabled={payingPlan === plan.key}
                   onClick={() => onUpgrade(plan.key as PayablePlan, plan.name)}
                 >

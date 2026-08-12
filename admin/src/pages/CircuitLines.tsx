@@ -19,9 +19,9 @@ export default function CircuitLines() {
     >
       <defs>
         <linearGradient id="circuitFade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#D4AF37" stopOpacity="0" />
-          <stop offset="50%" stopColor="#D4AF37" stopOpacity="0.85" />
-          <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
+          <stop offset="0%" stopColor="#B08D57" stopOpacity="0" />
+          <stop offset="50%" stopColor="#B08D57" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#B08D57" stopOpacity="0" />
         </linearGradient>
       </defs>
       {PATHS.map((d, i) => (

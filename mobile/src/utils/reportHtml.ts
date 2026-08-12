@@ -43,7 +43,7 @@ export function buildReportHtml(report: DocumentReport): string {
         )}</div>
         ${
           risk
-            ? `<div style="margin-top:16px;font-size:14px;color:#D4AF37;font-weight:700;">${risk.level} RISK &middot; ${risk.score}/100</div>`
+            ? `<div style="margin-top:16px;font-size:14px;color:#B08D57;font-weight:700;">${risk.level} RISK &middot; ${risk.score}/100</div>`
             : ''
         }
       </div>

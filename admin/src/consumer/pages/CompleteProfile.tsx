@@ -87,7 +87,7 @@ export default function CompleteProfile() {
                 key={g}
                 type="button"
                 className="cw-lang-chip"
-                style={gender === g ? { background: '#0B1220', borderColor: '#0B1220', color: '#D4AF37' } : undefined}
+                style={gender === g ? { background: '#0B1220', borderColor: '#0B1220', color: '#B08D57' } : undefined}
                 onClick={() => setGender(g)}
               >
                 {g === 'MALE' ? 'Male' : g === 'FEMALE' ? 'Female' : 'Other'}
@@ -99,21 +99,21 @@ export default function CompleteProfile() {
           <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
             <input
               className="cw-input-plain"
-              style={{ textAlign: 'center' }}
+              style={{ textAlign: 'center', flex: '1 1 0', minWidth: 0 }}
               placeholder="DD"
               value={day}
               onChange={(e) => setDay(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
             />
             <input
               className="cw-input-plain"
-              style={{ textAlign: 'center' }}
+              style={{ textAlign: 'center', flex: '1 1 0', minWidth: 0 }}
               placeholder="MM"
               value={month}
               onChange={(e) => setMonth(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
             />
             <input
               className="cw-input-plain"
-              style={{ textAlign: 'center', flex: 1.4 }}
+              style={{ textAlign: 'center', flex: '1.4 1 0', minWidth: 0 }}
               placeholder="YYYY"
               value={year}
               onChange={(e) => setYear(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}

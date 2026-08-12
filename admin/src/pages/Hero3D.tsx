@@ -4,7 +4,7 @@ import { Float, RoundedBox, Text3D, Center } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import type * as THREE from 'three';
 
-const GOLD = '#D4AF37';
+const GOLD = '#B08D57';
 const NAVY = '#0B1220';
 
 function GlowCube() {

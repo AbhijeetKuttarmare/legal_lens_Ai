@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LOGO = require('../../assets/Logo.png');
 const NAVY = '#0B1220';
-const GOLD = '#D4AF37';
+const GOLD = '#B08D57';
 
 type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 

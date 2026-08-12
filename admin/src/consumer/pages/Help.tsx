@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChatIcon } from '../../icons';
+import { Link } from 'react-router-dom';
+import { ChatIcon, ClipboardIcon, CreditCardIcon, DocumentIcon, GridIcon, TagIcon } from '../../icons';
 
 const SUPPORT_EMAIL = 'support@legallensai.app';
 
@@ -34,42 +35,68 @@ const FAQS = [
   },
 ];
 
+const QUICK_LINKS = [
+  { to: '/app/upload', label: 'Upload & Analyze', icon: DocumentIcon },
+  { to: '/app/documents', label: 'My Documents', icon: ClipboardIcon },
+  { to: '/app/compare', label: 'Compare Documents', icon: GridIcon },
+  { to: '/app/templates', label: 'Templates', icon: TagIcon },
+  { to: '/app/subscription', label: 'Subscription & Billing', icon: CreditCardIcon },
+];
+
 export default function Help() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div className="cw-container cw-container-narrow">
+    <div className="cw-container">
       <div className="cw-section-title" style={{ marginTop: 0 }}>
         Help & Support
       </div>
 
-      <a
-        className="cw-card"
-        style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none', color: 'inherit' }}
-        href={`mailto:${SUPPORT_EMAIL}?subject=LegalLens AI Support`}
-      >
-        <div className="cw-action-icon" style={{ background: '#FFF7E0', margin: 0 }}>
-          <ChatIcon style={{ color: '#0B1220' }} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div className="cw-action-title">Email us</div>
-          <div className="cw-action-sub">{SUPPORT_EMAIL}</div>
-        </div>
-      </a>
-
-      <div className="cw-section-title">Frequently Asked Questions</div>
-      {FAQS.map((item, idx) => {
-        const isOpen = openIndex === idx;
-        return (
-          <div key={item.q} className="cw-card" style={{ cursor: 'pointer' }} onClick={() => setOpenIndex(isOpen ? null : idx)}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
-              <span style={{ fontWeight: 700, color: '#0B1220', fontSize: 13.5 }}>{item.q}</span>
-              <span style={{ color: '#6B7280' }}>{isOpen ? '−' : '+'}</span>
-            </div>
-            {isOpen && <p style={{ color: '#374151', fontSize: 13, lineHeight: 1.6, marginTop: 10, marginBottom: 0 }}>{item.a}</p>}
+      <div className="cw-two-col">
+        <div>
+          <div className="cw-section-title" style={{ marginTop: 0 }}>
+            Frequently Asked Questions
           </div>
-        );
-      })}
+          {FAQS.map((item, idx) => {
+            const isOpen = openIndex === idx;
+            return (
+              <div key={item.q} className="cw-card" style={{ cursor: 'pointer' }} onClick={() => setOpenIndex(isOpen ? null : idx)}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
+                  <span style={{ fontWeight: 700, color: '#0B1220', fontSize: 13.5 }}>{item.q}</span>
+                  <span style={{ color: '#6B7280' }}>{isOpen ? '−' : '+'}</span>
+                </div>
+                {isOpen && <p style={{ color: '#374151', fontSize: 13, lineHeight: 1.6, marginTop: 10, marginBottom: 0 }}>{item.a}</p>}
+              </div>
+            );
+          })}
+        </div>
+
+        <div>
+          <a
+            className="cw-side-card"
+            style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit', marginBottom: 20 }}
+            href={`mailto:${SUPPORT_EMAIL}?subject=LegalLens AI Support`}
+          >
+            <div className="cw-action-icon" style={{ background: '#F3F4F6', margin: 0 }}>
+              <ChatIcon style={{ color: '#0B1220' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="cw-action-title">Email us</div>
+              <div className="cw-action-sub" style={{ wordBreak: 'break-all' }}>{SUPPORT_EMAIL}</div>
+            </div>
+          </a>
+
+          <div className="cw-side-card">
+            <div className="cw-side-card-title">Quick Links</div>
+            {QUICK_LINKS.map((link) => (
+              <Link key={link.to} to={link.to} className="cw-side-link-row">
+                <link.icon />
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -91,7 +91,7 @@ export default function Compare() {
       {result && (
         <div style={{ marginTop: 28 }}>
           <div className="cw-card" style={{ background: '#0B1220', color: 'white' }}>
-            <div style={{ color: '#D4AF37', fontWeight: 700, fontSize: 12.5, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ color: '#B08D57', fontWeight: 700, fontSize: 12.5, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Verdict
             </div>
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: '#E5E7EB' }}>{result.verdict}</p>

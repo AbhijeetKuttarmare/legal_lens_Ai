@@ -13,10 +13,7 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'PENDING', label: 'Processing' },
 ];
 
-function fileIcon(fileType: string) {
-  if (fileType === 'application/pdf') return { bg: '#FEE2E2', color: '#DC2626' };
-  if (fileType.includes('wordprocessingml')) return { bg: '#DBEAFE', color: '#2563EB' };
-  if (fileType.startsWith('image/')) return { bg: '#DCFCE7', color: '#16A34A' };
+function fileIcon(_fileType: string) {
   return { bg: '#EEF1F6', color: '#0B1220' };
 }
 

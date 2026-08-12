@@ -109,7 +109,7 @@ export default function HomeScreen({ navigation }: Props) {
               color="rgba(255,255,255,0.08)"
               style={styles.heroDecoration}
             />
-            <Text style={styles.heroGreeting}>Hello, {user?.firstName || 'there'} 👋</Text>
+            <Text style={styles.heroGreeting}>Welcome back, {user?.firstName || 'there'}</Text>
             <Text style={styles.heroSubtitle}>
               Upload any legal document and get AI-powered insights in seconds.
             </Text>

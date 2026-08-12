@@ -10,7 +10,7 @@ import SubscriptionScreen from '../screens/SubscriptionScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const NAVY = '#0B1220';
-const GOLD = '#D4AF37';
+const GOLD = '#B08D57';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 

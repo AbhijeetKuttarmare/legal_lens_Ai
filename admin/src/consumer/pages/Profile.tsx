@@ -60,7 +60,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="cw-container cw-container-narrow">
+    <div className="cw-container">
       <div className="cw-section-title" style={{ marginTop: 0 }}>
         Profile & Settings
       </div>
@@ -72,6 +72,8 @@ export default function Profile() {
         </div>
       )}
 
+      <div className="cw-two-col">
+        <div>
       <div className="cw-card">
         <div className="cw-field-label" style={{ marginBottom: 4 }}>
           Phone
@@ -91,7 +93,7 @@ export default function Profile() {
                 key={g}
                 type="button"
                 className="cw-lang-chip"
-                style={gender === g ? { background: '#0B1220', borderColor: '#0B1220', color: '#D4AF37' } : undefined}
+                style={gender === g ? { background: '#0B1220', borderColor: '#0B1220', color: '#B08D57' } : undefined}
                 onClick={() => setGender(g)}
               >
                 {g === 'MALE' ? 'Male' : g === 'FEMALE' ? 'Female' : 'Other'}
@@ -103,21 +105,21 @@ export default function Profile() {
           <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
             <input
               className="cw-input-plain"
-              style={{ textAlign: 'center' }}
+              style={{ textAlign: 'center', flex: '1 1 0', minWidth: 0 }}
               placeholder="DD"
               value={day}
               onChange={(e) => setDay(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
             />
             <input
               className="cw-input-plain"
-              style={{ textAlign: 'center' }}
+              style={{ textAlign: 'center', flex: '1 1 0', minWidth: 0 }}
               placeholder="MM"
               value={month}
               onChange={(e) => setMonth(e.target.value.replace(/[^0-9]/g, '').slice(0, 2))}
             />
             <input
               className="cw-input-plain"
-              style={{ textAlign: 'center', flex: 1.4 }}
+              style={{ textAlign: 'center', flex: '1.4 1 0', minWidth: 0 }}
               placeholder="YYYY"
               value={year}
               onChange={(e) => setYear(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
@@ -140,6 +142,32 @@ export default function Profile() {
         <button className="cw-btn cw-btn-outline" style={{ color: '#DC2626', borderColor: '#FCA5A5' }} onClick={onDeleteAccount} disabled={deleting}>
           {deleting ? 'Deleting…' : 'Delete Account'}
         </button>
+      </div>
+        </div>
+
+        <div>
+          <div className="cw-side-card">
+            <div className="cw-side-card-title">Account Summary</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Plan</div>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0B1220', marginTop: 2 }}>{user?.plan || 'FREE'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Phone</div>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0B1220', marginTop: 2 }}>
+                  {user?.phone ? `+91 ${user.phone}` : '—'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Name</div>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0B1220', marginTop: 2 }}>
+                  {user?.firstName || ''} {user?.lastName || ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

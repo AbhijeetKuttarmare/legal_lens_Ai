@@ -1,8 +1,9 @@
 .cw {
   --cw-navy: #0B1220;
   --cw-navy-800: #101c33;
-  --cw-gold: #D4AF37;
-  --cw-bg: #F4F5F9;
+  --cw-gold: #B08D57;
+  --cw-gold-dark: #8F7040;
+  --cw-bg: #F8FAFC;
   --cw-text: #111827;
   --cw-text-muted: #6B7280;
   --cw-border: #E5E7EB;
@@ -214,9 +215,16 @@
   color: white;
 }
 
+/* Primary action button. Kept the "gold" class name to avoid touching every
+   call site, but it's solid navy now — bronze is reserved for accents only,
+   not large fills, to read as enterprise-grade rather than consumer/retail. */
 .cw-btn-gold {
-  background: var(--cw-gold);
-  color: var(--cw-navy);
+  background: var(--cw-navy);
+  color: white;
+}
+
+.cw-btn-gold:hover {
+  background: var(--cw-navy-800);
 }
 
 .cw-btn-outline {
@@ -235,7 +243,8 @@
 .cw-sidebar {
   width: 250px;
   flex-shrink: 0;
-  background: var(--cw-navy);
+  background: white;
+  border-right: 1px solid var(--cw-border);
   display: flex;
   flex-direction: column;
   padding: 22px 16px;
@@ -256,7 +265,7 @@
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: white;
+  background: var(--cw-navy);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -266,18 +275,18 @@
 .cw-sidebar-mark svg {
   width: 19px;
   height: 19px;
-  color: var(--cw-navy);
+  color: var(--cw-gold);
 }
 
 .cw-sidebar-brand-name {
-  color: white;
+  color: var(--cw-navy);
   font-weight: 800;
   font-size: 14.5px;
   line-height: 1.2;
 }
 
 .cw-sidebar-brand-sub {
-  color: #5B6B8C;
+  color: #9CA3AF;
   font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -294,7 +303,7 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  color: #8D97A8;
+  color: #4B5563;
   text-decoration: none;
   padding: 10px 12px;
   border-radius: 9px;
@@ -309,18 +318,18 @@
 }
 
 .cw-sidebar-nav a:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: white;
+  background: #F3F4F6;
+  color: var(--cw-navy);
 }
 
 .cw-sidebar-nav a.active {
-  background: var(--cw-navy-800);
-  color: var(--cw-gold);
+  background: #FAF6F0;
+  color: var(--cw-gold-dark);
 }
 
 .cw-sidebar-footer {
   margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--cw-border);
   padding-top: 14px;
 }
 
@@ -347,7 +356,7 @@
 }
 
 .cw-sidebar-user-name {
-  color: white;
+  color: var(--cw-navy);
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
@@ -356,7 +365,7 @@
 }
 
 .cw-sidebar-user-plan {
-  color: #5B6B8C;
+  color: #9CA3AF;
   font-size: 11px;
   margin-top: 1px;
 }
@@ -366,9 +375,9 @@
   align-items: center;
   gap: 9px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.06);
+  background: #F3F4F6;
   border: none;
-  color: #B7C0D1;
+  color: #4B5563;
   padding: 10px 12px;
   border-radius: 9px;
   font-size: 12.5px;
@@ -382,8 +391,8 @@
 }
 
 .cw-sidebar-logout:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: #E5E7EB;
+  color: var(--cw-navy);
 }
 
 .cw-main {
@@ -438,7 +447,58 @@
 }
 
 .cw-container-narrow {
-  max-width: 560px;
+  max-width: 800px;
+}
+
+.cw-two-col {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+.cw-side-card {
+  background: white;
+  border: 1px solid var(--cw-border);
+  border-radius: 16px;
+  padding: 20px;
+  position: sticky;
+  top: 20px;
+}
+
+.cw-side-card-title {
+  font-weight: 700;
+  color: var(--cw-navy);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.cw-side-link-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  color: #4B5563;
+  font-size: 12.5px;
+  text-decoration: none;
+  border-bottom: 1px solid #F1F2F5;
+}
+
+.cw-side-link-row:last-child {
+  border-bottom: none;
+}
+
+.cw-side-link-row svg {
+  width: 15px;
+  height: 15px;
+  color: var(--cw-gold-dark);
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .cw-two-col {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- Hero card ---------- */

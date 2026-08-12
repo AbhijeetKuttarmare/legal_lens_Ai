@@ -443,7 +443,7 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
-                    <a href="#get-app" className={`btn ${p.highlight ? 'btn-gold' : 'btn-outline'} price-cta`}>
+                    <a href="#get-app" className={`btn ${p.highlight ? 'btn-white' : 'btn-outline'} price-cta`}>
                       {p.cta}
                     </a>
                   </div>
