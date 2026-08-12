@@ -50,4 +50,22 @@ export class DocumentsController {
   ) {
     return this.documentsService.deleteDocument(user.userId, id);
   }
+
+  @Post('compare')
+  compare(
+    @CurrentUser() user: { userId: string },
+    @Body('documentIdA') documentIdA: string,
+    @Body('documentIdB') documentIdB: string,
+    @Body('language') language?: string,
+  ) {
+    return this.documentsService.compareDocuments(user.userId, documentIdA, documentIdB, language);
+  }
+
+  @Get(':id/key-dates')
+  keyDates(
+    @CurrentUser() user: { userId: string },
+    @Param('id') id: string,
+  ) {
+    return this.documentsService.getKeyDates(user.userId, id);
+  }
 }

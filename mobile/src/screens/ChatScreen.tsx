@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { ActivityIndicator, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../navigation/types';
@@ -120,6 +122,8 @@ export default function ChatScreen({ route }: Props) {
   const strings = CHAT_STRINGS[language || 'en'] || CHAT_STRINGS.en;
   const queryClient = useQueryClient();
   const [question, setQuestion] = useState('');
+  const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
 
   const { data: messages } = useQuery({
     queryKey: ['chat', documentId],
@@ -142,8 +146,8 @@ export default function ChatScreen({ route }: Props) {
   return (
     <KeyboardAvoidingView
       style={styles.page}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={80}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={headerHeight}
     >
       <FlatList
         style={styles.list}
@@ -179,7 +183,7 @@ export default function ChatScreen({ route }: Props) {
       {mutation.isPending && (
         <ActivityIndicator style={{ marginBottom: 8 }} color={NAVY} />
       )}
-      <View style={styles.inputRow}>
+      <View style={[styles.inputRow, { paddingBottom: 12 + insets.bottom }]}>
         <TextInput
           style={styles.input}
           mode="outlined"

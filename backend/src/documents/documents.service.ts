@@ -170,4 +170,49 @@ export class DocumentsService {
 
     return { success: true };
   }
+
+  async compareDocuments(
+    userId: string,
+    documentIdA: string,
+    documentIdB: string,
+    language?: string,
+  ) {
+    if (!documentIdA || !documentIdB || documentIdA === documentIdB) {
+      throw new BadRequestException('Select two different documents to compare.');
+    }
+    const [docA, docB] = await Promise.all([
+      this.prisma.document.findFirst({ where: { id: documentIdA, userId } }),
+      this.prisma.document.findFirst({ where: { id: documentIdB, userId } }),
+    ]);
+    if (!docA || !docB) {
+      throw new NotFoundException('One or both documents were not found.');
+    }
+    if (!docA.extractedText || !docB.extractedText) {
+      throw new BadRequestException('Both documents must be fully analyzed before comparing.');
+    }
+
+    const result = await this.ai.compareDocuments(
+      { name: docA.fileName, text: docA.extractedText },
+      { name: docB.fileName, text: docB.extractedText },
+      language,
+    );
+
+    return {
+      documentA: { id: docA.id, fileName: docA.fileName },
+      documentB: { id: docB.id, fileName: docB.fileName },
+      ...result,
+    };
+  }
+
+  async getKeyDates(userId: string, documentId: string) {
+    const document = await this.prisma.document.findFirst({ where: { id: documentId, userId } });
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+    if (!document.extractedText) {
+      return { keyDates: [] };
+    }
+    const keyDates = await this.ai.extractKeyDates(document.extractedText, document.language ?? undefined);
+    return { keyDates };
+  }
 }

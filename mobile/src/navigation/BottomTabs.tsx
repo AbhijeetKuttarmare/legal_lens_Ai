@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { TabParamList } from './types';
@@ -28,13 +29,17 @@ function ScanTabPlaceholder() {
 }
 
 export default function BottomTabs() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: GOLD,
         tabBarInactiveTintColor: '#9CA3AF',
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [
+          styles.tabBar,
+          { height: 64 + insets.bottom, paddingBottom: 8 + insets.bottom },
+        ],
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons
             name={icons[route.name as Exclude<keyof TabParamList, 'Scan'>]}
@@ -71,7 +76,7 @@ export default function BottomTabs() {
 }
 
 const styles = StyleSheet.create({
-  tabBar: { backgroundColor: NAVY, borderTopWidth: 0, height: 64, paddingBottom: 8 },
+  tabBar: { backgroundColor: NAVY, borderTopWidth: 0, paddingTop: 8 },
   fab: {
     width: 52,
     height: 52,
