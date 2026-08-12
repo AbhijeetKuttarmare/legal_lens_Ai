@@ -8,6 +8,7 @@ interface RawUser {
   gender: string | null;
   dob: Date | null;
   plan: string;
+  documentCredits?: number;
 }
 
 export function toSafeUser(user: RawUser) {
@@ -21,6 +22,7 @@ export function toSafeUser(user: RawUser) {
     gender: user.gender,
     dob: user.dob,
     plan: user.plan,
+    documentCredits: user.documentCredits ?? 0,
     profileComplete: Boolean(user.firstName && user.lastName && user.gender && user.dob),
   };
 }

@@ -26,3 +26,22 @@ export async function verifyPayment(payload: VerifyPaymentPayload): Promise<Auth
   const { data } = await apiClient.post<AuthUser>('/payments/verify', payload);
   return data;
 }
+
+export type CreditPack = 'PACK_5' | 'PACK_10';
+
+export async function createCreditOrder(pack: CreditPack): Promise<RazorpayOrder> {
+  const { data } = await apiClient.post<RazorpayOrder>('/payments/create-credit-order', { pack });
+  return data;
+}
+
+export interface VerifyCreditOrderPayload {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+  pack: CreditPack;
+}
+
+export async function verifyCreditOrder(payload: VerifyCreditOrderPayload): Promise<AuthUser> {
+  const { data } = await apiClient.post<AuthUser>('/payments/verify-credit-order', payload);
+  return data;
+}

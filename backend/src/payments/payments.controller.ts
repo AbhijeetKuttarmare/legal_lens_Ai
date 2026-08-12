@@ -14,6 +14,8 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { PaymentsService } from './payments.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
+import { CreateCreditOrderDto } from './dto/create-credit-order.dto';
+import { VerifyCreditOrderDto } from './dto/verify-credit-order.dto';
 
 @Controller('payments')
 export class PaymentsController {
@@ -35,6 +37,24 @@ export class PaymentsController {
     @Body() dto: VerifyPaymentDto,
   ) {
     return this.paymentsService.verifyPayment(user.userId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('create-credit-order')
+  createCreditOrder(
+    @CurrentUser() user: { userId: string },
+    @Body() dto: CreateCreditOrderDto,
+  ) {
+    return this.paymentsService.createCreditOrder(user.userId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('verify-credit-order')
+  verifyCreditOrder(
+    @CurrentUser() user: { userId: string },
+    @Body() dto: VerifyCreditOrderDto,
+  ) {
+    return this.paymentsService.verifyCreditOrder(user.userId, dto);
   }
 
   // Called by Razorpay's servers directly (no user JWT) — authenticated via

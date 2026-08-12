@@ -1,8 +1,21 @@
 import { useState } from 'react';
-import { ApiError, createOrder, getStoredUser, setStoredUser, verifyPayment } from '../api';
-import type { PayablePlan } from '../types';
+import {
+  ApiError,
+  createCreditOrder,
+  createOrder,
+  getStoredUser,
+  setStoredUser,
+  verifyCreditOrder,
+  verifyPayment,
+} from '../api';
+import type { CreditPack, PayablePlan } from '../types';
 import { loadRazorpayScript } from '../razorpay';
 import { CheckIcon } from '../../icons';
+
+const CREDIT_PACKS: { key: CreditPack; credits: number; price: string }[] = [
+  { key: 'PACK_5', credits: 5, price: '₹249' },
+  { key: 'PACK_10', credits: 10, price: '₹449' },
+];
 
 const PLANS: {
   key: 'FREE' | PayablePlan;
@@ -33,6 +46,7 @@ const PLANS: {
 export default function Subscription() {
   const [user, setUser] = useState(getStoredUser());
   const [payingPlan, setPayingPlan] = useState<PayablePlan | null>(null);
+  const [payingPack, setPayingPack] = useState<CreditPack | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -82,6 +96,51 @@ export default function Subscription() {
     } catch (err) {
       setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Could not start checkout.');
       setPayingPlan(null);
+    }
+  }
+
+  async function onBuyCredits(pack: CreditPack, credits: number) {
+    setError(null);
+    setSuccess(null);
+    setPayingPack(pack);
+    try {
+      await loadRazorpayScript();
+      const order = await createCreditOrder(pack);
+
+      const razorpay = new window.Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.orderId,
+        name: 'LegalLens AI',
+        description: `${credits} document credits`,
+        prefill: { contact: user?.phone },
+        theme: { color: '#0B1220' },
+        handler: async (response) => {
+          try {
+            const updatedUser = await verifyCreditOrder({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              pack,
+            });
+            setStoredUser(updatedUser);
+            setUser(updatedUser);
+            setSuccess(`${credits} document credits added to your account.`);
+          } catch (err) {
+            setError(err instanceof ApiError ? err.message : 'Could not confirm payment. If money was deducted, contact support.');
+          } finally {
+            setPayingPack(null);
+          }
+        },
+        modal: {
+          ondismiss: () => setPayingPack(null),
+        },
+      });
+      razorpay.open();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Could not start checkout.');
+      setPayingPack(null);
     }
   }
 
@@ -152,6 +211,39 @@ export default function Subscription() {
           );
         })}
       </div>
+
+      {user?.plan === 'FREE' && (
+        <>
+          <div className="cw-section-title">Document Credits</div>
+          <p style={{ color: '#6B7280', fontSize: 13.5, marginTop: -6, marginBottom: 18 }}>
+            Don't need a subscription? Buy one-time credits to analyze extra documents on the Free plan.
+            {user && user.documentCredits > 0 && (
+              <strong style={{ color: '#0B1220' }}> You have {user.documentCredits} credit{user.documentCredits === 1 ? '' : 's'}.</strong>
+            )}
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 18 }}>
+            {CREDIT_PACKS.map((pack) => (
+              <div key={pack.key} className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#0B1220' }}>
+                  {pack.credits} document credits
+                </div>
+                <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 16, color: '#0B1220' }}>{pack.price}</div>
+                <p style={{ fontSize: 12.5, color: '#6B7280', marginBottom: 18, flex: 1 }}>
+                  Each credit lets you upload and analyze one document beyond your plan's limit. Credits never
+                  expire.
+                </p>
+                <button
+                  className="cw-btn cw-btn-navy"
+                  disabled={payingPack === pack.key}
+                  onClick={() => onBuyCredits(pack.key, pack.credits)}
+                >
+                  {payingPack === pack.key ? 'Opening checkout…' : 'Buy credits'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

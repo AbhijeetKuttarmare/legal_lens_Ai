@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { AiService, TEMPLATE_TYPES } from '../ai/ai.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PlanGuardService } from '../common/plan-guard.service';
 
 @Injectable()
 export class TemplatesService {
@@ -9,6 +10,7 @@ export class TemplatesService {
     private readonly ai: AiService,
     private readonly auditLog: AuditLogService,
     private readonly prisma: PrismaService,
+    private readonly planGuard: PlanGuardService,
   ) {}
 
   listTypes() {
@@ -22,6 +24,8 @@ export class TemplatesService {
     consentAccepted: boolean,
     language?: string,
   ) {
+    await this.planGuard.requirePaidPlan(userId, 'Document templates');
+
     if (!consentAccepted) {
       throw new BadRequestException(
         'You must confirm this is an AI-generated draft, not legal advice, before generating a document.',

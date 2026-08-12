@@ -22,6 +22,7 @@ export type MainStackParamList = {
   Terms: undefined;
   HelpSupport: undefined;
   Checkout: { plan: 'PRO' | 'ENTERPRISE'; planName: string };
+  CreditCheckout: { pack: 'PACK_5' | 'PACK_10'; credits: number; price: string };
   Compare: undefined;
   Templates: undefined;
 };

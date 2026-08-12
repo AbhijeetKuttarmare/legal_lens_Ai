@@ -3,6 +3,7 @@ import type {
   AuthUser,
   ChatMessage,
   ComparisonResult,
+  CreditPack,
   DocumentReport,
   DocumentSummary,
   KeyDate,
@@ -113,6 +114,27 @@ export interface VerifyPaymentPayload {
 
 export function verifyPayment(payload: VerifyPaymentPayload) {
   return request<AuthUser>('/payments/verify', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function createCreditOrder(pack: CreditPack) {
+  return request<RazorpayOrder>('/payments/create-credit-order', {
+    method: 'POST',
+    body: JSON.stringify({ pack }),
+  });
+}
+
+export interface VerifyCreditOrderPayload {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+  pack: CreditPack;
+}
+
+export function verifyCreditOrder(payload: VerifyCreditOrderPayload) {
+  return request<AuthUser>('/payments/verify-credit-order', {
     method: 'POST',
     body: JSON.stringify(payload),
   });

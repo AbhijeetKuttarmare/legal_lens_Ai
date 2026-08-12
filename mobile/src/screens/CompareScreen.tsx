@@ -6,8 +6,12 @@ import { compareDocuments, listDocuments } from '../api/documents';
 import { extractErrorMessage } from '../api/client';
 import { ComparisonResult, DocumentSummary } from '../api/types';
 import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppSelector } from '../store/hooks';
+import UpgradeGate from '../components/UpgradeGate';
 
 export default function CompareScreen() {
+  const user = useAppSelector((s) => s.auth.user);
+  const isPaid = user?.plan === 'PRO' || user?.plan === 'ENTERPRISE';
   const [documents, setDocuments] = useState<DocumentSummary[] | null>(null);
   const [idA, setIdA] = useState<string | null>(null);
   const [idB, setIdB] = useState<string | null>(null);
@@ -16,10 +20,11 @@ export default function CompareScreen() {
   const [result, setResult] = useState<ComparisonResult | null>(null);
 
   useEffect(() => {
+    if (!isPaid) return;
     listDocuments()
       .then((docs) => setDocuments(docs.filter((d) => d.status === 'READY')))
       .catch((e) => setError(extractErrorMessage(e)));
-  }, []);
+  }, [isPaid]);
 
   const onCompare = async () => {
     if (!idA || !idB || idA === idB) {
@@ -38,6 +43,17 @@ export default function CompareScreen() {
       setLoading(false);
     }
   };
+
+  if (!isPaid) {
+    return (
+      <ScrollView style={styles.page} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <Text style={styles.subtitle}>
+          Pick two analyzed documents — e.g. two job offers — to see the key differences side by side.
+        </Text>
+        <UpgradeGate feature="Document Comparison" />
+      </ScrollView>
+    );
+  }
 
   if (documents === null) {
     return (

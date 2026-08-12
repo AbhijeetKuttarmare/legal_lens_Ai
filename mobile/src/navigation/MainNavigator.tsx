@@ -10,6 +10,7 @@ import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import TermsScreen from '../screens/TermsScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
+import CreditCheckoutScreen from '../screens/CreditCheckoutScreen';
 import CompareScreen from '../screens/CompareScreen';
 import TemplatesScreen from '../screens/TemplatesScreen';
 
@@ -46,6 +47,11 @@ export default function MainNavigator() {
         name="Checkout"
         component={CheckoutScreen}
         options={({ route }) => ({ title: `Upgrade to ${route.params.planName}` })}
+      />
+      <Stack.Screen
+        name="CreditCheckout"
+        component={CreditCheckoutScreen}
+        options={{ title: 'Buy Document Credits' }}
       />
       <Stack.Screen name="Compare" component={CompareScreen} options={{ title: 'Compare Documents' }} />
       <Stack.Screen name="Templates" component={TemplatesScreen} options={{ title: 'Document Templates' }} />

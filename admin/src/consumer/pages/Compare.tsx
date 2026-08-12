@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ApiError, compareDocuments, listDocuments } from '../api';
+import { ApiError, compareDocuments, listDocuments, getStoredUser } from '../api';
 import type { ComparisonResult, DocumentSummary } from '../types';
 import { AlertIcon } from '../../icons';
+import UpgradeGate from '../UpgradeGate';
 
 export default function Compare() {
   const [documents, setDocuments] = useState<DocumentSummary[] | null>(null);
@@ -11,11 +12,15 @@ export default function Compare() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ComparisonResult | null>(null);
 
+  const user = getStoredUser();
+  const isPaid = user?.plan === 'PRO' || user?.plan === 'ENTERPRISE';
+
   useEffect(() => {
+    if (!isPaid) return;
     listDocuments()
       .then((docs) => setDocuments(docs.filter((d) => d.status === 'READY')))
       .catch(() => setError('Could not load your documents.'));
-  }, []);
+  }, [isPaid]);
 
   async function onCompare() {
     if (!idA || !idB || idA === idB) {
@@ -44,9 +49,11 @@ export default function Compare() {
         Pick two analyzed documents — e.g. two job offers — to see the key differences side by side.
       </p>
 
-      {error && <div className="cw-error">{error}</div>}
+      {!isPaid && <UpgradeGate feature="Document Comparison" />}
 
-      {documents === null && !error && (
+      {isPaid && error && <div className="cw-error">{error}</div>}
+
+      {isPaid && documents === null && !error && (
         <div className="cw-empty">
           <div className="cw-spinner" style={{ margin: '0 auto 12px' }} />
           Loading your documents…

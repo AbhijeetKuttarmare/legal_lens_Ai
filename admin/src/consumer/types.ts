@@ -8,6 +8,7 @@ export interface AuthUser {
   gender: 'MALE' | 'FEMALE' | 'OTHER' | null;
   dob: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+  documentCredits: number;
   profileComplete: boolean;
 }
 
@@ -65,6 +66,8 @@ export interface RazorpayOrder {
   currency: string;
   keyId: string;
 }
+
+export type CreditPack = 'PACK_5' | 'PACK_10';
 
 export interface ComparisonDifference {
   aspect: string;

@@ -4,6 +4,8 @@ import Razorpay from 'razorpay';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
+import { CreateCreditOrderDto } from './dto/create-credit-order.dto';
+import { VerifyCreditOrderDto } from './dto/verify-credit-order.dto';
 import { toSafeUser } from '../users/user.presenter';
 import { AuditLogService } from '../audit-log/audit-log.service';
 
@@ -11,6 +13,13 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 const PLAN_AMOUNTS: Record<string, number> = {
   PRO: 29900,
   ENTERPRISE: 59900,
+};
+
+// One-time document credit packs, for FREE-plan users who don't want a
+// subscription but need to analyze more than their plan's document limit.
+const CREDIT_PACKS: Record<string, { credits: number; amount: number }> = {
+  PACK_5: { credits: 5, amount: 24900 },
+  PACK_10: { credits: 10, amount: 44900 },
 };
 
 @Injectable()
@@ -67,6 +76,80 @@ export class PaymentsService {
     };
   }
 
+  async createCreditOrder(userId: string, dto: CreateCreditOrderDto) {
+    const requester = await this.prisma.user.findUnique({ where: { id: userId } });
+    const pack = CREDIT_PACKS[dto.pack];
+    const order = await this.client.orders.create({
+      amount: pack.amount,
+      currency: 'INR',
+      receipt: `${dto.pack}_${Date.now()}`,
+      notes: { userId, creditPack: dto.pack },
+    });
+
+    await this.prisma.creditOrder.create({
+      data: {
+        userId,
+        credits: pack.credits,
+        amount: pack.amount,
+        currency: 'INR',
+        razorpayOrderId: order.id,
+      },
+    });
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: userId,
+      actorLabel: requester?.name || requester?.email || requester?.phone || userId,
+      action: 'CREATE_CREDIT_ORDER',
+      targetType: 'CreditOrder',
+      targetId: order.id,
+      metadata: { pack: dto.pack, credits: pack.credits, amount: pack.amount },
+    });
+
+    return {
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: process.env.RAZORPAY_KEY_ID,
+    };
+  }
+
+  async verifyCreditOrder(userId: string, dto: VerifyCreditOrderDto) {
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .update(`${dto.razorpayOrderId}|${dto.razorpayPaymentId}`)
+      .digest('hex');
+
+    if (expectedSignature !== dto.razorpaySignature) {
+      throw new BadRequestException('Payment verification failed');
+    }
+
+    const pack = CREDIT_PACKS[dto.pack];
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { documentCredits: { increment: pack.credits } },
+    });
+
+    await this.prisma.creditOrder
+      .update({
+        where: { razorpayOrderId: dto.razorpayOrderId },
+        data: { status: 'PAID', razorpayPaymentId: dto.razorpayPaymentId },
+      })
+      .catch(() => undefined);
+
+    this.auditLog.record({
+      actorType: 'USER',
+      actorId: userId,
+      actorLabel: user.name || user.email || user.phone || userId,
+      action: 'CREDIT_ORDER_VERIFIED',
+      targetType: 'CreditOrder',
+      targetId: dto.razorpayOrderId,
+      metadata: { pack: dto.pack, credits: pack.credits },
+    });
+
+    return toSafeUser(user);
+  }
+
   // Server-side safety net: Razorpay calls this directly once a payment is
   // captured, so the plan still upgrades even if the mobile app never
   // reaches /payments/verify (crash, closed app, lost network, etc).
@@ -112,6 +195,33 @@ export class PaymentsService {
         targetId: payment.order_id ?? payment.id,
         metadata: { plan: payment.notes.plan },
       });
+    } else if (event?.event === 'payment.captured' && payment?.notes?.userId && payment?.notes?.creditPack) {
+      const pack = CREDIT_PACKS[payment.notes.creditPack];
+      if (pack) {
+        await this.prisma.user.update({
+          where: { id: payment.notes.userId },
+          data: { documentCredits: { increment: pack.credits } },
+        });
+
+        if (payment.order_id) {
+          await this.prisma.creditOrder
+            .update({
+              where: { razorpayOrderId: payment.order_id },
+              data: { status: 'PAID', razorpayPaymentId: payment.id },
+            })
+            .catch(() => undefined);
+        }
+
+        this.auditLog.record({
+          actorType: 'SYSTEM',
+          actorId: payment.notes.userId,
+          actorLabel: 'Razorpay webhook',
+          action: 'CREDIT_ORDER_CAPTURED_WEBHOOK',
+          targetType: 'CreditOrder',
+          targetId: payment.order_id ?? payment.id,
+          metadata: { pack: payment.notes.creditPack, credits: pack.credits },
+        });
+      }
     }
 
     return { received: true };

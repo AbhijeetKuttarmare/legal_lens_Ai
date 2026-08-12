@@ -9,6 +9,8 @@ import { listTemplateTypes, generateTemplate } from '../api/templates';
 import { extractErrorMessage } from '../api/client';
 import { TemplateTypeOption } from '../api/types';
 import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppSelector } from '../store/hooks';
+import UpgradeGate from '../components/UpgradeGate';
 
 const FIELD_SETS: Record<string, string[]> = {
   RENTAL_AGREEMENT: [
@@ -20,8 +22,56 @@ const FIELD_SETS: Record<string, string[]> = {
     'Lease Start Date',
     'Lease Duration',
   ],
+  RENTAL_AGREEMENT_US: [
+    'Landlord Name',
+    'Tenant Name',
+    'Property Address',
+    'Monthly Rent',
+    'Security Deposit',
+    'Lease Start Date',
+    'Lease Duration',
+    'State',
+  ],
+  RENTAL_AGREEMENT_UK: [
+    'Landlord Name',
+    'Tenant Name',
+    'Property Address',
+    'Monthly Rent',
+    'Deposit Amount',
+    'Tenancy Start Date',
+    'Tenancy Duration',
+  ],
   NDA: ['Disclosing Party', 'Receiving Party', 'Purpose of Disclosure', 'Effective Date', 'Duration'],
+  NDA_US: ['Disclosing Party', 'Receiving Party', 'Purpose of Disclosure', 'Effective Date', 'Duration', 'Governing State'],
   FREELANCE_CONTRACT: ['Client Name', 'Freelancer Name', 'Scope of Work', 'Payment Amount', 'Payment Terms', 'Start Date'],
+  FREELANCE_CONTRACT_US: [
+    'Client Name',
+    'Contractor Name',
+    'Scope of Work',
+    'Payment Amount',
+    'Payment Terms',
+    'Start Date',
+    'Governing State',
+  ],
+  EMPLOYMENT_OFFER_LETTER: [
+    'Company Name',
+    'Candidate Name',
+    'Job Title',
+    'Annual CTC',
+    'Joining Date',
+    'Probation Period',
+    'Reporting Manager',
+  ],
+  CONSULTING_AGREEMENT: ['Client Name', 'Consultant Name', 'Scope of Services', 'Fees', 'Payment Terms', 'Start Date', 'Term'],
+  NON_COMPETE_AGREEMENT: [
+    'Company Name',
+    'Employee Name',
+    'Restricted Activities',
+    'Geographic Scope',
+    'Duration',
+    'Effective Date',
+  ],
+  POWER_OF_ATTORNEY: ['Principal Name', 'Agent Name', 'Scope of Authority', 'Effective Date', 'Expiry Date'],
 };
 
 function escapeHtml(s: string): string {
@@ -29,6 +79,8 @@ function escapeHtml(s: string): string {
 }
 
 export default function TemplatesScreen() {
+  const user = useAppSelector((s) => s.auth.user);
+  const isPaid = user?.plan === 'PRO' || user?.plan === 'ENTERPRISE';
   const [types, setTypes] = useState<TemplateTypeOption[] | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -39,10 +91,11 @@ export default function TemplatesScreen() {
   const [consent, setConsent] = useState(false);
 
   useEffect(() => {
+    if (!isPaid) return;
     listTemplateTypes()
       .then(setTypes)
       .catch((e) => setError(extractErrorMessage(e)));
-  }, []);
+  }, [isPaid]);
 
   const selectType = (key: string) => {
     setSelectedType(key);
@@ -92,6 +145,17 @@ export default function TemplatesScreen() {
   };
 
   const activeFields = selectedType ? FIELD_SETS[selectedType] || [] : [];
+
+  if (!isPaid) {
+    return (
+      <ScrollView style={styles.page} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <Text style={styles.subtitle}>
+          Generate a draft document from a template. This is a starting point, not a final legal document.
+        </Text>
+        <UpgradeGate feature="Document Templates" />
+      </ScrollView>
+    );
+  }
 
   if (types === null) {
     return (

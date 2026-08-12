@@ -8,6 +8,7 @@ export interface AuthUser {
   gender: 'MALE' | 'FEMALE' | 'OTHER' | null;
   dob: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+  documentCredits: number;
   profileComplete: boolean;
 }
 

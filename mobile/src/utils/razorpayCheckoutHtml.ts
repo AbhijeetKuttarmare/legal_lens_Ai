@@ -4,6 +4,7 @@ interface CheckoutOptions {
   amount: number;
   currency: string;
   planLabel: string;
+  description?: string;
   phone?: string | null;
 }
 
@@ -28,7 +29,7 @@ export function buildRazorpayCheckoutHtml(opts: CheckoutOptions): string {
             currency: "${opts.currency}",
             order_id: "${opts.orderId}",
             name: "LegalLens AI",
-            description: "${opts.planLabel} Plan Subscription",
+            description: "${opts.description || `${opts.planLabel} Plan Subscription`}",
             prefill: { contact: "${contact}" },
             theme: { color: "#0B1220" },
             handler: function (response) {

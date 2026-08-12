@@ -64,10 +64,14 @@ model User {
   // Admin testing override for documents.service upload limit checks.
   // null = no override (use plan limit); -1 = unlimited; N = exact cap.
   trialDocumentLimit Int?
+  // Pay-per-document credits purchased outside a subscription; consumed when
+  // a FREE-plan user is over their plan limit but still wants to upload.
+  documentCredits Int @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   documents    Document[]
   payments     Payment[]
+  creditOrders CreditOrder[]
   reviews      Review[]
   auditLogs    AuditLog[]
 }
@@ -134,6 +138,20 @@ model Payment {
   user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String
   plan              PlanTier
+  amount            Int
+  currency          String        @default("INR")
+  status            PaymentStatus @default(CREATED)
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model CreditOrder {
+  id                String        @id @default(uuid())
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  credits           Int
   amount            Int
   currency          String        @default("INR")
   status            PaymentStatus @default(CREATED)

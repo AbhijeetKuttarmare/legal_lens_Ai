@@ -69,6 +69,11 @@ const PLANS: Plan[] = [
 
 const comingSoon = (title: string, message: string) => Alert.alert(title, message);
 
+const CREDIT_PACKS: { pack: 'PACK_5' | 'PACK_10'; credits: number; price: string }[] = [
+  { pack: 'PACK_5', credits: 5, price: '₹249' },
+  { pack: 'PACK_10', credits: 10, price: '₹449' },
+];
+
 export default function SubscriptionScreen({ navigation }: Props) {
   const user = useAppSelector((s) => s.auth.user);
   const currentPlan = user?.plan || 'FREE';
@@ -195,6 +200,32 @@ export default function SubscriptionScreen({ navigation }: Props) {
         })}
       </View>
 
+      {currentPlan === 'FREE' && (
+        <View style={styles.creditsSection}>
+          <Text style={styles.creditsTitle}>Document Credits</Text>
+          <Text style={styles.creditsSubtitle}>
+            Don't need a subscription? Buy one-time credits to analyze extra documents on the Free plan.
+            {user && user.documentCredits > 0
+              ? ` You have ${user.documentCredits} credit${user.documentCredits === 1 ? '' : 's'}.`
+              : ''}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            {CREDIT_PACKS.map((p) => (
+              <View key={p.pack} style={[styles.creditCard, cardShadow]}>
+                <Text style={styles.creditCount}>{p.credits} credits</Text>
+                <Text style={styles.creditPrice}>{p.price}</Text>
+                <Pressable
+                  style={styles.creditButton}
+                  onPress={() => navigation.navigate('CreditCheckout', { pack: p.pack, credits: p.credits, price: p.price })}
+                >
+                  <Text style={styles.creditButtonText}>Buy</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
       <View style={[styles.footerBanner, cardShadow]}>
         <View style={styles.footerIcon}>
           <MaterialCommunityIcons name="shield-check-outline" size={20} color={NAVY} />
@@ -309,6 +340,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   currentPlanBarText: { fontWeight: '700', color: TEXT_MUTED },
+  creditsSection: { paddingHorizontal: 20, marginTop: 24 },
+  creditsTitle: { fontWeight: '700', fontSize: 16, color: NAVY, marginBottom: 4 },
+  creditsSubtitle: { color: TEXT_MUTED, fontSize: 12.5, lineHeight: 18, marginBottom: 14 },
+  creditCard: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 16,
+  },
+  creditCount: { fontWeight: '700', fontSize: 14.5, color: NAVY, marginBottom: 4 },
+  creditPrice: { fontWeight: '800', fontSize: 20, color: NAVY, marginBottom: 12 },
+  creditButton: {
+    backgroundColor: NAVY,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  creditButtonText: { color: 'white', fontWeight: '700', fontSize: 12.5 },
   footerBanner: {
     flexDirection: 'row',
     alignItems: 'center',

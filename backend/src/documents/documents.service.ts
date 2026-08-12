@@ -5,6 +5,7 @@ import { AiService } from '../ai/ai.service';
 import { DocumentAnalysis } from '../ai/ai.types';
 import { extractText } from './text-extraction.util';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { PlanGuardService } from '../common/plan-guard.service';
 
 const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png'];
 
@@ -20,6 +21,7 @@ export class DocumentsService {
     private readonly prisma: PrismaService,
     private readonly ai: AiService,
     private readonly auditLog: AuditLogService,
+    private readonly planGuard: PlanGuardService,
   ) {}
 
   async listForUser(userId: string) {
@@ -54,10 +56,23 @@ export class DocumentsService {
     const existingCount = await this.prisma.document.count({
       where: { userId, status: { not: 'FAILED' } },
     });
+
+    let consumedCredit = false;
     if (existingCount >= limit) {
-      throw new ForbiddenException(
-        `Your ${user.plan} plan allows ${limit} document${limit === 1 ? '' : 's'}. Upgrade to upload more.`,
-      );
+      if (user.documentCredits > 0) {
+        consumedCredit = true;
+      } else {
+        throw new ForbiddenException(
+          `Your ${user.plan} plan allows ${limit} document${limit === 1 ? '' : 's'}. Upgrade to upload more, or buy document credits.`,
+        );
+      }
+    }
+
+    if (consumedCredit) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { documentCredits: { decrement: 1 } },
+      });
     }
 
     const document = await this.prisma.document.create({
@@ -135,6 +150,12 @@ export class DocumentsService {
         where: { id: document.id },
         data: { status: 'FAILED' },
       });
+      if (consumedCredit) {
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: { documentCredits: { increment: 1 } },
+        });
+      }
       fs.unlink(file.path, () => {});
       throw err;
     }
@@ -177,6 +198,8 @@ export class DocumentsService {
     documentIdB: string,
     language?: string,
   ) {
+    await this.planGuard.requirePaidPlan(userId, 'Comparing documents');
+
     if (!documentIdA || !documentIdB || documentIdA === documentIdB) {
       throw new BadRequestException('Select two different documents to compare.');
     }

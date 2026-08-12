@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
-import { ApiError, generateTemplate, listTemplateTypes } from '../api';
+import { ApiError, generateTemplate, listTemplateTypes, getStoredUser } from '../api';
 import type { TemplateTypeOption } from '../types';
 import { exportPlainTextPdf } from '../exportPdf';
 import { AlertIcon, DocumentIcon } from '../../icons';
+import UpgradeGate from '../UpgradeGate';
 
 const FIELD_SETS: Record<string, string[]> = {
   RENTAL_AGREEMENT: ['Landlord Name', 'Tenant Name', 'Property Address', 'Monthly Rent', 'Security Deposit', 'Lease Start Date', 'Lease Duration'],
+  RENTAL_AGREEMENT_US: ['Landlord Name', 'Tenant Name', 'Property Address', 'Monthly Rent', 'Security Deposit', 'Lease Start Date', 'Lease Duration', 'State'],
+  RENTAL_AGREEMENT_UK: ['Landlord Name', 'Tenant Name', 'Property Address', 'Monthly Rent', 'Deposit Amount', 'Tenancy Start Date', 'Tenancy Duration'],
   NDA: ['Disclosing Party', 'Receiving Party', 'Purpose of Disclosure', 'Effective Date', 'Duration'],
+  NDA_US: ['Disclosing Party', 'Receiving Party', 'Purpose of Disclosure', 'Effective Date', 'Duration', 'Governing State'],
   FREELANCE_CONTRACT: ['Client Name', 'Freelancer Name', 'Scope of Work', 'Payment Amount', 'Payment Terms', 'Start Date'],
+  FREELANCE_CONTRACT_US: ['Client Name', 'Contractor Name', 'Scope of Work', 'Payment Amount', 'Payment Terms', 'Start Date', 'Governing State'],
+  EMPLOYMENT_OFFER_LETTER: ['Company Name', 'Candidate Name', 'Job Title', 'Annual CTC', 'Joining Date', 'Probation Period', 'Reporting Manager'],
+  CONSULTING_AGREEMENT: ['Client Name', 'Consultant Name', 'Scope of Services', 'Fees', 'Payment Terms', 'Start Date', 'Term'],
+  NON_COMPETE_AGREEMENT: ['Company Name', 'Employee Name', 'Restricted Activities', 'Geographic Scope', 'Duration', 'Effective Date'],
+  POWER_OF_ATTORNEY: ['Principal Name', 'Agent Name', 'Scope of Authority', 'Effective Date', 'Expiry Date'],
 };
 
 export default function Templates() {
@@ -19,11 +28,15 @@ export default function Templates() {
   const [content, setContent] = useState<string | null>(null);
   const [consent, setConsent] = useState(false);
 
+  const user = getStoredUser();
+  const isPaid = user?.plan === 'PRO' || user?.plan === 'ENTERPRISE';
+
   useEffect(() => {
+    if (!isPaid) return;
     listTemplateTypes()
       .then(setTypes)
       .catch(() => setError('Could not load template types.'));
-  }, []);
+  }, [isPaid]);
 
   function selectType(key: string) {
     setSelectedType(key);
@@ -65,30 +78,34 @@ export default function Templates() {
         Generate a draft document from a template. This is a starting point, not a final legal document.
       </p>
 
-      <div
-        style={{
-          background: '#FEF3C7',
-          border: '1px solid #FDE68A',
-          color: '#92400E',
-          fontSize: 12.5,
-          padding: '12px 14px',
-          borderRadius: 10,
-          marginBottom: 20,
-          display: 'flex',
-          gap: 10,
-          alignItems: 'flex-start',
-        }}
-      >
-        <AlertIcon style={{ width: 16, height: 16, flexShrink: 0, marginTop: 1 }} />
-        <span>
-          <strong>Draft only — not legal advice.</strong> Every generated document must be reviewed by a qualified
-          lawyer before you sign or use it.
-        </span>
-      </div>
+      {!isPaid && <UpgradeGate feature="Document Templates" />}
 
-      {error && <div className="cw-error">{error}</div>}
+      {isPaid && (
+        <div
+          style={{
+            background: '#FEF3C7',
+            border: '1px solid #FDE68A',
+            color: '#92400E',
+            fontSize: 12.5,
+            padding: '12px 14px',
+            borderRadius: 10,
+            marginBottom: 20,
+            display: 'flex',
+            gap: 10,
+            alignItems: 'flex-start',
+          }}
+        >
+          <AlertIcon style={{ width: 16, height: 16, flexShrink: 0, marginTop: 1 }} />
+          <span>
+            <strong>Draft only — not legal advice.</strong> Every generated document must be reviewed by a qualified
+            lawyer before you sign or use it.
+          </span>
+        </div>
+      )}
 
-      {!selectedType && (
+      {isPaid && error && <div className="cw-error">{error}</div>}
+
+      {isPaid && !selectedType && (
         <div className="cw-actions-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
           {(types || []).map((t) => (
             <button key={t.key} className="cw-action-card" onClick={() => selectType(t.key)}>
