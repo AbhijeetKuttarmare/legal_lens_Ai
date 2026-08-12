@@ -10,6 +10,8 @@ import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import TermsScreen from '../screens/TermsScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
+import CompareScreen from '../screens/CompareScreen';
+import TemplatesScreen from '../screens/TemplatesScreen';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -45,6 +47,8 @@ export default function MainNavigator() {
         component={CheckoutScreen}
         options={({ route }) => ({ title: `Upgrade to ${route.params.planName}` })}
       />
+      <Stack.Screen name="Compare" component={CompareScreen} options={{ title: 'Compare Documents' }} />
+      <Stack.Screen name="Templates" component={TemplatesScreen} options={{ title: 'Document Templates' }} />
     </Stack.Navigator>
   );
 }

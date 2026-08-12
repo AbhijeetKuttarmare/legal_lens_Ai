@@ -56,3 +56,27 @@ export interface ChatMessage {
   content: string;
   createdAt: string;
 }
+
+export interface ComparisonDifference {
+  aspect: string;
+  documentAValue: string;
+  documentBValue: string;
+  note: string;
+}
+
+export interface ComparisonResult {
+  documentA: { id: string; fileName: string };
+  documentB: { id: string; fileName: string };
+  verdict: string;
+  differences: ComparisonDifference[];
+}
+
+export interface KeyDate {
+  label: string;
+  detail: string;
+}
+
+export interface TemplateTypeOption {
+  key: string;
+  label: string;
+}

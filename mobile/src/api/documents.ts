@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import { DocumentReport, DocumentSummary } from './types';
+import { ComparisonResult, DocumentReport, DocumentSummary, KeyDate } from './types';
 
 export async function listDocuments(): Promise<DocumentSummary[]> {
   const { data } = await apiClient.get<DocumentSummary[]>('/documents');
@@ -13,6 +13,24 @@ export async function getDocumentReport(id: string): Promise<DocumentReport> {
 
 export async function deleteDocument(id: string): Promise<void> {
   await apiClient.delete(`/documents/${id}`);
+}
+
+export async function compareDocuments(
+  documentIdA: string,
+  documentIdB: string,
+  language = 'en',
+): Promise<ComparisonResult> {
+  const { data } = await apiClient.post<ComparisonResult>('/documents/compare', {
+    documentIdA,
+    documentIdB,
+    language,
+  });
+  return data;
+}
+
+export async function getKeyDates(documentId: string): Promise<KeyDate[]> {
+  const { data } = await apiClient.get<{ keyDates: KeyDate[] }>(`/documents/${documentId}/key-dates`);
+  return data.keyDates;
 }
 
 export interface PickedFile {

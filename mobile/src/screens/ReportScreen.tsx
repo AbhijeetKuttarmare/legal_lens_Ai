@@ -9,7 +9,9 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { MainStackParamList, RootNavigationParamList } from '../navigation/types';
-import { getDocumentReport } from '../api/documents';
+import { getDocumentReport, getKeyDates } from '../api/documents';
+import { extractErrorMessage } from '../api/client';
+import { KeyDate } from '../api/types';
 import { riskColor, NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
 import { useAppSelector } from '../store/hooks';
 import { buildReportHtml } from '../utils/reportHtml';
@@ -24,6 +26,9 @@ export default function ReportScreen({ route, navigation }: Props) {
   const user = useAppSelector((s) => s.auth.user);
   const isPremium = user?.plan === 'ENTERPRISE';
   const [exporting, setExporting] = useState(false);
+  const [keyDates, setKeyDates] = useState<KeyDate[] | null>(null);
+  const [keyDatesLoading, setKeyDatesLoading] = useState(false);
+  const [keyDatesError, setKeyDatesError] = useState<string | null>(null);
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['document', documentId],
     queryFn: () => getDocumentReport(documentId),
@@ -67,6 +72,19 @@ export default function ReportScreen({ route, navigation }: Props) {
       Alert.alert('Export failed', `Could not generate the PDF. Please try again.\n\n${detail}`);
     } finally {
       setExporting(false);
+    }
+  };
+
+  const onCheckDeadlines = async () => {
+    setKeyDatesLoading(true);
+    setKeyDatesError(null);
+    try {
+      const dates = await getKeyDates(documentId);
+      setKeyDates(dates);
+    } catch (e) {
+      setKeyDatesError(extractErrorMessage(e));
+    } finally {
+      setKeyDatesLoading(false);
     }
   };
 
@@ -194,6 +212,42 @@ export default function ReportScreen({ route, navigation }: Props) {
           </View>
         )}
 
+        <View style={[styles.card, cardShadow]}>
+          <View style={styles.cardTitleRow}>
+            <MaterialCommunityIcons name="calendar-alert-outline" size={18} color={NAVY} />
+            <Text style={styles.cardTitle}>Key Dates & Deadlines</Text>
+          </View>
+          {keyDatesError && <Text style={{ color: '#DC2626', fontSize: 12.5 }}>{keyDatesError}</Text>}
+          {keyDates === null && (
+            <Pressable
+              style={styles.deadlinesButton}
+              onPress={onCheckDeadlines}
+              disabled={keyDatesLoading}
+            >
+              {keyDatesLoading ? (
+                <ActivityIndicator size="small" color={NAVY} />
+              ) : (
+                <Text style={styles.deadlinesButtonText}>Check for deadlines in this document</Text>
+              )}
+            </Pressable>
+          )}
+          {keyDates !== null && keyDates.length === 0 && (
+            <Text style={{ color: TEXT_MUTED, fontSize: 12.5 }}>
+              No explicit dates or deadlines found in this document.
+            </Text>
+          )}
+          {keyDates !== null &&
+            keyDates.map((kd, idx) => (
+              <View key={idx} style={styles.flagRow}>
+                <MaterialCommunityIcons name="clock-alert-outline" size={18} color="#D97706" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.flagTitle}>{kd.label}</Text>
+                  <Text style={styles.flagDetail}>{kd.detail}</Text>
+                </View>
+              </View>
+            ))}
+        </View>
+
         <Pressable
           style={[styles.chatButton, cardShadow]}
           onPress={() =>
@@ -306,6 +360,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   chatButtonText: { color: NAVY, fontWeight: '700', fontSize: 15 },
+  deadlinesButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingVertical: 12,
+  },
+  deadlinesButtonText: { color: NAVY, fontWeight: '600', fontSize: 13 },
   exportButton: {
     flexDirection: 'row',
     alignItems: 'center',

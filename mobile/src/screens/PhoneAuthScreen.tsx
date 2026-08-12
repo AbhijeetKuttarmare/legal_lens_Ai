@@ -303,6 +303,7 @@ export default function PhoneAuthScreen() {
             .
           </Text>
         </View>
+      </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
   );

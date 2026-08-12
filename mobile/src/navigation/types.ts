@@ -22,6 +22,8 @@ export type MainStackParamList = {
   Terms: undefined;
   HelpSupport: undefined;
   Checkout: { plan: 'PRO' | 'ENTERPRISE'; planName: string };
+  Compare: undefined;
+  Templates: undefined;
 };
 
 // Screens nested inside the bottom tabs need to navigate to stack-only routes

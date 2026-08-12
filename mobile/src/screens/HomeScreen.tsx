@@ -149,6 +149,18 @@ export default function HomeScreen({ navigation }: Props) {
               subtitle="Manage your plan"
               onPress={() => navigation.navigate('Subscription')}
             />
+            <QuickAction
+              icon="file-compare"
+              title="Compare Documents"
+              subtitle="See two documents side by side"
+              onPress={() => navigation.navigate('Compare')}
+            />
+            <QuickAction
+              icon="file-outline"
+              title="Templates"
+              subtitle="Generate a draft document"
+              onPress={() => navigation.navigate('Templates')}
+            />
           </View>
 
           <Pressable
