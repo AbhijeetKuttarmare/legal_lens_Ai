@@ -1,17 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
-interface OtpSession {
-  sessionId: string;
-  expiresAt: number;
-}
-
 const SESSION_TTL_MS = 10 * 60 * 1000;
 
 @Injectable()
 export class OtpService {
-  private sessions = new Map<string, OtpSession>();
-
   constructor(private readonly prisma: PrismaService) {}
 
   private get apiKey(): string {
@@ -48,12 +41,21 @@ export class OtpService {
     );
   }
 
+  private async saveSession(phone: string, sessionId: string): Promise<void> {
+    await this.prisma.otpSession.upsert({
+      where: { phone },
+      create: { phone, sessionId, expiresAt: new Date(Date.now() + SESSION_TTL_MS) },
+      update: { sessionId, expiresAt: new Date(Date.now() + SESSION_TTL_MS) },
+    });
+  }
+
+  private async clearSession(phone: string): Promise<void> {
+    await this.prisma.otpSession.delete({ where: { phone } }).catch(() => undefined);
+  }
+
   async sendOtp(tenDigitPhone: string): Promise<void> {
     if (this.isReviewBypass(tenDigitPhone)) {
-      this.sessions.set(tenDigitPhone, {
-        sessionId: 'review-bypass',
-        expiresAt: Date.now() + SESSION_TTL_MS,
-      });
+      await this.saveSession(tenDigitPhone, 'review-bypass');
       this.logOtp(tenDigitPhone, 'REQUESTED', true);
       return;
     }
@@ -69,23 +71,20 @@ export class OtpService {
       );
     }
 
-    this.sessions.set(tenDigitPhone, {
-      sessionId: data.Details,
-      expiresAt: Date.now() + SESSION_TTL_MS,
-    });
+    await this.saveSession(tenDigitPhone, data.Details);
     this.logOtp(tenDigitPhone, 'REQUESTED', true);
   }
 
   async verifyOtp(tenDigitPhone: string, code: string): Promise<boolean> {
-    const session = this.sessions.get(tenDigitPhone);
-    if (!session || session.expiresAt < Date.now()) {
+    const session = await this.prisma.otpSession.findUnique({ where: { phone: tenDigitPhone } });
+    if (!session || session.expiresAt.getTime() < Date.now()) {
       this.logOtp(tenDigitPhone, 'VERIFIED', false);
       throw new BadRequestException('OTP expired or not requested. Please request a new OTP.');
     }
 
     if (this.isReviewBypass(tenDigitPhone)) {
       const success = code === process.env.REVIEW_TEST_OTP;
-      if (success) this.sessions.delete(tenDigitPhone);
+      if (success) await this.clearSession(tenDigitPhone);
       this.logOtp(tenDigitPhone, 'VERIFIED', success);
       return success;
     }
@@ -95,7 +94,7 @@ export class OtpService {
     const data = (await res.json()) as { Status: string; Details: string };
 
     const success = data.Status === 'Success';
-    if (success) this.sessions.delete(tenDigitPhone);
+    if (success) await this.clearSession(tenDigitPhone);
     this.logOtp(tenDigitPhone, 'VERIFIED', success);
     return success;
   }

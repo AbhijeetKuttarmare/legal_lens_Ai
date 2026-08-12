@@ -203,3 +203,15 @@ model OtpLog {
   success   Boolean
   createdAt DateTime @default(now())
 }
+
+// Persisted so a pending OTP session survives a backend redeploy or Render's
+// free-tier spin-down — it previously lived in an in-memory Map, which wiped
+// out on every restart mid-login. Never stores the actual OTP digits, only
+// the 2Factor.in session id needed to verify it.
+model OtpSession {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  sessionId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
