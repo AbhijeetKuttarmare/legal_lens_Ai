@@ -1,10 +1,18 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 const SESSION_TTL_MS = 10 * 60 * 1000;
 
 @Injectable()
 export class OtpService {
+  private readonly logger = new Logger(OtpService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   private get apiKey(): string {
@@ -54,48 +62,60 @@ export class OtpService {
   }
 
   async sendOtp(tenDigitPhone: string): Promise<void> {
-    if (this.isReviewBypass(tenDigitPhone)) {
-      await this.saveSession(tenDigitPhone, 'review-bypass');
+    try {
+      if (this.isReviewBypass(tenDigitPhone)) {
+        await this.saveSession(tenDigitPhone, 'review-bypass');
+        this.logOtp(tenDigitPhone, 'REQUESTED', true);
+        return;
+      }
+
+      const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/${this.fullNumber(tenDigitPhone)}/AUTOGEN2/${encodeURIComponent(this.templateName)}`;
+      const res = await fetch(url);
+      const data = (await res.json()) as { Status: string; Details: string };
+
+      if (data.Status !== 'Success') {
+        this.logOtp(tenDigitPhone, 'REQUESTED', false);
+        throw new BadRequestException(
+          `Failed to send OTP: ${data.Details || 'Unknown error from SMS provider'}`,
+        );
+      }
+
+      await this.saveSession(tenDigitPhone, data.Details);
       this.logOtp(tenDigitPhone, 'REQUESTED', true);
-      return;
+    } catch (err) {
+      if (err instanceof HttpException) throw err;
+      this.logger.error(`sendOtp failed: ${(err as Error).message}`, (err as Error).stack);
+      throw new BadRequestException(`Could not send OTP: ${(err as Error).message}`);
     }
-
-    const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/${this.fullNumber(tenDigitPhone)}/AUTOGEN2/${encodeURIComponent(this.templateName)}`;
-    const res = await fetch(url);
-    const data = (await res.json()) as { Status: string; Details: string };
-
-    if (data.Status !== 'Success') {
-      this.logOtp(tenDigitPhone, 'REQUESTED', false);
-      throw new BadRequestException(
-        `Failed to send OTP: ${data.Details || 'Unknown error from SMS provider'}`,
-      );
-    }
-
-    await this.saveSession(tenDigitPhone, data.Details);
-    this.logOtp(tenDigitPhone, 'REQUESTED', true);
   }
 
   async verifyOtp(tenDigitPhone: string, code: string): Promise<boolean> {
-    const session = await this.prisma.otpSession.findUnique({ where: { phone: tenDigitPhone } });
-    if (!session || session.expiresAt.getTime() < Date.now()) {
-      this.logOtp(tenDigitPhone, 'VERIFIED', false);
-      throw new BadRequestException('OTP expired or not requested. Please request a new OTP.');
-    }
+    try {
+      const session = await this.prisma.otpSession.findUnique({ where: { phone: tenDigitPhone } });
+      if (!session || session.expiresAt.getTime() < Date.now()) {
+        this.logOtp(tenDigitPhone, 'VERIFIED', false);
+        throw new BadRequestException('OTP expired or not requested. Please request a new OTP.');
+      }
 
-    if (this.isReviewBypass(tenDigitPhone)) {
-      const success = code === process.env.REVIEW_TEST_OTP;
+      if (this.isReviewBypass(tenDigitPhone)) {
+        const success = code === process.env.REVIEW_TEST_OTP;
+        if (success) await this.clearSession(tenDigitPhone);
+        this.logOtp(tenDigitPhone, 'VERIFIED', success);
+        return success;
+      }
+
+      const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/VERIFY/${session.sessionId}/${code}`;
+      const res = await fetch(url);
+      const data = (await res.json()) as { Status: string; Details: string };
+
+      const success = data.Status === 'Success';
       if (success) await this.clearSession(tenDigitPhone);
       this.logOtp(tenDigitPhone, 'VERIFIED', success);
       return success;
+    } catch (err) {
+      if (err instanceof HttpException) throw err;
+      this.logger.error(`verifyOtp failed: ${(err as Error).message}`, (err as Error).stack);
+      throw new BadRequestException(`Could not verify OTP: ${(err as Error).message}`);
     }
-
-    const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/VERIFY/${session.sessionId}/${code}`;
-    const res = await fetch(url);
-    const data = (await res.json()) as { Status: string; Details: string };
-
-    const success = data.Status === 'Success';
-    if (success) await this.clearSession(tenDigitPhone);
-    this.logOtp(tenDigitPhone, 'VERIFIED', success);
-    return success;
   }
 }
