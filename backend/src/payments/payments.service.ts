@@ -41,12 +41,11 @@ export class PaymentsService {
   }
 
   async createOrder(userId: string, dto: CreateOrderDto) {
-    const requester = await this.prisma.user.findUnique({ where: { id: userId } });
-    const amount = PLAN_AMOUNTS[dto.plan];
-
-    let order: any;
     try {
-      order = await this.client.orders.create({
+      const requester = await this.prisma.user.findUnique({ where: { id: userId } });
+      const amount = PLAN_AMOUNTS[dto.plan];
+
+      const order = await this.client.orders.create({
         amount,
         currency: 'INR',
         // Razorpay caps receipt at 56 chars; a full plan name + UUID + timestamp
@@ -54,57 +53,51 @@ export class PaymentsService {
         receipt: `${dto.plan}_${Date.now()}`,
         notes: { userId, plan: dto.plan },
       });
+
+      await this.prisma.payment.create({
+        data: {
+          userId,
+          plan: dto.plan,
+          amount,
+          currency: 'INR',
+          razorpayOrderId: order.id,
+        },
+      });
+
+      this.auditLog.record({
+        actorType: 'USER',
+        actorId: userId,
+        actorLabel: requester?.name || requester?.email || requester?.phone || userId,
+        action: 'CREATE_PAYMENT_ORDER',
+        targetType: 'Payment',
+        targetId: order.id,
+        metadata: { plan: dto.plan, amount },
+      });
+
+      return {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.RAZORPAY_KEY_ID,
+      };
     } catch (err) {
-      this.logger.error(`Razorpay order creation failed: ${(err as Error).message}`, (err as Error).stack);
+      this.logger.error(`createOrder failed: ${(err as Error).message}`, (err as Error).stack);
       throw new BadRequestException(`Could not start checkout: ${(err as Error).message}`);
     }
-
-    await this.prisma.payment.create({
-      data: {
-        userId,
-        plan: dto.plan,
-        amount,
-        currency: 'INR',
-        razorpayOrderId: order.id,
-      },
-    });
-
-    this.auditLog.record({
-      actorType: 'USER',
-      actorId: userId,
-      actorLabel: requester?.name || requester?.email || requester?.phone || userId,
-      action: 'CREATE_PAYMENT_ORDER',
-      targetType: 'Payment',
-      targetId: order.id,
-      metadata: { plan: dto.plan, amount },
-    });
-
-    return {
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID,
-    };
   }
 
   async createCreditOrder(userId: string, dto: CreateCreditOrderDto) {
-    const requester = await this.prisma.user.findUnique({ where: { id: userId } });
-    const pack = CREDIT_PACKS[dto.pack];
-
-    let order: any;
     try {
-      order = await this.client.orders.create({
+      const requester = await this.prisma.user.findUnique({ where: { id: userId } });
+      const pack = CREDIT_PACKS[dto.pack];
+
+      const order = await this.client.orders.create({
         amount: pack.amount,
         currency: 'INR',
         receipt: `${dto.pack}_${Date.now()}`,
         notes: { userId, creditPack: dto.pack },
       });
-    } catch (err) {
-      this.logger.error(`Razorpay credit order creation failed: ${(err as Error).message}`, (err as Error).stack);
-      throw new BadRequestException(`Could not start checkout: ${(err as Error).message}`);
-    }
 
-    try {
       await this.prisma.creditOrder.create({
         data: {
           userId,
@@ -114,27 +107,27 @@ export class PaymentsService {
           razorpayOrderId: order.id,
         },
       });
+
+      this.auditLog.record({
+        actorType: 'USER',
+        actorId: userId,
+        actorLabel: requester?.name || requester?.email || requester?.phone || userId,
+        action: 'CREATE_CREDIT_ORDER',
+        targetType: 'CreditOrder',
+        targetId: order.id,
+        metadata: { pack: dto.pack, credits: pack.credits, amount: pack.amount },
+      });
+
+      return {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.RAZORPAY_KEY_ID,
+      };
     } catch (err) {
-      this.logger.error(`CreditOrder DB write failed: ${(err as Error).message}`, (err as Error).stack);
+      this.logger.error(`createCreditOrder failed: ${(err as Error).message}`, (err as Error).stack);
       throw new BadRequestException(`Could not start checkout: ${(err as Error).message}`);
     }
-
-    this.auditLog.record({
-      actorType: 'USER',
-      actorId: userId,
-      actorLabel: requester?.name || requester?.email || requester?.phone || userId,
-      action: 'CREATE_CREDIT_ORDER',
-      targetType: 'CreditOrder',
-      targetId: order.id,
-      metadata: { pack: dto.pack, credits: pack.credits, amount: pack.amount },
-    });
-
-    return {
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID,
-    };
   }
 
   async verifyCreditOrder(userId: string, dto: VerifyCreditOrderDto) {
