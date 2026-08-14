@@ -1,40 +1,41 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   --navy-950: #0B1220;
   --navy-900: #101A2E;
   --navy-800: #16223B;
   --navy-700: #1C2942;
 
-  --bg: #F4F5F9;
-  --surface: #FFFFFF;
-  --border: #E5E8EF;
-  --border-soft: #EEF0F4;
+  --bg: #0A101E;
+  --surface: #121B2E;
+  --surface-2: #0E1626;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-soft: rgba(255, 255, 255, 0.06);
 
-  --text-primary: #111827;
-  --text-secondary: #4B5563;
-  --text-muted: #6B7280;
+  --text-primary: #F5F7FA;
+  --text-secondary: #C6CCDA;
+  --text-muted: #8D97A8;
   --text-inverse: #FFFFFF;
   --text-inverse-muted: #94A3C4;
 
-  --accent: #3B82F6;
-  --accent-dark: #1D4ED8;
-  --accent-soft: #EFF6FF;
+  --accent: #E8A93D;
+  --accent-dark: #E8A93D;
+  --accent-soft: rgba(232, 169, 61, 0.12);
 
-  --success: #059669;
-  --success-soft: #D1FAE5;
-  --warning: #B45309;
-  --warning-soft: #FEF3C7;
-  --danger: #DC2626;
-  --danger-soft: #FEE2E2;
-  --neutral-soft: #E5E7EB;
+  --success: #4ADE80;
+  --success-soft: rgba(34, 197, 94, 0.15);
+  --warning: #FBBF24;
+  --warning-soft: rgba(217, 119, 6, 0.15);
+  --danger: #F87171;
+  --danger-soft: rgba(220, 38, 38, 0.15);
+  --neutral-soft: rgba(255, 255, 255, 0.08);
 
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
 
-  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
-  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -354,7 +355,7 @@ th, td {
 }
 
 th {
-  background: #FAFBFC;
+  background: var(--surface-2);
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
@@ -373,7 +374,7 @@ tbody tr:last-child {
 }
 
 tbody tr:hover {
-  background: #FAFBFD;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .cell-user {
@@ -417,16 +418,16 @@ tbody tr:hover {
   font-weight: 600;
 }
 
-.badge-free { background: var(--neutral-soft); color: #374151; }
+.badge-free { background: var(--neutral-soft); color: var(--text-secondary); }
 .badge-pro { background: var(--accent-soft); color: var(--accent-dark); }
-.badge-enterprise { background: #EDE9FE; color: #6D28D9; }
+.badge-enterprise { background: rgba(139, 92, 246, 0.15); color: #A78BFA; }
 
 .badge-ready { background: var(--success-soft); color: var(--success); }
 .badge-processing { background: var(--warning-soft); color: var(--warning); }
-.badge-uploaded { background: var(--neutral-soft); color: #374151; }
+.badge-uploaded { background: var(--neutral-soft); color: var(--text-secondary); }
 .badge-failed { background: var(--danger-soft); color: var(--danger); }
 
-.badge-admin { background: var(--navy-950); color: #fff; }
+.badge-admin { background: var(--accent); color: var(--navy-950); }
 
 /* ---------- Login ---------- */
 
@@ -440,6 +441,7 @@ tbody tr:hover {
 
 .login-card {
   background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 32px;
   width: 340px;
@@ -483,7 +485,8 @@ tbody tr:hover {
   border-radius: var(--radius-sm);
   margin-bottom: 12px;
   font-size: 14px;
-  background: var(--bg);
+  background: var(--surface-2);
+  color: var(--text-primary);
   transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
@@ -491,7 +494,7 @@ tbody tr:hover {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
-  background: var(--surface);
+  background: var(--surface-2);
 }
 
 .login-card button {
@@ -499,8 +502,8 @@ tbody tr:hover {
   padding: 10px 12px;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--navy-950);
-  color: #fff;
+  background: var(--accent);
+  color: var(--navy-950);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -508,7 +511,7 @@ tbody tr:hover {
 }
 
 .login-card button:hover:not(:disabled) {
-  background: var(--navy-800);
+  background: #F0BB5E;
 }
 
 .login-card button:disabled {
@@ -662,7 +665,7 @@ tbody tr:hover {
 
 .icon-button.danger {
   color: var(--danger);
-  border-color: #FCA5A5;
+  border-color: rgba(248, 113, 113, 0.4);
 }
 
 .stars {

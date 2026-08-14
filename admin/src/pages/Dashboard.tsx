@@ -44,28 +44,28 @@ export default function Dashboard() {
     <div>
       <div className="stat-row">
         <div className="stat-card">
-          <div className="icon" style={{ background: '#EFF6FF', color: '#1D4ED8' }}>
+          <div className="icon" style={{ background: 'rgba(59,130,246,0.15)', color: '#60A5FA' }}>
             <UsersIcon />
           </div>
           <div className="value">{stats.totalUsers}</div>
           <div className="label">Total users</div>
         </div>
         <div className="stat-card">
-          <div className="icon" style={{ background: '#EDE9FE', color: '#6D28D9' }}>
+          <div className="icon" style={{ background: 'rgba(139,92,246,0.15)', color: '#A78BFA' }}>
             <UsersIcon />
           </div>
           <div className="value">{stats.payingUsers}</div>
           <div className="label">Paying users</div>
         </div>
         <div className="stat-card">
-          <div className="icon" style={{ background: '#F3F4F6', color: '#374151' }}>
+          <div className="icon" style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)' }}>
             <DocumentIcon />
           </div>
           <div className="value">{stats.totalDocuments}</div>
           <div className="label">Total documents</div>
         </div>
         <div className="stat-card">
-          <div className="icon" style={{ background: '#D1FAE5', color: '#047857' }}>
+          <div className="icon" style={{ background: 'rgba(74,222,128,0.15)', color: '#4ADE80' }}>
             <UsersIcon />
           </div>
           <div className="value">{formatInr(stats.totalRevenue)}</div>
