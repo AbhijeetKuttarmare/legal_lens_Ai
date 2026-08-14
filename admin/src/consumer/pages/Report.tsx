@@ -253,7 +253,7 @@ export default function Report() {
             Key Actions
           </div>
           <Link to={`/app/chat/${report.id}`} className="cw-btn cw-btn-gold" style={{ marginBottom: 10, textDecoration: 'none' }}>
-            <ChatIcon style={{ width: 18, height: 18 }} /> Ask AI About This Document
+            <ChatIcon style={{ width: 18, height: 18 }} /> Ask Clauzera About This Document
           </Link>
 
           {isPremium ? (

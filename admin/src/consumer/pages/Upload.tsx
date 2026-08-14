@@ -47,7 +47,7 @@ export default function Upload() {
         <div className="cw-spinner" style={{ margin: '0 auto 20px' }} />
         <div style={{ fontWeight: 700, color: 'white', marginBottom: 6 }}>Analyzing your document</div>
         <div style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5 }}>
-          Extracting text and analyzing with AI. This can take up to a minute…
+          Extracting text and analyzing with Clauzera. This can take up to a minute…
         </div>
       </div>
     );

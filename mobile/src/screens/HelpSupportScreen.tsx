@@ -14,7 +14,7 @@ const FAQS = [
   },
   {
     q: 'What file types can I upload?',
-    a: 'You can upload PDF and DOCX files, or take a photo of a printed document with your camera — our AI can read text directly from photos.',
+    a: 'You can upload PDF and DOCX files, or take a photo of a printed document with your camera — Clauzera can read text directly from photos.',
   },
   {
     q: 'Is my document data secure?',

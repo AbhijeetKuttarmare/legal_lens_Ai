@@ -259,7 +259,7 @@ export default function ReportScreen({ route, navigation }: Props) {
           }
         >
           <MaterialCommunityIcons name="chat-processing-outline" size={20} color={NAVY} />
-          <Text style={styles.chatButtonText}>Ask AI About This Document</Text>
+          <Text style={styles.chatButtonText}>Ask Clauzera About This Document</Text>
         </Pressable>
 
         <Pressable

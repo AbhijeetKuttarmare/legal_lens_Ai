@@ -47,7 +47,7 @@ function trend(thisMonth: number, lastMonth: number) {
 const FREE_PLAN_LIMIT = 1;
 
 const FEATURES = [
-  { icon: <DocumentIcon />, title: 'Smart Analysis', desc: 'AI scans and understands legal language' },
+  { icon: <DocumentIcon />, title: 'Smart Analysis', desc: 'Clauzera scans and understands legal language' },
   { icon: <ShieldIcon />, title: 'Risk Detection', desc: 'Identifies risky clauses and red flags' },
   { icon: <ChatIcon />, title: 'Plain Language', desc: 'Explains complex terms in simple words' },
   { icon: <CreditCardIcon />, title: 'Secure & Private', desc: 'Your documents are 100% encrypted' },
@@ -113,7 +113,7 @@ export default function Home() {
     <div className="cw-container">
       <div className="cw-hero">
         <h1>Welcome back, {user?.firstName || 'there'}</h1>
-        <p>Upload any legal document and get AI-powered insights in seconds.</p>
+        <p>Upload any legal document and get Clauzera-powered insights in seconds.</p>
         <button className="cw-btn cw-btn-gold" onClick={() => navigate('/app/upload')}>
           Analyze a Document
         </button>

@@ -40,7 +40,7 @@ export default function UploadScreen({ navigation }: Props) {
     mutationFn: (file: PickedFile) => uploadDocument(file, language),
     onMutate: () => {
       setError(null);
-      setStatusText('Extracting text and analyzing with AI. This can take up to a minute...');
+      setStatusText('Extracting text and analyzing with Clauzera. This can take up to a minute...');
     },
     onSuccess: (report) => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
@@ -153,7 +153,7 @@ export default function UploadScreen({ navigation }: Props) {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.optionTitle}>Scan with Camera</Text>
-          <Text style={styles.optionSub}>JPG / PNG · Read instantly by AI</Text>
+          <Text style={styles.optionSub}>JPG / PNG · Read instantly by Clauzera</Text>
         </View>
         <MaterialCommunityIcons name="chevron-right" size={22} color={TEXT_MUTED} />
       </Pressable>

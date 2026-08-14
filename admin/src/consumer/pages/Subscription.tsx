@@ -29,7 +29,7 @@ const PLANS: {
   period: string;
   features: string[];
 }[] = [
-  { key: 'FREE', name: 'Free', price: '₹0', period: '', features: ['3 documents', 'AI summary', 'Document history'] },
+  { key: 'FREE', name: 'Free', price: '₹0', period: '', features: ['3 documents', 'Clauzera summary', 'Document history'] },
   {
     key: 'PRO',
     name: 'Pro',
@@ -37,7 +37,7 @@ const PLANS: {
     period: '/month',
     features: [
       'Unlimited uploads',
-      'Unlimited AI chat',
+      'Unlimited Clauzera chat',
       'Risk detection',
       'Clause comparison',
       'Multi-language support',
@@ -260,7 +260,7 @@ export default function Subscription() {
         Subscription & Billing
       </div>
       <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginTop: -6, marginBottom: 20 }}>
-        Unlock unlimited documents and deeper AI insight.
+        Unlock unlimited documents and deeper Clauzera insight.
       </p>
 
       <div className="cw-plan-tabs">

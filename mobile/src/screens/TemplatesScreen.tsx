@@ -207,7 +207,7 @@ export default function TemplatesScreen() {
           <Pressable style={styles.consentRow} onPress={() => setConsent((c) => !c)}>
             <Checkbox status={consent ? 'checked' : 'unchecked'} color={NAVY} onPress={() => setConsent((c) => !c)} />
             <Text style={styles.consentText}>
-              I understand this is an AI-generated draft, not legal advice, and I will have it reviewed by a
+              I understand this is a Clauzera-generated draft, not legal advice, and I will have it reviewed by a
               qualified lawyer before signing or using it.
             </Text>
           </Pressable>

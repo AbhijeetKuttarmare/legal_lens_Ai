@@ -29,7 +29,7 @@ const PLANS: Plan[] = [
     id: 'FREE',
     name: 'Free',
     price: '₹0',
-    features: ['1 document', 'AI summary', 'Document history'],
+    features: ['1 document', 'Clauzera summary', 'Document history'],
     icon: 'send-outline',
     iconBg: '#DBEAFE',
     iconColor: '#2563EB',
@@ -40,7 +40,7 @@ const PLANS: Plan[] = [
     name: 'Pro',
     price: '₹299',
     period: '/month',
-    features: ['Unlimited uploads', 'Unlimited AI chat', 'Risk detection'],
+    features: ['Unlimited uploads', 'Unlimited Clauzera chat', 'Risk detection'],
     icon: 'diamond-stone',
     iconBg: '#FFF7E0',
     iconColor: GOLD,
@@ -58,10 +58,10 @@ const PLANS: Plan[] = [
     decoration: 'shield-check',
     features: [
       'Unlimited uploads',
-      'Unlimited AI chat',
+      'Unlimited Clauzera chat',
       'Risk detection',
       'Priority support',
-      'Advanced AI insights',
+      'Advanced Clauzera insights',
       'Export & download reports',
     ],
   },
@@ -109,7 +109,7 @@ export default function SubscriptionScreen({ navigation }: Props) {
         <MaterialCommunityIcons name="crown" size={70} color={GOLD} style={styles.headerCrown} />
         <Text style={styles.headerTitle}>Choose your plan</Text>
         <View style={styles.headerUnderline} />
-        <Text style={styles.headerSubtitle}>Unlock unlimited documents and deeper AI insights.</Text>
+        <Text style={styles.headerSubtitle}>Unlock unlimited documents and deeper Clauzera insights.</Text>
       </View>
 
       <View style={styles.plansWrap}>

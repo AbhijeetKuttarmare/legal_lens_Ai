@@ -140,7 +140,7 @@ export default function Templates() {
               style={{ marginTop: 3, flexShrink: 0 }}
             />
             <span style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', lineHeight: 1.5 }}>
-              I understand this is an AI-generated draft, not legal advice, and I will have it reviewed by a
+              I understand this is a Clauzera-generated draft, not legal advice, and I will have it reviewed by a
               qualified lawyer before signing or using it.
             </span>
           </label>

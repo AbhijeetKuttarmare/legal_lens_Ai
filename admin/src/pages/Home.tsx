@@ -64,7 +64,7 @@ const FEATURES = [
   {
     icon: AlertIcon,
     title: 'Risk detection',
-    body: 'Our AI flags clauses that could work against you before you sign — penalty terms, lock-ins, unusual liabilities.',
+    body: 'Clauzera flags clauses that could work against you before you sign — penalty terms, lock-ins, unusual liabilities.',
   },
   {
     icon: ClipboardIcon,
@@ -96,7 +96,7 @@ const STEPS = [
   },
   {
     n: '02',
-    title: 'AI reads it for you',
+    title: 'Clauzera reads it for you',
     body: 'Clauzera analyzes the full document in seconds — summary, risks, and key clauses.',
   },
   {
@@ -230,7 +230,7 @@ export default function Home() {
             <div className="hero-text">
               <div className="hero-badge hero-anim hero-anim-1">
                 <ShieldIcon className="hero-badge-icon" />
-                AI-powered document analysis
+                Clauzera-powered document analysis
               </div>
               <h1 className="hero-anim hero-anim-2">
                 Understand any document
@@ -278,7 +278,7 @@ export default function Home() {
               </div>
               <div className="float-badge float-badge-3">
                 <CheckIcon className="float-badge-icon float-badge-icon-ok" />
-                AI analyzed
+                Clauzera analyzed
               </div>
             </div>
           </div>

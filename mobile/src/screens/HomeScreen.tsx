@@ -111,7 +111,7 @@ export default function HomeScreen({ navigation }: Props) {
             />
             <Text style={styles.heroGreeting}>Welcome back, {user?.firstName || 'there'}</Text>
             <Text style={styles.heroSubtitle}>
-              Upload any legal document and get AI-powered insights in seconds.
+              Upload any legal document and get Clauzera-powered insights in seconds.
             </Text>
             <Pressable style={styles.scanButton} onPress={() => navigation.navigate('Upload')}>
               <MaterialCommunityIcons name="tray-arrow-up" size={20} color={NAVY} />
@@ -128,7 +128,7 @@ export default function HomeScreen({ navigation }: Props) {
             <QuickAction
               icon="file-document-outline"
               title="Analyze Document"
-              subtitle="Get AI insights and summaries"
+              subtitle="Get Clauzera insights and summaries"
               onPress={() => navigation.navigate('Upload')}
             />
             <QuickAction
@@ -167,8 +167,8 @@ export default function HomeScreen({ navigation }: Props) {
             style={[styles.insightsBanner, cardShadow]}
             onPress={() =>
               comingSoon(
-                'AI-Powered Insights',
-                'Our AI highlights key points, risks, important clauses and more from your documents.',
+                'Clauzera-Powered Insights',
+                'Clauzera highlights key points, risks, important clauses and more from your documents.',
               )
             }
           >
@@ -176,7 +176,7 @@ export default function HomeScreen({ navigation }: Props) {
               <MaterialCommunityIcons name="shield-check-outline" size={22} color={NAVY} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.insightsTitle}>AI-Powered Insights</Text>
+              <Text style={styles.insightsTitle}>Clauzera-Powered Insights</Text>
               <Text style={styles.insightsSubtitle}>
                 Highlights key points, risks and clauses from your documents.
               </Text>

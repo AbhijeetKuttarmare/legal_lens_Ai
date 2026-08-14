@@ -11,7 +11,7 @@ const FAQS = [
   },
   {
     q: 'What file types can I upload?',
-    a: 'You can upload PDF and DOCX files, or upload a photo of a printed document — our AI can read text directly from photos.',
+    a: 'You can upload PDF and DOCX files, or upload a photo of a printed document — Clauzera can read text directly from photos.',
   },
   {
     q: 'Is my document data secure?',
@@ -19,7 +19,7 @@ const FAQS = [
   },
   {
     q: 'What does the Free plan include?',
-    a: 'The Free plan includes 3 documents, AI summaries, and document history. Upgrade to Pro for unlimited uploads and full features from the Subscription page.',
+    a: 'The Free plan includes 3 documents, Clauzera summaries, and document history. Upgrade to Pro for unlimited uploads and full features from the Subscription page.',
   },
   {
     q: 'How do I delete a document?',
