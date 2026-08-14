@@ -70,8 +70,10 @@ export class OtpService {
       }
 
       const url = `https://2factor.in/API/V1/${this.apiKey}/SMS/${this.fullNumber(tenDigitPhone)}/AUTOGEN2/${encodeURIComponent(this.templateName)}`;
+      const startedAt = Date.now();
       const res = await fetch(url);
       const data = (await res.json()) as { Status: string; Details: string };
+      this.logger.log(`2Factor SMS API responded in ${Date.now() - startedAt}ms (status=${data.Status})`);
 
       if (data.Status !== 'Success') {
         this.logOtp(tenDigitPhone, 'REQUESTED', false);
