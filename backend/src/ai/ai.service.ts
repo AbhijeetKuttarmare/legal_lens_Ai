@@ -439,26 +439,33 @@ export class AiService {
     }
   }
 
-  async chatAboutDocument(
+  async *streamChatAboutDocument(
     documentText: string,
     history: { role: 'user' | 'assistant'; content: string }[],
     question: string,
     language?: string,
-  ): Promise<string> {
-    try {
-      const truncated = documentText.slice(0, 20000);
-      const response = await this.client.messages.create({
-        model: this.model,
-        max_tokens: 1024,
-        system: chatSystemBlocks(truncated, language),
-        messages: [...history, { role: 'user', content: question }],
-      });
+  ): AsyncGenerator<{ type: 'text'; text: string } | { type: 'usage'; inputTokens: number; outputTokens: number }> {
+    const truncated = documentText.slice(0, 20000);
+    const stream = this.client.messages.stream({
+      model: this.model,
+      max_tokens: 1024,
+      system: chatSystemBlocks(truncated, language),
+      messages: [...history, { role: 'user', content: question }],
+    });
 
-      return firstText(response.content) || 'Sorry, I could not generate an answer.';
-    } catch (err) {
-      throw new InternalServerErrorException(
-        `AI chat failed: ${(err as Error).message}. Check ANTHROPIC_API_KEY in backend/.env`,
-      );
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    for await (const event of stream) {
+      if (event.type === 'message_start') {
+        inputTokens = event.message.usage.input_tokens;
+      } else if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+        yield { type: 'text', text: event.delta.text };
+      } else if (event.type === 'message_delta') {
+        outputTokens = event.usage.output_tokens;
+      }
     }
+
+    yield { type: 'usage', inputTokens, outputTokens };
   }
 }

@@ -1,6 +1,6 @@
 import { FormEvent, Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { ApiError, askQuestion, getChatHistory } from '../api';
+import { ApiError, ChatUsage, getChatHistory, streamAskQuestion } from '../api';
 import type { ChatMessage } from '../types';
 import { ChatIcon } from '../../icons';
 
@@ -72,6 +72,7 @@ export default function Chat() {
   const [question, setQuestion] = useState(() => (location.state as { prefill?: string } | null)?.prefill || '');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tokenUsage, setTokenUsage] = useState<Record<string, ChatUsage>>({});
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -90,18 +91,21 @@ export default function Chat() {
     setQuestion('');
     setSending(true);
     setError(null);
+    const assistantId = `local-${Date.now()}-a`;
     setMessages((prev) => [
       ...prev,
       { id: `local-${Date.now()}`, role: 'user', content: q, createdAt: new Date().toISOString() },
+      { id: assistantId, role: 'assistant', content: '', createdAt: new Date().toISOString() },
     ]);
     try {
-      const { answer } = await askQuestion(id, q);
-      setMessages((prev) => [
-        ...prev,
-        { id: `local-${Date.now()}-a`, role: 'assistant', content: answer, createdAt: new Date().toISOString() },
-      ]);
+      const usage = await streamAskQuestion(id, q, (chunk) => {
+        setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)));
+      });
+      if (usage) {
+        setTokenUsage((prev) => ({ ...prev, [assistantId]: usage }));
+      }
     } catch (err) {
-      setMessages((prev) => prev.slice(0, -1));
+      setMessages((prev) => prev.slice(0, -2));
       setQuestion(q);
       setError(err instanceof ApiError ? err.message : 'Could not get an answer. Please try again.');
     } finally {
@@ -118,25 +122,45 @@ export default function Chat() {
             <div>Ask anything about this document — e.g. "Can I resign anytime?"</div>
           </div>
         )}
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={m.role === 'assistant' ? 'cw-chat-bubble-rich' : undefined}
-            style={{
-              maxWidth: '82%',
-              marginBottom: 12,
-              padding: '12px 14px',
-              borderRadius: 16,
-              lineHeight: 1.5,
-              fontSize: 14,
-              ...(m.role === 'user'
-                ? { background: 'var(--cw-gold-bright)', color: 'var(--cw-navy)', marginLeft: 'auto', borderBottomRightRadius: 4 }
-                : { background: 'var(--cw-dark-surface-2)', color: 'var(--cw-dark-text)', border: '1px solid var(--cw-dark-border)', borderBottomLeftRadius: 4 }),
-            }}
-          >
-            {m.role === 'assistant' ? renderMessage(m.content) : m.content}
-          </div>
-        ))}
+        {messages.map((m, idx) => {
+          const isStreamingPlaceholder = m.role === 'assistant' && m.content === '' && sending && idx === messages.length - 1;
+          const usage = tokenUsage[m.id];
+          return (
+            <div key={m.id} style={{ maxWidth: '82%', marginBottom: 12, marginLeft: m.role === 'user' ? 'auto' : 0 }}>
+              <div
+                className={m.role === 'assistant' ? 'cw-chat-bubble-rich' : undefined}
+                style={{
+                  padding: '12px 14px',
+                  borderRadius: 16,
+                  lineHeight: 1.5,
+                  fontSize: 14,
+                  ...(m.role === 'user'
+                    ? { background: 'var(--cw-gold-bright)', color: 'var(--cw-navy)', borderBottomRightRadius: 4 }
+                    : { background: 'var(--cw-dark-surface-2)', color: 'var(--cw-dark-text)', border: '1px solid var(--cw-dark-border)', borderBottomLeftRadius: 4 }),
+                }}
+              >
+                {m.role === 'assistant' ? (
+                  isStreamingPlaceholder ? (
+                    <span className="cw-typing-dots">
+                      <span />
+                      <span />
+                      <span />
+                    </span>
+                  ) : (
+                    renderMessage(m.content)
+                  )
+                ) : (
+                  m.content
+                )}
+              </div>
+              {usage && (
+                <div style={{ fontSize: 10.5, color: 'var(--cw-dark-text-muted)', marginTop: 4, paddingLeft: 4 }}>
+                  {usage.inputTokens + usage.outputTokens} tokens ({usage.inputTokens} in · {usage.outputTokens} out)
+                </div>
+              )}
+            </div>
+          );
+        })}
         {error && <div className="cw-error">{error}</div>}
         <div ref={bottomRef} />
       </div>
