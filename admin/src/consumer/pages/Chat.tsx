@@ -1,8 +1,69 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { askQuestion, getChatHistory } from '../api';
 import type { ChatMessage } from '../types';
 import { ChatIcon } from '../../icons';
+
+function renderInline(text: string, keyPrefix: string): ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return <strong key={`${keyPrefix}-${i}`}>{part.slice(2, -2)}</strong>;
+    }
+    return <Fragment key={`${keyPrefix}-${i}`}>{part}</Fragment>;
+  });
+}
+
+function renderMessage(text: string): ReactNode[] {
+  const blocks: ReactNode[] = [];
+  let listItems: string[] = [];
+  let listType: 'ul' | 'ol' | null = null;
+
+  function flushList() {
+    if (!listType || listItems.length === 0) {
+      listItems = [];
+      listType = null;
+      return;
+    }
+    const ListTag = listType;
+    blocks.push(
+      <ListTag key={blocks.length} className="cw-chat-list">
+        {listItems.map((item, i) => (
+          <li key={i}>{renderInline(item, `li-${blocks.length}-${i}`)}</li>
+        ))}
+      </ListTag>,
+    );
+    listItems = [];
+    listType = null;
+  }
+
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushList();
+      continue;
+    }
+    const bulletMatch = line.match(/^[-*]\s+(.*)/);
+    const numberedMatch = line.match(/^\d+[.)]\s+(.*)/);
+    if (bulletMatch) {
+      if (listType !== 'ul') flushList();
+      listType = 'ul';
+      listItems.push(bulletMatch[1]);
+    } else if (numberedMatch) {
+      if (listType !== 'ol') flushList();
+      listType = 'ol';
+      listItems.push(numberedMatch[1]);
+    } else {
+      flushList();
+      blocks.push(
+        <p key={blocks.length} className="cw-chat-p">
+          {renderInline(line, `p-${blocks.length}`)}
+        </p>,
+      );
+    }
+  }
+  flushList();
+  return blocks;
+}
 
 export default function Chat() {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +118,7 @@ export default function Chat() {
         {messages.map((m) => (
           <div
             key={m.id}
+            className={m.role === 'assistant' ? 'cw-chat-bubble-rich' : undefined}
             style={{
               maxWidth: '82%',
               marginBottom: 12,
@@ -69,7 +131,7 @@ export default function Chat() {
                 : { background: 'var(--cw-dark-surface-2)', color: 'var(--cw-dark-text)', border: '1px solid var(--cw-dark-border)', borderBottomLeftRadius: 4 }),
             }}
           >
-            {m.content}
+            {m.role === 'assistant' ? renderMessage(m.content) : m.content}
           </div>
         ))}
         {error && <div className="cw-error">{error}</div>}

@@ -108,7 +108,7 @@ export default function Compare() {
           {result.differences.map((diff, idx) => (
             <div key={idx} className="cw-card">
               <div style={{ fontWeight: 700, color: 'white', fontSize: 13.5, marginBottom: 10 }}>{diff.aspect}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 10 }}>
+              <div className="cw-diff-grid">
                 <div>
                   <div style={{ fontSize: 10.5, color: 'var(--cw-dark-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {result.documentA.fileName}

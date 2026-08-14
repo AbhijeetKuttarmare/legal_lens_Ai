@@ -88,17 +88,17 @@ export default function History() {
           </div>
           <div style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13 }}>All your legal documents in one place</div>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <input
             className="cw-input-plain"
-            style={{ marginBottom: 0, width: 220 }}
+            style={{ marginBottom: 0, width: 220, maxWidth: '100%', flex: '1 1 180px' }}
             placeholder="Search by file name…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <select
             className="cw-input-plain"
-            style={{ marginBottom: 0, width: 170 }}
+            style={{ marginBottom: 0, width: 170, maxWidth: '100%', flex: '1 1 140px' }}
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
           >
@@ -156,7 +156,7 @@ export default function History() {
       )}
 
       {filtered.length > 0 && (
-        <div className="cw-table-wrap" style={{ marginTop: 16, overflow: 'visible' }}>
+        <div className="cw-table-wrap" style={{ marginTop: 16, overflowY: 'visible' }}>
           <table className="cw-table">
             <thead>
               <tr>

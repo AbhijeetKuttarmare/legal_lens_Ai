@@ -211,7 +211,7 @@ export default function Home() {
             </div>
           )}
 
-          <div className="cw-stat-row" style={{ marginTop: 24, gridTemplateColumns: 'repeat(4, 1fr)' }}>
+          <div className="cw-stat-row" style={{ marginTop: 24 }}>
             {FEATURES.map((f) => (
               <div key={f.title} className="cw-stat-card">
                 <div className="cw-stat-icon">{f.icon}</div>

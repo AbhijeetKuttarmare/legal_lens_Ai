@@ -4,12 +4,14 @@ import { clearSession, getStoredUser } from '../api';
 import {
   ChevronRightIcon,
   ClipboardIcon,
+  CloseIcon,
   CreditCardIcon,
   CrownIcon,
   DocumentIcon,
   DotsVerticalIcon,
   GridIcon,
   LogoutIcon,
+  MenuIcon,
   ScaleIcon,
   ShieldIcon,
   TagIcon,
@@ -29,6 +31,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const isFree = (user?.plan ?? 'FREE') === 'FREE';
 
   function onLogout() {
@@ -40,20 +43,27 @@ export default function Layout() {
 
   return (
     <div className="cw cw-shell">
-      <aside className="cw-sidebar">
-        <NavLink to="/app" className="cw-sidebar-brand">
-          <span className="cw-sidebar-mark">
-            <ScaleIcon />
-          </span>
-          <div>
-            <div className="cw-sidebar-brand-name">
-              Clauzera <span>AI</span>
-            </div>
-            <div className="cw-sidebar-brand-sub">Understand Before You Sign.</div>
-          </div>
-        </NavLink>
+      {navOpen && <div className="cw-sidebar-overlay" onClick={() => setNavOpen(false)} />}
 
-        <nav className="cw-sidebar-nav">
+      <aside className={`cw-sidebar${navOpen ? ' cw-sidebar-open' : ''}`}>
+        <div className="cw-sidebar-brand-row">
+          <NavLink to="/app" className="cw-sidebar-brand" onClick={() => setNavOpen(false)}>
+            <span className="cw-sidebar-mark">
+              <ScaleIcon />
+            </span>
+            <div>
+              <div className="cw-sidebar-brand-name">
+                Clauzera <span>AI</span>
+              </div>
+              <div className="cw-sidebar-brand-sub">Understand Before You Sign.</div>
+            </div>
+          </NavLink>
+          <button className="cw-sidebar-close-btn" onClick={() => setNavOpen(false)} aria-label="Close menu">
+            <CloseIcon style={{ width: 18, height: 18 }} />
+          </button>
+        </div>
+
+        <nav className="cw-sidebar-nav" onClick={() => setNavOpen(false)}>
           <NavLink to="/app" end className={({ isActive }) => (isActive ? 'active' : '')}>
             <DocumentIcon /> Home
           </NavLink>
@@ -77,7 +87,7 @@ export default function Layout() {
           </NavLink>
         </nav>
 
-        <div className="cw-sidebar-footer">
+        <div className="cw-sidebar-footer" onClick={() => setNavOpen(false)}>
           <div className="cw-sidebar-plan-card">
             <div className="cw-sidebar-plan-label">
               <CrownIcon /> PREMIUM PLAN
@@ -108,6 +118,9 @@ export default function Layout() {
 
       <main className="cw-main">
         <div className="cw-topstrip">
+          <button className="cw-hamburger-btn" onClick={() => setNavOpen(true)} aria-label="Open menu">
+            <MenuIcon style={{ width: 20, height: 20 }} />
+          </button>
           <div style={{ position: 'relative' }}>
             <button className="cw-bell-btn" onClick={() => setNotifOpen((o) => !o)}>
               <BellIcon style={{ width: 18, height: 18 }} />

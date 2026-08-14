@@ -126,12 +126,12 @@ export default function Upload() {
         onChange={handleFile}
       />
 
-      <div className="cw-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div className="cw-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginTop: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
           <div className="cw-stat-icon" style={{ marginBottom: 0 }}>
             <ShieldIcon />
           </div>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontWeight: 700, color: 'white', fontSize: 13.5 }}>Your data is 100% secure and confidential</div>
             <div style={{ color: 'var(--cw-dark-text-muted)', fontSize: 12 }}>We use bank-level encryption to protect your documents and data.</div>
           </div>

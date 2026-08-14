@@ -281,7 +281,7 @@ export default function Subscription() {
 
       {tab === 'individual' && (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }}>
+          <div className="cw-plan-grid-3">
             {PLANS.map((plan) => {
               const isCurrent = user?.plan === plan.key;
               const highlight = plan.key === 'PRO';
@@ -363,7 +363,7 @@ export default function Subscription() {
                   <strong style={{ color: 'white' }}> You have {user.documentCredits} credit{user.documentCredits === 1 ? '' : 's'}.</strong>
                 )}
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 18 }}>
+              <div className="cw-plan-grid-2">
                 {CREDIT_PACKS.map((pack) => (
                   <div key={pack.key} className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: 'white' }}>
@@ -394,7 +394,7 @@ export default function Subscription() {
           {org === undefined && <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5 }}>Loading…</p>}
 
           {org === null && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 18 }}>
+            <div className="cw-plan-grid-2">
               <div className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: 11.5, color: 'var(--cw-dark-text-muted)', marginBottom: 4 }}>2–150 users</div>
                 <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: 'white' }}>Team</div>

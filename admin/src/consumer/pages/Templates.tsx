@@ -105,7 +105,7 @@ export default function Templates() {
       {isPaid && error && <div className="cw-error">{error}</div>}
 
       {isPaid && !selectedType && (
-        <div className="cw-actions-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+        <div className="cw-actions-grid cw-actions-grid--3">
           {(types || []).map((t) => (
             <button key={t.key} className="cw-action-card" onClick={() => selectType(t.key)}>
               <div className="cw-action-icon">
