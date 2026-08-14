@@ -24,7 +24,7 @@ export class TemplatesService {
     consentAccepted: boolean,
     language?: string,
   ) {
-    await this.planGuard.requirePaidPlan(userId, 'Document templates');
+    await this.planGuard.requirePaidPlan(userId, 'Document templates', 'templatesTrialUntil');
 
     if (!consentAccepted) {
       throw new BadRequestException(

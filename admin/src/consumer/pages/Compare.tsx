@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ApiError, compareDocuments, listDocuments, getStoredUser } from '../api';
+import { ApiError, compareDocuments, listDocuments, getStoredUser, getMe, setStoredUser, hasFeatureAccess } from '../api';
 import type { ComparisonResult, DocumentSummary } from '../types';
 import { AlertIcon } from '../../icons';
 import UpgradeGate from '../UpgradeGate';
@@ -11,9 +11,18 @@ export default function Compare() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ComparisonResult | null>(null);
+  const [user, setUser] = useState(getStoredUser());
 
-  const user = getStoredUser();
-  const isPaid = user?.plan === 'PRO' || user?.plan === 'ENTERPRISE';
+  const isPaid = hasFeatureAccess(user, 'compareTrialUntil');
+
+  useEffect(() => {
+    getMe()
+      .then((fresh) => {
+        setStoredUser(fresh);
+        setUser(fresh);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isPaid) return;

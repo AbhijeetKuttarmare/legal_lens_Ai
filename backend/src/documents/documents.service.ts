@@ -209,7 +209,7 @@ export class DocumentsService {
     documentIdB: string,
     language?: string,
   ) {
-    await this.planGuard.requirePaidPlan(userId, 'Comparing documents');
+    await this.planGuard.requirePaidPlan(userId, 'Comparing documents', 'compareTrialUntil');
 
     if (!documentIdA || !documentIdB || documentIdA === documentIdB) {
       throw new BadRequestException('Select two different documents to compare.');
@@ -236,6 +236,11 @@ export class DocumentsService {
       documentB: { id: docB.id, fileName: docB.fileName },
       ...result,
     };
+  }
+
+  async checkExportAccess(userId: string) {
+    await this.planGuard.requirePaidPlan(userId, 'Exporting reports', 'exportTrialUntil');
+    return { allowed: true };
   }
 
   async getKeyDates(userId: string, documentId: string) {

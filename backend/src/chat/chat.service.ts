@@ -1,12 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
+import { PlanGuardService } from '../common/plan-guard.service';
+
+const FREE_CHAT_MESSAGE_LIMIT = 5;
 
 @Injectable()
 export class ChatService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ai: AiService,
+    private readonly planGuard: PlanGuardService,
   ) {}
 
   async getHistory(userId: string, documentId: string) {
@@ -19,6 +23,18 @@ export class ChatService {
 
   async ask(userId: string, documentId: string, question: string) {
     const document = await this.assertOwnership(userId, documentId);
+
+    const hasPaidAccess = await this.planGuard.hasPaidAccess(userId, 'chatTrialUntil');
+    if (!hasPaidAccess) {
+      const messageCount = await this.prisma.chatMessage.count({
+        where: { documentId, role: 'user' },
+      });
+      if (messageCount >= FREE_CHAT_MESSAGE_LIMIT) {
+        throw new ForbiddenException(
+          `Free plan allows ${FREE_CHAT_MESSAGE_LIMIT} questions per document. Upgrade to Pro for unlimited chat.`,
+        );
+      }
+    }
 
     const priorMessages = await this.prisma.chatMessage.findMany({
       where: { documentId },

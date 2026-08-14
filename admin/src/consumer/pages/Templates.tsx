@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ApiError, generateTemplate, listTemplateTypes, getStoredUser } from '../api';
+import { ApiError, generateTemplate, listTemplateTypes, getStoredUser, getMe, setStoredUser, hasFeatureAccess } from '../api';
 import type { TemplateTypeOption } from '../types';
 import { exportPlainTextPdf } from '../exportPdf';
 import { AlertIcon, DocumentIcon } from '../../icons';
@@ -26,8 +26,17 @@ export default function Templates() {
   const [content, setContent] = useState<string | null>(null);
   const [consent, setConsent] = useState(false);
 
-  const user = getStoredUser();
-  const isPaid = user?.plan === 'PRO' || user?.plan === 'ENTERPRISE';
+  const [user, setUser] = useState(getStoredUser());
+  const isPaid = hasFeatureAccess(user, 'templatesTrialUntil');
+
+  useEffect(() => {
+    getMe()
+      .then((fresh) => {
+        setStoredUser(fresh);
+        setUser(fresh);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isPaid) return;

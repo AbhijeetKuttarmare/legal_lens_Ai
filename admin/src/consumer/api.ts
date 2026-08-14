@@ -97,6 +97,22 @@ export function updateProfile(payload: UpdateProfilePayload) {
   });
 }
 
+export function getMe() {
+  return request<AuthUser>('/users/me');
+}
+
+type FeatureTrialField = 'compareTrialUntil' | 'templatesTrialUntil' | 'exportTrialUntil' | 'chatTrialUntil';
+
+function isTrialActive(iso: string | null | undefined) {
+  return Boolean(iso && new Date(iso).getTime() > Date.now());
+}
+
+export function hasFeatureAccess(user: AuthUser | null, trialField: FeatureTrialField) {
+  if (!user) return false;
+  if (user.plan === 'PRO' || user.plan === 'ENTERPRISE') return true;
+  return isTrialActive(user[trialField]);
+}
+
 export function deleteAccount() {
   return request<void>('/users/me', { method: 'DELETE' });
 }
@@ -163,6 +179,10 @@ export function uploadDocument(file: File, language = 'en') {
     method: 'POST',
     body: form,
   });
+}
+
+export function checkExportAccess() {
+  return request<{ allowed: true }>('/documents/export-access', { method: 'POST' });
 }
 
 export function compareDocuments(documentIdA: string, documentIdB: string, language = 'en') {

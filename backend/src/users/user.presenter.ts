@@ -9,6 +9,10 @@ interface RawUser {
   dob: Date | null;
   plan: string;
   documentCredits?: number;
+  compareTrialUntil?: Date | null;
+  templatesTrialUntil?: Date | null;
+  exportTrialUntil?: Date | null;
+  chatTrialUntil?: Date | null;
 }
 
 export function toSafeUser(user: RawUser) {
@@ -24,5 +28,9 @@ export function toSafeUser(user: RawUser) {
     plan: user.plan,
     documentCredits: user.documentCredits ?? 0,
     profileComplete: Boolean(user.firstName && user.lastName && user.gender && user.dob),
+    compareTrialUntil: user.compareTrialUntil ?? null,
+    templatesTrialUntil: user.templatesTrialUntil ?? null,
+    exportTrialUntil: user.exportTrialUntil ?? null,
+    chatTrialUntil: user.chatTrialUntil ?? null,
   };
 }

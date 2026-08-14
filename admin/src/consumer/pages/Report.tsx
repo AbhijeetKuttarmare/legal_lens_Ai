@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ApiError, getDocumentReport, getKeyDates, getStoredUser } from '../api';
+import { ApiError, checkExportAccess, getDocumentReport, getKeyDates, getMe, getStoredUser, hasFeatureAccess, setStoredUser } from '../api';
 import type { DocumentReport, KeyDate } from '../types';
 import { exportReportPdf } from '../exportPdf';
 import { AlertIcon, ArrowLeftIcon, ChatIcon, ClipboardIcon, DocumentIcon, DownloadIcon, ShareIcon } from '../../icons';
@@ -17,8 +17,19 @@ export default function Report() {
   const [keyDatesLoading, setKeyDatesLoading] = useState(false);
   const [keyDatesError, setKeyDatesError] = useState<string | null>(null);
   const [shared, setShared] = useState(false);
-  const user = getStoredUser();
-  const isPremium = user?.plan === 'ENTERPRISE';
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [user, setUser] = useState(getStoredUser());
+  const isPaid = hasFeatureAccess(user, 'exportTrialUntil');
+
+  useEffect(() => {
+    getMe()
+      .then((fresh) => {
+        setStoredUser(fresh);
+        setUser(fresh);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -58,9 +69,18 @@ export default function Report() {
     }
   }
 
-  function onExport() {
+  async function onExport() {
     if (!report) return;
-    exportReportPdf(report);
+    setExportError(null);
+    setExporting(true);
+    try {
+      await checkExportAccess();
+      exportReportPdf(report);
+    } catch (err) {
+      setExportError(err instanceof ApiError ? err.message : 'Could not export this report.');
+    } finally {
+      setExporting(false);
+    }
   }
 
   async function onShare() {
@@ -132,9 +152,9 @@ export default function Report() {
           <div className="cw-report-type-value">{report.documentType?.replace(/_/g, ' ') || 'Document'}</div>
         </div>
         <div className="cw-report-actions">
-          {isPremium ? (
-            <button className="cw-btn cw-btn-outline" onClick={onExport}>
-              <DownloadIcon style={{ width: 16, height: 16 }} /> Download Report
+          {isPaid ? (
+            <button className="cw-btn cw-btn-outline" onClick={onExport} disabled={exporting}>
+              <DownloadIcon style={{ width: 16, height: 16 }} /> {exporting ? 'Checking…' : 'Download Report'}
             </button>
           ) : (
             <Link to="/app/subscription" className="cw-btn cw-btn-outline" style={{ textDecoration: 'none' }}>
@@ -146,6 +166,8 @@ export default function Report() {
           </button>
         </div>
       </div>
+
+      {exportError && <div className="cw-error" style={{ marginTop: -12, marginBottom: 20 }}>{exportError}</div>}
 
       {risk && (
         <div className="cw-score-row" style={{ marginBottom: 24 }}>
@@ -256,13 +278,13 @@ export default function Report() {
             <ChatIcon style={{ width: 18, height: 18 }} /> Ask Clauzera About This Document
           </Link>
 
-          {isPremium ? (
-            <button className="cw-btn cw-btn-outline" onClick={onExport}>
-              <DocumentIcon style={{ width: 16, height: 16 }} /> Export Report (PDF)
+          {isPaid ? (
+            <button className="cw-btn cw-btn-outline" onClick={onExport} disabled={exporting}>
+              <DocumentIcon style={{ width: 16, height: 16 }} /> {exporting ? 'Checking…' : 'Export Report (PDF)'}
             </button>
           ) : (
             <Link to="/app/subscription" className="cw-btn cw-btn-outline" style={{ textDecoration: 'none' }}>
-              <DocumentIcon style={{ width: 16, height: 16 }} /> Export Report (Premium)
+              <DocumentIcon style={{ width: 16, height: 16 }} /> Export Report (Pro)
             </Link>
           )}
         </div>

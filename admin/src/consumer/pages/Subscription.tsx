@@ -29,7 +29,7 @@ const PLANS: {
   period: string;
   features: string[];
 }[] = [
-  { key: 'FREE', name: 'Free', price: '₹0', period: '', features: ['3 documents', 'Clauzera summary', 'Document history'] },
+  { key: 'FREE', name: 'Free', price: '₹0', period: '', features: ['3 documents', 'Clauzera summary', '5 questions per document', 'Document history'] },
   {
     key: 'PRO',
     name: 'Pro',

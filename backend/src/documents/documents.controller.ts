@@ -51,6 +51,11 @@ export class DocumentsController {
     return this.documentsService.deleteDocument(user.userId, id);
   }
 
+  @Post('export-access')
+  checkExportAccess(@CurrentUser() user: { userId: string }) {
+    return this.documentsService.checkExportAccess(user.userId);
+  }
+
   @Post('compare')
   compare(
     @CurrentUser() user: { userId: string },

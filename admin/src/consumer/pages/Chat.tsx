@@ -1,6 +1,6 @@
 import { FormEvent, Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { askQuestion, getChatHistory } from '../api';
+import { ApiError, askQuestion, getChatHistory } from '../api';
 import type { ChatMessage } from '../types';
 import { ChatIcon } from '../../icons';
 
@@ -99,8 +99,10 @@ export default function Chat() {
         ...prev,
         { id: `local-${Date.now()}-a`, role: 'assistant', content: answer, createdAt: new Date().toISOString() },
       ]);
-    } catch {
-      setError('Could not get an answer. Please try again.');
+    } catch (err) {
+      setMessages((prev) => prev.slice(0, -1));
+      setQuestion(q);
+      setError(err instanceof ApiError ? err.message : 'Could not get an answer. Please try again.');
     } finally {
       setSending(false);
     }

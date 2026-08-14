@@ -10,6 +10,10 @@ export interface AuthUser {
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
   documentCredits: number;
   profileComplete: boolean;
+  compareTrialUntil?: string | null;
+  templatesTrialUntil?: string | null;
+  exportTrialUntil?: string | null;
+  chatTrialUntil?: string | null;
 }
 
 export interface AuthResponse {

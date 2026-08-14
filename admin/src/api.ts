@@ -129,6 +129,10 @@ export interface AdminSubscription {
   name: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
   trialDocumentLimit: number | null;
+  compareTrialUntil: string | null;
+  templatesTrialUntil: string | null;
+  exportTrialUntil: string | null;
+  chatTrialUntil: string | null;
   createdAt: string;
   _count: { documents: number };
 }
@@ -142,6 +146,22 @@ export function setTrialLimit(userId: string, trialDocumentLimit: number | null)
   return request<{ id: string; trialDocumentLimit: number | null }>(`/admin/users/${userId}/trial`, {
     method: 'PATCH',
     body: JSON.stringify({ trialDocumentLimit }),
+  });
+}
+
+export type FeatureTrialKey = 'COMPARE' | 'TEMPLATES' | 'EXPORT' | 'CHAT';
+
+// days: null clears the trial, N grants access for N days from now
+export function setFeatureTrial(userId: string, feature: FeatureTrialKey, days: number | null) {
+  return request<{
+    id: string;
+    compareTrialUntil: string | null;
+    templatesTrialUntil: string | null;
+    exportTrialUntil: string | null;
+    chatTrialUntil: string | null;
+  }>(`/admin/users/${userId}/feature-trial`, {
+    method: 'PATCH',
+    body: JSON.stringify({ feature, days }),
   });
 }
 

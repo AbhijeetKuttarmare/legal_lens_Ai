@@ -2,9 +2,17 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { FeatureTrialKey } from './dto/set-feature-trial.dto';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
+
+const FEATURE_TRIAL_COLUMNS: Record<FeatureTrialKey, 'compareTrialUntil' | 'templatesTrialUntil' | 'exportTrialUntil' | 'chatTrialUntil'> = {
+  COMPARE: 'compareTrialUntil',
+  TEMPLATES: 'templatesTrialUntil',
+  EXPORT: 'exportTrialUntil',
+  CHAT: 'chatTrialUntil',
+};
 
 function clampPageSize(pageSize?: number) {
   if (!pageSize || pageSize < 1) return DEFAULT_PAGE_SIZE;
@@ -332,6 +340,10 @@ export class AdminService {
           name: true,
           plan: true,
           trialDocumentLimit: true,
+          compareTrialUntil: true,
+          templatesTrialUntil: true,
+          exportTrialUntil: true,
+          chatTrialUntil: true,
           createdAt: true,
           _count: { select: { documents: true } },
         },
@@ -376,6 +388,58 @@ export class AdminService {
       metadata: {
         targetLabel: updated.name || updated.email || updated.phone,
         trialDocumentLimit: normalized,
+      },
+    });
+
+    return updated;
+  }
+
+  async setFeatureTrial(
+    adminUserId: string,
+    targetUserId: string,
+    feature: FeatureTrialKey,
+    days: number | null | undefined,
+  ) {
+    const column = FEATURE_TRIAL_COLUMNS[feature];
+    const normalizedDays = days === undefined ? null : days;
+    const expiresAt = normalizedDays ? new Date(Date.now() + normalizedDays * 24 * 60 * 60 * 1000) : null;
+
+    const [admin, target] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: adminUserId } }),
+      this.prisma.user.findUnique({ where: { id: targetUserId } }),
+    ]);
+
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: targetUserId },
+      data: { [column]: expiresAt },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        compareTrialUntil: true,
+        templatesTrialUntil: true,
+        exportTrialUntil: true,
+        chatTrialUntil: true,
+      },
+    });
+
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action: expiresAt ? 'GRANT_FEATURE_TRIAL' : 'CLEAR_FEATURE_TRIAL',
+      targetType: 'User',
+      targetId: targetUserId,
+      metadata: {
+        targetLabel: updated.name || updated.email || updated.phone,
+        feature,
+        days: normalizedDays,
+        expiresAt,
       },
     });
 

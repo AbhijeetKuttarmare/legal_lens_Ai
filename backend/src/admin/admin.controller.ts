@@ -3,6 +3,7 @@ import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { ListQueryDto } from './dto/list-query.dto';
 import { SetTrialLimitDto } from './dto/set-trial-limit.dto';
+import { SetFeatureTrialDto } from './dto/set-feature-trial.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 
 @Controller('admin')
@@ -62,6 +63,15 @@ export class AdminController {
     @Body() dto: SetTrialLimitDto,
   ) {
     return this.adminService.setTrialLimit(admin.userId, targetUserId, dto.trialDocumentLimit);
+  }
+
+  @Patch('users/:id/feature-trial')
+  setFeatureTrial(
+    @CurrentUser() admin: { userId: string },
+    @Param('id') targetUserId: string,
+    @Body() dto: SetFeatureTrialDto,
+  ) {
+    return this.adminService.setFeatureTrial(admin.userId, targetUserId, dto.feature, dto.days);
   }
 
   @Get('otp-log')

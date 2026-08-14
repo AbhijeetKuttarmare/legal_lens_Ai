@@ -79,6 +79,12 @@ model User {
   // Pay-per-document credits purchased outside a subscription; consumed when
   // a FREE-plan user is over their plan limit but still wants to upload.
   documentCredits Int @default(0)
+  // Admin-granted, time-boxed access to individual paid features, independent
+  // of plan. null = no trial; a future timestamp = active until then.
+  compareTrialUntil   DateTime?
+  templatesTrialUntil DateTime?
+  exportTrialUntil    DateTime?
+  chatTrialUntil      DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   documents    Document[]
