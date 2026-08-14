@@ -112,41 +112,6 @@ const USE_CASES = [
   { title: 'Everyday paperwork', body: 'Loan agreements, insurance policies, terms you’re asked to accept — understood in seconds.' },
 ];
 
-const PLANS = [
-  {
-    name: 'Free',
-    price: '₹0',
-    period: '',
-    features: ['3 documents', 'AI summary', 'Document history'],
-    cta: 'Start free',
-    highlight: false,
-  },
-  {
-    name: 'Pro',
-    price: '₹299',
-    period: '/month',
-    features: [
-      'Unlimited uploads',
-      'Unlimited AI chat',
-      'Risk detection',
-      'Clause comparison',
-      'Multi-language support',
-      'Export PDF report',
-      'Priority support',
-    ],
-    cta: 'Upgrade to Pro',
-    highlight: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: '',
-    features: ['Everything in Pro', 'Team accounts', 'Dedicated support'],
-    cta: 'Contact us',
-    highlight: false,
-  },
-];
-
 const FAQS = [
   {
     q: 'Is Clauzera AI a substitute for a lawyer?',
@@ -240,7 +205,7 @@ export default function Home() {
             <a href="#services">Services</a>
             <a href="#features">Features</a>
             <a href="#how-it-works">How it works</a>
-            <a href="#pricing">Pricing</a>
+            <a href="/app/subscription">Subscription</a>
             <a href="#faq">FAQ</a>
           </nav>
           <a href="/app/login" className="nav-login">
@@ -416,40 +381,6 @@ export default function Home() {
                 </span>
               ))}
             </Reveal>
-          </div>
-        </section>
-
-        <section id="pricing" className="section">
-          <div className="section-inner">
-            <Reveal className="section-heading">
-              <span className="eyebrow">Pricing</span>
-              <h2>Simple plans, no surprises</h2>
-            </Reveal>
-            <div className="pricing-grid">
-              {PLANS.map((p, i) => (
-                <Reveal key={p.name} delay={i * 100}>
-                  <div className={`price-card${p.highlight ? ' price-card-highlight' : ''}`}>
-                    {p.highlight && <span className="price-badge">Most popular</span>}
-                    <h3>{p.name}</h3>
-                    <div className="price-value">
-                      {p.price}
-                      <span className="price-period">{p.period}</span>
-                    </div>
-                    <ul className="price-features">
-                      {p.features.map((f) => (
-                        <li key={f}>
-                          <CheckIcon className="price-check" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <a href="#get-app" className={`btn ${p.highlight ? 'btn-white' : 'btn-outline'} price-cta`}>
-                      {p.cta}
-                    </a>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
           </div>
         </section>
 
