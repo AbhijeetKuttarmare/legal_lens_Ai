@@ -46,10 +46,10 @@ export default function Chat() {
   }
 
   return (
-    <div className="cw" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 60px)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 60px)', background: 'var(--cw-dark-bg)' }}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 0', maxWidth: 700, margin: '0 auto', width: '100%' }}>
         {messages.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#6B7280', padding: '40px 20px' }}>
+          <div style={{ textAlign: 'center', color: 'var(--cw-dark-text-muted)', padding: '40px 20px' }}>
             <ChatIcon style={{ width: 32, height: 32, opacity: 0.4, marginBottom: 10 }} />
             <div>Ask anything about this document — e.g. "Can I resign anytime?"</div>
           </div>
@@ -65,8 +65,8 @@ export default function Chat() {
               lineHeight: 1.5,
               fontSize: 14,
               ...(m.role === 'user'
-                ? { background: '#0B1220', color: 'white', marginLeft: 'auto', borderBottomRightRadius: 4 }
-                : { background: 'white', color: '#1F2937', borderBottomLeftRadius: 4 }),
+                ? { background: 'var(--cw-gold-bright)', color: 'var(--cw-navy)', marginLeft: 'auto', borderBottomRightRadius: 4 }
+                : { background: 'var(--cw-dark-surface-2)', color: 'var(--cw-dark-text)', border: '1px solid var(--cw-dark-border)', borderBottomLeftRadius: 4 }),
             }}
           >
             {m.content}

@@ -82,7 +82,7 @@ export default function Report() {
     return (
       <div className="cw-container" style={{ textAlign: 'center', paddingTop: 60 }}>
         <div className="cw-spinner" style={{ margin: '0 auto 16px' }} />
-        <div style={{ color: '#374151' }}>Still analyzing this document…</div>
+        <div style={{ color: 'var(--cw-dark-text)' }}>Still analyzing this document…</div>
       </div>
     );
   }
@@ -183,7 +183,7 @@ export default function Report() {
           </button>
         )}
         {keyDates !== null && keyDates.length === 0 && (
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>No explicit dates or deadlines found in this document.</p>
+          <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13, margin: 0 }}>No explicit dates or deadlines found in this document.</p>
         )}
         {keyDates !== null &&
           keyDates.map((kd, idx) => (

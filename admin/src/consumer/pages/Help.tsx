@@ -62,10 +62,10 @@ export default function Help() {
             return (
               <div key={item.q} className="cw-card" style={{ cursor: 'pointer' }} onClick={() => setOpenIndex(isOpen ? null : idx)}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, color: '#0B1220', fontSize: 13.5 }}>{item.q}</span>
-                  <span style={{ color: '#6B7280' }}>{isOpen ? '−' : '+'}</span>
+                  <span style={{ fontWeight: 700, color: isOpen ? 'var(--cw-gold-bright)' : 'white', fontSize: 13.5 }}>{item.q}</span>
+                  <span style={{ color: 'var(--cw-dark-text-muted)' }}>{isOpen ? '−' : '+'}</span>
                 </div>
-                {isOpen && <p style={{ color: '#374151', fontSize: 13, lineHeight: 1.6, marginTop: 10, marginBottom: 0 }}>{item.a}</p>}
+                {isOpen && <p style={{ color: 'var(--cw-dark-text)', fontSize: 13, lineHeight: 1.6, marginTop: 10, marginBottom: 0 }}>{item.a}</p>}
               </div>
             );
           })}
@@ -77,8 +77,8 @@ export default function Help() {
             style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit', marginBottom: 20 }}
             href={`mailto:${SUPPORT_EMAIL}?subject=Clauzera AI Support`}
           >
-            <div className="cw-action-icon" style={{ background: '#F3F4F6', margin: 0 }}>
-              <ChatIcon style={{ color: '#0B1220' }} />
+            <div className="cw-action-icon" style={{ margin: 0 }}>
+              <ChatIcon />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="cw-action-title">Email us</div>

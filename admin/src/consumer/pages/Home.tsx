@@ -14,7 +14,7 @@ import {
 } from '../../icons';
 
 function fileIcon(_fileType: string) {
-  return { bg: '#EEF1F6', color: '#0B1220' };
+  return { bg: 'var(--cw-dark-surface-2)', color: 'white' };
 }
 
 function formatFileSize(bytes: number | null) {

@@ -259,7 +259,7 @@ export default function Subscription() {
       <div className="cw-section-title" style={{ marginTop: 0 }}>
         Subscription & Billing
       </div>
-      <p style={{ color: '#6B7280', fontSize: 13.5, marginTop: -6, marginBottom: 20 }}>
+      <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginTop: -6, marginBottom: 20 }}>
         Unlock unlimited documents and deeper AI insight.
       </p>
 
@@ -357,20 +357,20 @@ export default function Subscription() {
           {user?.plan === 'FREE' && (
             <>
               <div className="cw-section-title">Document Credits</div>
-              <p style={{ color: '#6B7280', fontSize: 13.5, marginTop: -6, marginBottom: 18 }}>
+              <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginTop: -6, marginBottom: 18 }}>
                 Don't need a subscription? Buy one-time credits to analyze extra documents on the Free plan.
                 {user && user.documentCredits > 0 && (
-                  <strong style={{ color: '#0B1220' }}> You have {user.documentCredits} credit{user.documentCredits === 1 ? '' : 's'}.</strong>
+                  <strong style={{ color: 'white' }}> You have {user.documentCredits} credit{user.documentCredits === 1 ? '' : 's'}.</strong>
                 )}
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 18 }}>
                 {CREDIT_PACKS.map((pack) => (
                   <div key={pack.key} className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: '#0B1220' }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: 'white' }}>
                       {pack.credits} document credits
                     </div>
-                    <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 16, color: '#0B1220' }}>{pack.price}</div>
-                    <p style={{ fontSize: 12.5, color: '#6B7280', marginBottom: 18, flex: 1 }}>
+                    <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 16, color: 'white' }}>{pack.price}</div>
+                    <p style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', marginBottom: 18, flex: 1 }}>
                       Each credit lets you upload and analyze one document beyond your plan's limit. Credits never
                       expire.
                     </p>
@@ -391,14 +391,14 @@ export default function Subscription() {
 
       {tab === 'team' && (
         <>
-          {org === undefined && <p style={{ color: '#6B7280', fontSize: 13.5 }}>Loading…</p>}
+          {org === undefined && <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5 }}>Loading…</p>}
 
           {org === null && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 18 }}>
               <div className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: 11.5, color: '#6B7280', marginBottom: 4 }}>2–150 users</div>
-                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: '#0B1220' }}>Team</div>
-                <div style={{ fontSize: 12.5, color: '#6B7280', marginBottom: 18 }}>Predictable pricing per seat</div>
+                <div style={{ fontSize: 11.5, color: 'var(--cw-dark-text-muted)', marginBottom: 4 }}>2–150 users</div>
+                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: 'white' }}>Team</div>
+                <div style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', marginBottom: 18 }}>Predictable pricing per seat</div>
 
                 <div className="cw-plan-tabs" style={{ marginBottom: 16 }}>
                   <span className={seatTier === 'STANDARD' ? 'active' : ''} onClick={() => setSeatTier('STANDARD')}>
@@ -409,13 +409,13 @@ export default function Subscription() {
                   </span>
                 </div>
 
-                <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4, color: '#0B1220' }}>
+                <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4, color: 'white' }}>
                   {SEAT_PRICES[seatTier].price}
-                  <span style={{ fontSize: 13, fontWeight: 500, color: '#6B7280' }}>/seat/mo</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--cw-dark-text-muted)' }}>/seat/mo</span>
                 </div>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 18 }}>{SEAT_PRICES[seatTier].label}, billed monthly</div>
+                <div style={{ fontSize: 12, color: 'var(--cw-dark-text-muted)', marginBottom: 18 }}>{SEAT_PRICES[seatTier].label}, billed monthly</div>
 
-                <label style={{ fontSize: 12.5, fontWeight: 600, color: '#0B1220', marginBottom: 6, display: 'block' }}>
+                <label style={{ fontSize: 12.5, fontWeight: 600, color: 'white', marginBottom: 6, display: 'block' }}>
                   Number of seats
                 </label>
                 <input
@@ -424,10 +424,10 @@ export default function Subscription() {
                   max={150}
                   value={seatCount}
                   onChange={(e) => setSeatCount(Math.max(2, Math.min(150, Number(e.target.value))))}
+                  className="cw-input-plain"
                   style={{
                     width: '100%',
                     padding: '9px 12px',
-                    border: '1px solid #E5E7EB',
                     borderRadius: 8,
                     fontSize: 14,
                     marginBottom: 18,
@@ -436,22 +436,22 @@ export default function Subscription() {
 
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                   {TEAM_FEATURES.map((f) => (
-                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6B7280' }}>
-                      <CheckIcon style={{ width: 15, height: 15, color: '#B08D57', flexShrink: 0 }} />
+                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--cw-dark-text-muted)' }}>
+                      <CheckIcon style={{ width: 15, height: 15, color: 'var(--cw-gold-bright)', flexShrink: 0 }} />
                       {f}
                     </div>
                   ))}
                 </div>
 
-                <button className="cw-btn cw-btn-navy" disabled={creatingTeam} onClick={onGetTeamPlan}>
+                <button className="cw-btn cw-btn-gold" disabled={creatingTeam} onClick={onGetTeamPlan}>
                   {creatingTeam ? 'Opening checkout…' : 'Get Team plan'}
                 </button>
               </div>
 
               <div className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: 11.5, color: '#6B7280', marginBottom: 4 }}>20+ users</div>
-                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: '#0B1220' }}>Enterprise</div>
-                <div style={{ fontSize: 12.5, color: '#6B7280', marginBottom: 18 }}>Custom volume &amp; support</div>
+                <div style={{ fontSize: 11.5, color: 'var(--cw-dark-text-muted)', marginBottom: 4 }}>20+ users</div>
+                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: 'white' }}>Enterprise</div>
+                <div style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', marginBottom: 18 }}>Custom volume &amp; support</div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                   {[
                     'Everything in Team',
@@ -460,8 +460,8 @@ export default function Subscription() {
                     'Custom contract & invoicing',
                     'Priority onboarding',
                   ].map((f) => (
-                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6B7280' }}>
-                      <CheckIcon style={{ width: 15, height: 15, color: '#B08D57', flexShrink: 0 }} />
+                    <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--cw-dark-text-muted)' }}>
+                      <CheckIcon style={{ width: 15, height: 15, color: 'var(--cw-gold-bright)', flexShrink: 0 }} />
                       {f}
                     </div>
                   ))}
@@ -481,7 +481,7 @@ export default function Subscription() {
           {org && (
             <div className="cw-card" style={{ margin: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <div style={{ fontWeight: 700, fontSize: 16, color: '#0B1220' }}>{org.name}</div>
+                <div style={{ fontWeight: 700, fontSize: 16, color: 'white' }}>{org.name}</div>
                 <span
                   style={{
                     fontSize: 11,
@@ -495,7 +495,7 @@ export default function Subscription() {
                   {org.subscriptionStatus}
                 </span>
               </div>
-              <div style={{ fontSize: 12.5, color: '#6B7280', marginBottom: 20 }}>
+              <div style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', marginBottom: 20 }}>
                 {SEAT_PRICES[org.seatTier].label} · {org.members.length}/{org.seatCount} seats used · You are {org.role === 'OWNER' ? 'the owner' : 'a member'}
               </div>
 
@@ -507,10 +507,11 @@ export default function Subscription() {
                     value={memberPhone}
                     onChange={(e) => setMemberPhone(e.target.value)}
                     required
-                    style={{ flex: 1, padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 14 }}
+                    className="cw-input-plain"
+                    style={{ flex: 1, padding: '9px 12px', borderRadius: 8, fontSize: 14, marginBottom: 0 }}
                   />
                   <button
-                    className="cw-btn cw-btn-navy"
+                    className="cw-btn cw-btn-gold"
                     type="submit"
                     disabled={addingMember || org.members.length >= org.seatCount}
                     style={{ width: 'auto', padding: '0 18px' }}
@@ -523,15 +524,15 @@ export default function Subscription() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <tbody>
                   {org.members.map((m) => (
-                    <tr key={m.userId} style={{ borderTop: '1px solid #EEF0F4' }}>
+                    <tr key={m.userId} style={{ borderTop: '1px solid var(--cw-dark-border)' }}>
                       <td style={{ padding: '10px 0' }}>
-                        <div style={{ fontSize: 13.5, fontWeight: 600, color: '#0B1220' }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 600, color: 'white' }}>
                           {m.name || m.email || m.phone || 'Unnamed'}
                           {m.role === 'OWNER' && (
-                            <span style={{ marginLeft: 6, fontSize: 10.5, fontWeight: 700, color: '#B08D57' }}>OWNER</span>
+                            <span style={{ marginLeft: 6, fontSize: 10.5, fontWeight: 700, color: 'var(--cw-gold-bright)' }}>OWNER</span>
                           )}
                         </div>
-                        <div style={{ fontSize: 12, color: '#6B7280' }}>{m.phone}</div>
+                        <div style={{ fontSize: 12, color: 'var(--cw-dark-text-muted)' }}>{m.phone}</div>
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         {org.role === 'OWNER' && m.role !== 'OWNER' && (

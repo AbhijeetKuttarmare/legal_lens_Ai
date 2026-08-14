@@ -1086,17 +1086,17 @@
 .cw-card-title-row svg {
   width: 18px;
   height: 18px;
-  color: var(--cw-navy);
+  color: var(--cw-gold-bright);
 }
 
 .cw-card-title {
   font-weight: 700;
-  color: var(--cw-navy);
+  color: white;
   font-size: 15px;
 }
 
 .cw-summary-text {
-  color: #374151;
+  color: var(--cw-dark-text);
   line-height: 1.6;
   font-size: 14px;
 }
@@ -1117,12 +1117,12 @@
 
 .cw-flag-title {
   font-weight: 700;
-  color: var(--cw-navy);
+  color: white;
   font-size: 13.5px;
 }
 
 .cw-flag-detail {
-  color: var(--cw-text-muted);
+  color: var(--cw-dark-text-muted);
   font-size: 12.5px;
   margin-top: 2px;
 }
@@ -1135,20 +1135,21 @@
 }
 
 .cw-clause-card {
-  background: white;
+  background: var(--cw-dark-surface-2);
+  border: 1px solid var(--cw-dark-border);
   border-radius: 14px;
   padding: 14px;
 }
 
 .cw-clause-label {
-  color: var(--cw-text-muted);
+  color: var(--cw-dark-text-muted);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .cw-clause-value {
-  color: var(--cw-navy);
+  color: white;
   font-weight: 700;
   font-size: 14.5px;
   margin-top: 4px;
@@ -1165,7 +1166,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--cw-gold);
+  background: var(--cw-gold-bright);
   color: var(--cw-navy);
   font-size: 11px;
   font-weight: 800;
@@ -1177,7 +1178,7 @@
 }
 
 .cw-suggestion-text {
-  color: #374151;
+  color: var(--cw-dark-text);
   font-size: 13.5px;
   line-height: 1.55;
 }
