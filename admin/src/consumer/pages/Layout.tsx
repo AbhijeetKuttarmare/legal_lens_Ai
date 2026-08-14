@@ -36,7 +36,7 @@ export default function Layout() {
 
   function onLogout() {
     clearSession();
-    navigate('/app/login', { replace: true });
+    navigate('/', { replace: true });
   }
 
   const initials = (user?.firstName?.[0] || '') + (user?.lastName?.[0] || '');

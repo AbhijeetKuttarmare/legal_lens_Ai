@@ -4,7 +4,7 @@ import LegalScreen from '../components/LegalScreen';
 const SECTIONS = [
   {
     heading: '1. Introduction',
-    body: 'LegalLens AI ("we", "us", "our") provides an app that uses artificial intelligence to explain legal and business documents in plain English. This policy explains what information we collect, how we use it, and the choices you have.',
+    body: 'Clauzera AI ("we", "us", "our") provides an app that uses artificial intelligence to explain legal and business documents in plain English. This policy explains what information we collect, how we use it, and the choices you have.',
   },
   {
     heading: '2. Information We Collect',
@@ -36,7 +36,7 @@ const SECTIONS = [
   },
   {
     heading: '9. Children\'s Privacy',
-    body: 'LegalLens AI is not directed at children under 18 and we do not knowingly collect data from them.',
+    body: 'Clauzera AI is not directed at children under 18 and we do not knowingly collect data from them.',
   },
   {
     heading: '10. Changes to This Policy',

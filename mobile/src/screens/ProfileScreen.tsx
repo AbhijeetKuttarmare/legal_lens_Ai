@@ -149,7 +149,7 @@ export default function ProfileScreen({ navigation }: Props) {
       bg: '#FEF3C7',
       color: '#D97706',
       title: 'Terms of Service',
-      subtitle: 'Rules for using LegalLens AI',
+      subtitle: 'Rules for using Clauzera AI',
       onPress: () => navigation.navigate('Terms'),
     },
   ];

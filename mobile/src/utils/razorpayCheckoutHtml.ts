@@ -28,7 +28,7 @@ export function buildRazorpayCheckoutHtml(opts: CheckoutOptions): string {
             amount: "${opts.amount}",
             currency: "${opts.currency}",
             order_id: "${opts.orderId}",
-            name: "LegalLens AI",
+            name: "Clauzera AI",
             description: "${opts.description || `${opts.planLabel} Plan Subscription`}",
             prefill: { contact: "${contact}" },
             theme: { color: "#0B1220" },

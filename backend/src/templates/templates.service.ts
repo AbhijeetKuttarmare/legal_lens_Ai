@@ -28,7 +28,7 @@ export class TemplatesService {
 
     if (!consentAccepted) {
       throw new BadRequestException(
-        'You must confirm this is an AI-generated draft, not legal advice, before generating a document.',
+        'You must confirm this is a Clauzera-generated draft, not legal advice, before generating a document.',
       );
     }
 

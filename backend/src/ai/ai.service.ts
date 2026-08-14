@@ -32,7 +32,7 @@ function languageName(code?: string): string {
   return SUPPORTED_LANGUAGES[code || 'en'] || 'English';
 }
 
-const ANALYSIS_SYSTEM_PROMPT_BASE = `You are LegalLens AI, a document explainer that turns legal and business documents into plain, simple language. You are NOT a lawyer and must never claim to give legal advice.
+const ANALYSIS_SYSTEM_PROMPT_BASE = `You are Clauzera AI, a document explainer that turns legal and business documents into plain, simple language. You are NOT a lawyer and must never claim to give legal advice.
 
 Given the extracted text of a document, analyze it and produce:
 - documentType: the closest matching type
@@ -51,7 +51,7 @@ function analysisSystemPrompt(language?: string): string {
   return `${ANALYSIS_SYSTEM_PROMPT_BASE}\n\nWrite all free-text output fields (summary, clause labels and values, risk flag titles and details, suggestions) in ${name}. Keep "documentType", "riskLevel" and flag "severity" as the exact English enum values given, not translated. If an "extractedText" field is requested, it must be a literal transcription of the document in its original language exactly as written — never translate it.`;
 }
 
-const CHAT_SYSTEM_PROMPT_BASE = `You are LegalLens AI, a friendly document explainer. Answer the user's question using ONLY the provided document text as context. Explain in simple, plain language. If the answer isn't in the document, say so clearly.
+const CHAT_SYSTEM_PROMPT_BASE = `You are Clauzera AI, a friendly document explainer. Answer the user's question using ONLY the provided document text as context. Explain in simple, plain language. If the answer isn't in the document, say so clearly.
 Always end your answer with this exact disclaimer on its own line: "This is an informational explanation, not professional legal advice. Consult a qualified lawyer for important decisions."`;
 
 // Split into two blocks so the (large, static-per-conversation) document text
@@ -62,12 +62,15 @@ Always end your answer with this exact disclaimer on its own line: "This is an i
 // reads the cached prefix at a fraction of the cost. The tiny instructions
 // block above it is left uncached since caching it separately isn't worth
 // the extra cache-write overhead for something this small.
-function chatSystemBlocks(documentText: string, language?: string): Anthropic.TextBlockParam[] {
+function chatSystemBlocks(documentText: string, language?: string, userName?: string): Anthropic.TextBlockParam[] {
   const name = languageName(language);
   const languageLine =
     name === 'English' ? '' : `\n\nRespond in ${name}, including the disclaimer line.`;
+  const nameLine = userName
+    ? `\n\nThe person you're chatting with is named ${userName}. If this is the start of the conversation, greet them by their first name naturally — don't use their name in every message after that.`
+    : '';
   return [
-    { type: 'text', text: `${CHAT_SYSTEM_PROMPT_BASE}${languageLine}` },
+    { type: 'text', text: `${CHAT_SYSTEM_PROMPT_BASE}${languageLine}${nameLine}` },
     {
       type: 'text',
       text: `Document text:\n${documentText}`,
@@ -134,7 +137,7 @@ const IMAGE_ANALYSIS_SCHEMA = {
   required: [...ANALYSIS_SCHEMA.required, 'extractedText'],
 };
 
-const COMPARISON_SYSTEM_PROMPT_BASE = `You are LegalLens AI, comparing two documents for a non-lawyer. You are NOT a lawyer and must never claim to give legal advice.
+const COMPARISON_SYSTEM_PROMPT_BASE = `You are Clauzera AI, comparing two documents for a non-lawyer. You are NOT a lawyer and must never claim to give legal advice.
 
 Identify the meaningful differences between the two documents — payment terms, notice periods, liabilities, obligations, deadlines, and any other terms a person should know about before choosing between them or signing either one.
 
@@ -173,7 +176,7 @@ const COMPARISON_SCHEMA = {
   additionalProperties: false,
 };
 
-const KEY_DATES_SYSTEM_PROMPT_BASE = `You are LegalLens AI. Scan this document for any dates, deadlines, notice periods, renewal dates, expiry dates, or other time-bound obligations. For each one found, give a short label and a plain-language detail explaining what happens and when — use relative timing (e.g. "90 days from signing", "30 days before the end of the term") if no absolute date is given. If none are found, return an empty list. Do not invent dates that aren't in the text.`;
+const KEY_DATES_SYSTEM_PROMPT_BASE = `You are Clauzera AI. Scan this document for any dates, deadlines, notice periods, renewal dates, expiry dates, or other time-bound obligations. For each one found, give a short label and a plain-language detail explaining what happens and when — use relative timing (e.g. "90 days from signing", "30 days before the end of the term") if no absolute date is given. If none are found, return an empty list. Do not invent dates that aren't in the text.`;
 
 function keyDatesSystemPrompt(language?: string): string {
   const name = languageName(language);
@@ -231,10 +234,10 @@ function templateSystemPrompt(templateType: string, templateLabel: string, langu
   const name = languageName(language);
   const languageLine = name === 'English' ? '' : `\n\nWrite the document in ${name}.`;
   const jurisdictionNote = JURISDICTION_NOTES[templateType] || 'using standard, widely-accepted clauses for this document type';
-  return `You are LegalLens AI, drafting a DRAFT ${templateLabel} template for a non-lawyer based on the details they provide. You are NOT a lawyer and this is NOT legal advice.
+  return `You are Clauzera AI, drafting a DRAFT ${templateLabel} template for a non-lawyer based on the details they provide. You are NOT a lawyer and this is NOT legal advice.
 
 Rules:
-- Start the document with this exact notice on its own line: "DRAFT — Generated by AI. Not legal advice. Have a qualified lawyer review this before signing or using it."
+- Start the document with this exact notice on its own line: "DRAFT — Generated by Clauzera. Not legal advice. Have a qualified lawyer review this before signing or using it."
 - Use standard, fair, commonly-used clauses for this document type, ${jurisdictionNote}.
 - Fill in the details the user provided. For any detail not provided, use a clear placeholder like [TENANT NAME] instead of inventing information.
 - Output clean plain text with clear section headings and numbered clauses. No markdown, no commentary outside the document itself.${languageLine}`;
@@ -444,12 +447,13 @@ export class AiService {
     history: { role: 'user' | 'assistant'; content: string }[],
     question: string,
     language?: string,
+    userName?: string,
   ): AsyncGenerator<{ type: 'text'; text: string } | { type: 'usage'; inputTokens: number; outputTokens: number }> {
     const truncated = documentText.slice(0, 20000);
     const stream = this.client.messages.stream({
       model: this.model,
       max_tokens: 1024,
-      system: chatSystemBlocks(truncated, language),
+      system: chatSystemBlocks(truncated, language, userName),
       messages: [...history, { role: 'user', content: question }],
     });
 

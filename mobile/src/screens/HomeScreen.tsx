@@ -88,7 +88,7 @@ export default function HomeScreen({ navigation }: Props) {
             <View style={styles.brand}>
               <MaterialCommunityIcons name="text-box-search-outline" size={20} color={GOLD} />
               <Text style={styles.brandTitle}>
-                Legal Lens <Text style={{ color: GOLD }}>AI</Text>
+                Clauzera <Text style={{ color: GOLD }}>AI</Text>
               </Text>
               <Text style={styles.brandTagline}>Understand. Analyze. Empower.</Text>
             </View>

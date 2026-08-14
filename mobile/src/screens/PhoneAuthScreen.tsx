@@ -126,7 +126,7 @@ export default function PhoneAuthScreen() {
             <Image source={LOGO} style={styles.logo} resizeMode="contain" />
           </View>
           <Text style={styles.brandTitle}>
-            LegalLens <Text style={{ color: GOLD }}>AI</Text>
+            Clauzera <Text style={{ color: GOLD }}>AI</Text>
           </Text>
           <Text style={styles.brandTagline}>Understand. Analyze. Empower.</Text>
         </View>

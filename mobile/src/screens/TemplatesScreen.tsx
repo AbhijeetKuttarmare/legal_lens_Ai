@@ -120,7 +120,7 @@ export default function TemplatesScreen() {
         label,
       )}</h2>${escapeHtml(content)}</body></html>`;
       const { uri } = await Print.printToFileAsync({ html });
-      const destUri = `${FileSystem.documentDirectory}LegalLensAI-${selectedType}.pdf`;
+      const destUri = `${FileSystem.documentDirectory}ClauzeraAI-${selectedType}.pdf`;
       await FileSystem.copyAsync({ from: uri, to: destUri });
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {

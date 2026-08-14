@@ -56,7 +56,7 @@ export default function ReportScreen({ route, navigation }: Props) {
     try {
       const html = buildReportHtml(report);
       const { uri } = await Print.printToFileAsync({ html });
-      const destUri = `${FileSystem.documentDirectory}LegalLensAI-Report-${documentId}.pdf`;
+      const destUri = `${FileSystem.documentDirectory}ClauzeraAI-Report-${documentId}.pdf`;
       await FileSystem.copyAsync({ from: uri, to: destUri });
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {

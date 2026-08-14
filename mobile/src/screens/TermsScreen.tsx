@@ -4,15 +4,15 @@ import LegalScreen from '../components/LegalScreen';
 const SECTIONS = [
   {
     heading: '1. Acceptance of Terms',
-    body: 'By creating an account or using LegalLens AI, you agree to these Terms of Service and our Privacy Policy. If you do not agree, please do not use the app.',
+    body: 'By creating an account or using Clauzera AI, you agree to these Terms of Service and our Privacy Policy. If you do not agree, please do not use the app.',
   },
   {
     heading: '2. Description of Service',
-    body: 'LegalLens AI uses artificial intelligence to summarize legal and business documents, flag potential risks, and answer questions about documents you upload, in plain English.',
+    body: 'Clauzera AI uses artificial intelligence to summarize legal and business documents, flag potential risks, and answer questions about documents you upload, in plain English.',
   },
   {
     heading: '3. Not Legal Advice',
-    body: 'LegalLens AI is an informational tool, not a law firm, and does not provide legal advice. AI-generated summaries and risk flags may be incomplete or inaccurate. Always consult a qualified lawyer before signing or relying on any document.',
+    body: 'Clauzera AI is an informational tool, not a law firm, and does not provide legal advice. AI-generated summaries and risk flags may be incomplete or inaccurate. Always consult a qualified lawyer before signing or relying on any document.',
   },
   {
     heading: '4. AI-Generated Document Templates',
@@ -20,11 +20,11 @@ const SECTIONS = [
   },
   {
     heading: '5. Eligibility & Account',
-    body: 'You must be at least 18 years old to use LegalLens AI. You sign in using your phone number and a one-time password (OTP). You are responsible for keeping access to your phone number secure, since it is your account\'s identity.',
+    body: 'You must be at least 18 years old to use Clauzera AI. You sign in using your phone number and a one-time password (OTP). You are responsible for keeping access to your phone number secure, since it is your account\'s identity.',
   },
   {
     heading: '6. Subscription Plans',
-    body: 'LegalLens AI offers Free, Pro, and Premium plans with different document limits and features, as shown on the Subscription screen. Plan prices and features may change; we will make reasonable efforts to notify you of material changes.',
+    body: 'Clauzera AI offers Free, Pro, and Premium plans with different document limits and features, as shown on the Subscription screen. Plan prices and features may change; we will make reasonable efforts to notify you of material changes.',
   },
   {
     heading: '7. Acceptable Use',
@@ -40,7 +40,7 @@ const SECTIONS = [
   },
   {
     heading: '10. Limitation of Liability',
-    body: 'LegalLens AI is provided "as is" without warranties of any kind. To the maximum extent permitted by law, we are not liable for decisions made based on AI-generated output, including generated document templates.',
+    body: 'Clauzera AI is provided "as is" without warranties of any kind. To the maximum extent permitted by law, we are not liable for decisions made based on AI-generated output, including generated document templates.',
   },
   {
     heading: '11. Governing Law',

@@ -20,13 +20,13 @@ function page(title: string, updated: string, sections: { heading: string; body:
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LegalLens AI - ${title}</title>
+  <title>Clauzera AI - ${title}</title>
   <style>${PAGE_STYLE}</style>
 </head>
 <body>
   <div class="header">
     <h1>${title}</h1>
-    <p>LegalLens AI &middot; Last updated: ${updated}</p>
+    <p>Clauzera AI &middot; Last updated: ${updated}</p>
   </div>
   <div class="body">
     ${sectionsHtml}
@@ -38,7 +38,7 @@ function page(title: string, updated: string, sections: { heading: string; body:
 const PRIVACY_SECTIONS = [
   {
     heading: '1. Introduction',
-    body: 'LegalLens AI ("we", "us", "our") provides an app that uses artificial intelligence to explain legal and business documents in plain English. This policy explains what information we collect, how we use it, and the choices you have.',
+    body: 'Clauzera AI ("we", "us", "our") provides an app that uses artificial intelligence to explain legal and business documents in plain English. This policy explains what information we collect, how we use it, and the choices you have.',
   },
   {
     heading: '2. Information We Collect',
@@ -70,7 +70,7 @@ const PRIVACY_SECTIONS = [
   },
   {
     heading: "9. Children's Privacy",
-    body: 'LegalLens AI is not directed at children under 18 and we do not knowingly collect data from them.',
+    body: 'Clauzera AI is not directed at children under 18 and we do not knowingly collect data from them.',
   },
   {
     heading: '10. Changes to This Policy',
@@ -85,15 +85,15 @@ const PRIVACY_SECTIONS = [
 const TERMS_SECTIONS = [
   {
     heading: '1. Acceptance of Terms',
-    body: 'By creating an account or using LegalLens AI, you agree to these Terms of Service and our Privacy Policy. If you do not agree, please do not use the app.',
+    body: 'By creating an account or using Clauzera AI, you agree to these Terms of Service and our Privacy Policy. If you do not agree, please do not use the app.',
   },
   {
     heading: '2. Description of Service',
-    body: 'LegalLens AI uses artificial intelligence to summarize legal and business documents, flag potential risks, and answer questions about documents you upload, in plain English.',
+    body: 'Clauzera AI uses artificial intelligence to summarize legal and business documents, flag potential risks, and answer questions about documents you upload, in plain English.',
   },
   {
     heading: '3. Not Legal Advice',
-    body: 'LegalLens AI is an informational tool, not a law firm, and does not provide legal advice. AI-generated summaries and risk flags may be incomplete or inaccurate. Always consult a qualified lawyer before signing or relying on any document.',
+    body: 'Clauzera AI is an informational tool, not a law firm, and does not provide legal advice. AI-generated summaries and risk flags may be incomplete or inaccurate. Always consult a qualified lawyer before signing or relying on any document.',
   },
   {
     heading: '4. AI-Generated Document Templates',
@@ -101,11 +101,11 @@ const TERMS_SECTIONS = [
   },
   {
     heading: '5. Eligibility & Account',
-    body: 'You must be at least 18 years old to use LegalLens AI. You sign in using your phone number and a one-time password (OTP). You are responsible for keeping access to your phone number secure, since it is your account\'s identity.',
+    body: 'You must be at least 18 years old to use Clauzera AI. You sign in using your phone number and a one-time password (OTP). You are responsible for keeping access to your phone number secure, since it is your account\'s identity.',
   },
   {
     heading: '6. Subscription Plans',
-    body: 'LegalLens AI offers Free, Pro, and Premium plans with different document limits and features, as shown on the Subscription screen. Plan prices and features may change; we will make reasonable efforts to notify you of material changes.',
+    body: 'Clauzera AI offers Free, Pro, and Premium plans with different document limits and features, as shown on the Subscription screen. Plan prices and features may change; we will make reasonable efforts to notify you of material changes.',
   },
   {
     heading: '7. Acceptable Use',
@@ -121,7 +121,7 @@ const TERMS_SECTIONS = [
   },
   {
     heading: '10. Limitation of Liability',
-    body: 'LegalLens AI is provided "as is" without warranties of any kind. To the maximum extent permitted by law, we are not liable for decisions made based on AI-generated output, including generated document templates.',
+    body: 'Clauzera AI is provided "as is" without warranties of any kind. To the maximum extent permitted by law, we are not liable for decisions made based on AI-generated output, including generated document templates.',
   },
   {
     heading: '11. Governing Law',
@@ -139,8 +139,8 @@ const TERMS_SECTIONS = [
 
 const DELETE_ACCOUNT_SECTIONS = [
   {
-    heading: 'How to delete your LegalLens AI account',
-    body: 'Open the LegalLens AI app and sign in with your phone number. Go to the Profile tab, scroll to the bottom, and tap "Delete Account." Confirm twice when prompted. Your account is deleted immediately — this cannot be undone.',
+    heading: 'How to delete your Clauzera AI account',
+    body: 'Open the Clauzera AI app and sign in with your phone number. Go to the Profile tab, scroll to the bottom, and tap "Delete Account." Confirm twice when prompted. Your account is deleted immediately — this cannot be undone.',
   },
   {
     heading: "Can't access the app?",

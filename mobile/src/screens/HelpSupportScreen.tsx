@@ -10,7 +10,7 @@ const SUPPORT_EMAIL = 'support@legallensai.app';
 const FAQS = [
   {
     q: 'How do I sign in?',
-    a: 'LegalLens AI uses your phone number to sign in. Enter your number, and we\'ll send a one-time password (OTP) via SMS to verify it — no password needed.',
+    a: 'Clauzera AI uses your phone number to sign in. Enter your number, and we\'ll send a one-time password (OTP) via SMS to verify it — no password needed.',
   },
   {
     q: 'What file types can I upload?',
@@ -34,7 +34,7 @@ const FAQS = [
   },
   {
     q: 'Is this legal advice?',
-    a: 'No. LegalLens AI explains documents in plain English and flags things worth asking about, but it is not a substitute for a qualified lawyer. Always get professional advice before signing anything important.',
+    a: 'No. Clauzera AI explains documents in plain English and flags things worth asking about, but it is not a substitute for a qualified lawyer. Always get professional advice before signing anything important.',
   },
 ];
 
@@ -55,7 +55,7 @@ export default function HelpSupportScreen() {
       <ScrollView contentContainerStyle={styles.body}>
         <Pressable
           style={[styles.contactCard, cardShadow]}
-          onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=LegalLens AI Support`)}
+          onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=Clauzera AI Support`)}
         >
           <View style={styles.contactIcon}>
             <MaterialCommunityIcons name="email-outline" size={20} color={NAVY} />
