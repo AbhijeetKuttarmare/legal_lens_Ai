@@ -263,6 +263,22 @@
   font-weight: 700;
 }
 
+.cw-fix-box {
+  background: var(--cw-dark-surface-2);
+  border: 1px solid var(--cw-dark-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 8px;
+}
+
+.cw-fix-box .cw-chat-bubble-rich {
+  font-size: 13px;
+}
+
+.cw-fix-box .cw-chat-bubble-rich .cw-chat-p:last-of-type {
+  margin-bottom: 0;
+}
+
 .cw-typing-dots {
   display: inline-flex;
   align-items: center;

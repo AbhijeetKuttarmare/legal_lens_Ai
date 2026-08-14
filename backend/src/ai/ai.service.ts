@@ -184,6 +184,14 @@ function keyDatesSystemPrompt(language?: string): string {
   return `${KEY_DATES_SYSTEM_PROMPT_BASE}\n\nWrite the label and detail fields in ${name}.`;
 }
 
+const SUGGEST_FIX_SYSTEM_PROMPT_BASE = `You are Clauzera AI. The user is looking at one specific risk flag from a document analysis and wants a short, practical suggestion for how to address it. Using ONLY the provided document text as context, give a concise, actionable suggestion in 2-4 sentences of plain language — focus on what they can DO about it (what to ask, what to request be changed, what to clarify with the other party), not on restating the risk. Do not use markdown headings. End with this exact disclaimer on its own line: "This is an informational explanation, not professional legal advice. Consult a qualified lawyer for important decisions."`;
+
+function suggestFixSystemPrompt(language?: string): string {
+  const name = languageName(language);
+  if (name === 'English') return SUGGEST_FIX_SYSTEM_PROMPT_BASE;
+  return `${SUGGEST_FIX_SYSTEM_PROMPT_BASE}\n\nRespond in ${name}, including the disclaimer line.`;
+}
+
 const KEY_DATES_SCHEMA = {
   type: 'object',
   properties: {
@@ -438,6 +446,32 @@ export class AiService {
     } catch (err) {
       throw new InternalServerErrorException(
         `AI template generation failed: ${(err as Error).message}. Check ANTHROPIC_API_KEY in backend/.env`,
+      );
+    }
+  }
+
+  async suggestFix(
+    documentText: string,
+    flagTitle: string,
+    flagDetail: string,
+    language?: string,
+  ): Promise<string> {
+    try {
+      const truncated = documentText.slice(0, 20000);
+      const response = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 400,
+        thinking: { type: 'disabled' },
+        system: [
+          { type: 'text', text: suggestFixSystemPrompt(language) },
+          { type: 'text', text: `Document text:\n${truncated}`, cache_control: { type: 'ephemeral' } },
+        ],
+        messages: [{ role: 'user', content: `Risk flag: ${flagTitle}\nDetail: ${flagDetail}\n\nWhat should I do about this?` }],
+      });
+      return firstText(response.content) || 'Sorry, I could not generate a suggestion.';
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `AI suggestion failed: ${(err as Error).message}. Check ANTHROPIC_API_KEY in backend/.env`,
       );
     }
   }

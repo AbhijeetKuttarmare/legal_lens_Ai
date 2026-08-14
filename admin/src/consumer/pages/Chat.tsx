@@ -1,69 +1,9 @@
-import { FormEvent, Fragment, ReactNode, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { ApiError, ChatUsage, getChatHistory, streamAskQuestion } from '../api';
 import type { ChatMessage } from '../types';
 import { ChatIcon } from '../../icons';
-
-function renderInline(text: string, keyPrefix: string): ReactNode[] {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
-      return <strong key={`${keyPrefix}-${i}`}>{part.slice(2, -2)}</strong>;
-    }
-    return <Fragment key={`${keyPrefix}-${i}`}>{part}</Fragment>;
-  });
-}
-
-function renderMessage(text: string): ReactNode[] {
-  const blocks: ReactNode[] = [];
-  let listItems: string[] = [];
-  let listType: 'ul' | 'ol' | null = null;
-
-  function flushList() {
-    if (!listType || listItems.length === 0) {
-      listItems = [];
-      listType = null;
-      return;
-    }
-    const ListTag = listType;
-    blocks.push(
-      <ListTag key={blocks.length} className="cw-chat-list">
-        {listItems.map((item, i) => (
-          <li key={i}>{renderInline(item, `li-${blocks.length}-${i}`)}</li>
-        ))}
-      </ListTag>,
-    );
-    listItems = [];
-    listType = null;
-  }
-
-  for (const rawLine of text.split('\n')) {
-    const line = rawLine.trim();
-    if (!line) {
-      flushList();
-      continue;
-    }
-    const bulletMatch = line.match(/^[-*]\s+(.*)/);
-    const numberedMatch = line.match(/^\d+[.)]\s+(.*)/);
-    if (bulletMatch) {
-      if (listType !== 'ul') flushList();
-      listType = 'ul';
-      listItems.push(bulletMatch[1]);
-    } else if (numberedMatch) {
-      if (listType !== 'ol') flushList();
-      listType = 'ol';
-      listItems.push(numberedMatch[1]);
-    } else {
-      flushList();
-      blocks.push(
-        <p key={blocks.length} className="cw-chat-p">
-          {renderInline(line, `p-${blocks.length}`)}
-        </p>,
-      );
-    }
-  }
-  flushList();
-  return blocks;
-}
+import { renderMessage } from '../markdown';
 
 export default function Chat() {
   const { id } = useParams<{ id: string }>();
@@ -126,10 +66,20 @@ export default function Chat() {
           const isStreamingPlaceholder = m.role === 'assistant' && m.content === '' && sending && idx === messages.length - 1;
           const usage = tokenUsage[m.id];
           return (
-            <div key={m.id} style={{ maxWidth: '82%', marginBottom: 12, marginLeft: m.role === 'user' ? 'auto' : 0 }}>
+            <div
+              key={m.id}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: m.role === 'user' ? 'flex-end' : 'flex-start',
+                marginBottom: 12,
+              }}
+            >
               <div
                 className={m.role === 'assistant' ? 'cw-chat-bubble-rich' : undefined}
                 style={{
+                  width: 'fit-content',
+                  maxWidth: '82%',
                   padding: '12px 14px',
                   borderRadius: 16,
                   lineHeight: 1.5,

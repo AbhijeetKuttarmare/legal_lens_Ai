@@ -254,4 +254,21 @@ export class DocumentsService {
     const keyDates = await this.ai.extractKeyDates(document.extractedText, document.language ?? undefined);
     return { keyDates };
   }
+
+  // Isolated from the document's chat thread on purpose — this is a quick,
+  // one-off suggestion, not a conversation turn, so it doesn't consume any
+  // chat history and doesn't count against the Free plan's message limit.
+  async suggestFix(userId: string, documentId: string, flagTitle: string, flagDetail: string) {
+    const document = await this.prisma.document.findFirst({ where: { id: documentId, userId } });
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+    const suggestion = await this.ai.suggestFix(
+      document.extractedText || '',
+      flagTitle,
+      flagDetail,
+      document.language ?? undefined,
+    );
+    return { suggestion };
+  }
 }

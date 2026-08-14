@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ApiError, checkExportAccess, getDocumentReport, getKeyDates, getMe, getStoredUser, hasFeatureAccess, setStoredUser } from '../api';
+import { ApiError, checkExportAccess, getDocumentReport, getKeyDates, getMe, getStoredUser, hasFeatureAccess, setStoredUser, suggestFix } from '../api';
 import type { DocumentReport, KeyDate } from '../types';
 import { exportReportPdf } from '../exportPdf';
+import { renderMessage } from '../markdown';
 import { AlertIcon, ArrowLeftIcon, ChatIcon, ClipboardIcon, DocumentIcon, DownloadIcon, ShareIcon } from '../../icons';
+
+interface FixState {
+  loading: boolean;
+  text: string | null;
+  error: string | null;
+}
 
 const RISK_COLOR: Record<string, string> = { LOW: '#16A34A', MEDIUM: '#D97706', HIGH: '#DC2626' };
 const FLAG_COLOR: Record<string, string> = { low: '#16A34A', medium: '#D97706', high: '#DC2626' };
@@ -22,6 +29,8 @@ export default function Report() {
   const [exportError, setExportError] = useState<string | null>(null);
   const [user, setUser] = useState(getStoredUser());
   const isPaid = hasFeatureAccess(user, 'exportTrialUntil');
+  const [expandedFix, setExpandedFix] = useState<Set<number>>(new Set());
+  const [fixData, setFixData] = useState<Record<number, FixState>>({});
 
   useEffect(() => {
     getMe()
@@ -84,7 +93,27 @@ export default function Report() {
     }
   }
 
-  function onSuggestFix(flagTitle: string, flagDetail: string) {
+  async function onToggleFix(idx: number, flagTitle: string, flagDetail: string) {
+    setExpandedFix((prev) => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+    if (!id || fixData[idx]?.text) return;
+    setFixData((prev) => ({ ...prev, [idx]: { loading: true, text: null, error: null } }));
+    try {
+      const { suggestion } = await suggestFix(id, flagTitle, flagDetail);
+      setFixData((prev) => ({ ...prev, [idx]: { loading: false, text: suggestion, error: null } }));
+    } catch (err) {
+      setFixData((prev) => ({
+        ...prev,
+        [idx]: { loading: false, text: null, error: err instanceof ApiError ? err.message : 'Could not get a suggestion.' },
+      }));
+    }
+  }
+
+  function onDiscussFurther(flagTitle: string, flagDetail: string) {
     if (!report) return;
     navigate(`/app/chat/${report.id}`, {
       state: {
@@ -207,23 +236,53 @@ export default function Report() {
                 <AlertIcon />
                 <span className="cw-card-title">Risk Flags</span>
               </div>
-              {risk.flags.map((flag, idx) => (
-                <div key={idx} className="cw-flag-row">
-                  <AlertIcon style={{ color: FLAG_COLOR[flag.severity] }} />
-                  <div>
-                    <div className="cw-flag-title">{flag.title}</div>
-                    <div className="cw-flag-detail">{flag.detail}</div>
-                    <button
-                      type="button"
-                      className="cw-link-btn"
-                      style={{ padding: 0, marginTop: 6, color: 'var(--cw-gold-bright)', fontSize: 12, fontWeight: 700 }}
-                      onClick={() => onSuggestFix(flag.title, flag.detail)}
-                    >
-                      Suggest a Fix →
-                    </button>
+              {risk.flags.map((flag, idx) => {
+                const isOpen = expandedFix.has(idx);
+                const fix = fixData[idx];
+                return (
+                  <div key={idx} className="cw-flag-row">
+                    <AlertIcon style={{ color: FLAG_COLOR[flag.severity] }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="cw-flag-title">{flag.title}</div>
+                      <div className="cw-flag-detail">{flag.detail}</div>
+                      <button
+                        type="button"
+                        className="cw-link-btn"
+                        style={{ padding: 0, marginTop: 6, color: 'var(--cw-gold-bright)', fontSize: 12, fontWeight: 700 }}
+                        onClick={() => onToggleFix(idx, flag.title, flag.detail)}
+                      >
+                        {isOpen ? 'Hide suggestion ↑' : 'Suggest a Fix →'}
+                      </button>
+
+                      {isOpen && (
+                        <div className="cw-fix-box">
+                          {fix?.loading && (
+                            <span className="cw-typing-dots">
+                              <span />
+                              <span />
+                              <span />
+                            </span>
+                          )}
+                          {fix?.error && <div className="cw-error" style={{ marginBottom: 0 }}>{fix.error}</div>}
+                          {fix?.text && (
+                            <>
+                              <div className="cw-chat-bubble-rich">{renderMessage(fix.text)}</div>
+                              <button
+                                type="button"
+                                className="cw-link-btn"
+                                style={{ padding: 0, marginTop: 4, color: 'var(--cw-gold-bright)', fontSize: 11.5, fontWeight: 700 }}
+                                onClick={() => onDiscussFurther(flag.title, flag.detail)}
+                              >
+                                Discuss further →
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

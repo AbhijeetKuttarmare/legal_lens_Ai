@@ -73,4 +73,14 @@ export class DocumentsController {
   ) {
     return this.documentsService.getKeyDates(user.userId, id);
   }
+
+  @Post(':id/suggest-fix')
+  suggestFix(
+    @CurrentUser() user: { userId: string },
+    @Param('id') id: string,
+    @Body('flagTitle') flagTitle: string,
+    @Body('flagDetail') flagDetail: string,
+  ) {
+    return this.documentsService.suggestFix(user.userId, id, flagTitle, flagDetail);
+  }
 }
