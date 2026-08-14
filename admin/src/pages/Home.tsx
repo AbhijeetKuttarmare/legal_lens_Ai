@@ -13,6 +13,7 @@ import {
 } from '../icons';
 import Hero3D from './Hero3D';
 import CircuitLines from './CircuitLines';
+import LoginModal from './LoginModal';
 import './Home.css';
 
 const LEGAL_BASE = 'https://legallens-backend-twbd.onrender.com';
@@ -188,8 +189,11 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 export default function Home() {
+  const [loginOpen, setLoginOpen] = useState(false);
+
   return (
     <div className="site">
+      {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} />}
       <header className="site-nav">
         <div className="site-nav-inner">
           <a href="#top" className="brand">
@@ -208,9 +212,9 @@ export default function Home() {
             <a href="/app/subscription">Subscription</a>
             <a href="#faq">FAQ</a>
           </nav>
-          <a href="/app/login" className="nav-login">
+          <button type="button" className="nav-login" onClick={() => setLoginOpen(true)}>
             Log in
-          </a>
+          </button>
           <a href="#get-app" className="nav-cta">
             Get the App
           </a>
@@ -427,7 +431,10 @@ export default function Home() {
             </div>
             <p className="cta-note">Free to start &middot; No credit card required</p>
             <p className="cta-login-note">
-              Already have an account? <a href="/app/login">Log in on the web</a>
+              Already have an account?{' '}
+              <button type="button" className="cta-login-link" onClick={() => setLoginOpen(true)}>
+                Log in on the web
+              </button>
             </p>
           </Reveal>
         </section>
