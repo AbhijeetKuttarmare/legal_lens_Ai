@@ -48,9 +48,19 @@ export class DocumentsService {
     file: Express.Multer.File,
     language = 'en',
   ) {
-    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const [user, orgMembership] = await Promise.all([
+      this.prisma.user.findUniqueOrThrow({ where: { id: userId } }),
+      this.prisma.organizationMember.findUnique({
+        where: { userId },
+        include: { organization: { include: { subscription: true } } },
+      }),
+    ]);
+    // Active team members (owner or invited) get unlimited access, same as
+    // an individual PRO/ENTERPRISE plan — the team's subscription is what's
+    // being paid for, not each member's personal plan.
+    const isActiveTeamMember = orgMembership?.organization.subscription?.status === 'ACTIVE';
     const limit =
-      user.trialDocumentLimit === -1
+      user.trialDocumentLimit === -1 || isActiveTeamMember
         ? Infinity
         : (user.trialDocumentLimit ?? PLAN_DOCUMENT_LIMITS[user.plan] ?? 1);
     const existingCount = await this.prisma.document.count({

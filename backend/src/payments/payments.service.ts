@@ -8,11 +8,14 @@ import { CreateCreditOrderDto } from './dto/create-credit-order.dto';
 import { VerifyCreditOrderDto } from './dto/verify-credit-order.dto';
 import { toSafeUser } from '../users/user.presenter';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { OrganizationsService } from '../organizations/organizations.service';
 
 // Amounts in paise, matching the prices shown on the Subscription screen.
+// PlanTier enum values stay PRO/ENTERPRISE internally (avoids a data
+// migration); the UI displays them as "Pro" and "Max".
 const PLAN_AMOUNTS: Record<string, number> = {
-  PRO: 29900,
-  ENTERPRISE: 59900,
+  PRO: 200000,
+  ENTERPRISE: 1199900,
 };
 
 // One-time document credit packs, for FREE-plan users who don't want a
@@ -30,6 +33,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLog: AuditLogService,
+    private readonly organizations: OrganizationsService,
   ) {
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       this.logger.error('RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET are not set — all payment endpoints will fail.');
@@ -185,6 +189,12 @@ export class PaymentsService {
     }
 
     const event = JSON.parse(rawBody.toString('utf8'));
+
+    if (typeof event?.event === 'string' && event.event.startsWith('subscription.')) {
+      await this.organizations.handleSubscriptionWebhookEvent(event);
+      return { received: true };
+    }
+
     const payment = event?.payload?.payment?.entity;
 
     if (event?.event === 'payment.captured' && payment?.notes?.userId && payment?.notes?.plan) {

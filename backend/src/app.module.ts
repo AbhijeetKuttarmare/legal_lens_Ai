@@ -16,6 +16,7 @@ import { AdminModule } from './admin/admin.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { TemplatesModule } from './templates/templates.module';
 import { PlanGuardModule } from './common/plan-guard.module';
+import { OrganizationsModule } from './organizations/organizations.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { PlanGuardModule } from './common/plan-guard.module';
     ReviewsModule,
     TemplatesModule,
     PlanGuardModule,
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
