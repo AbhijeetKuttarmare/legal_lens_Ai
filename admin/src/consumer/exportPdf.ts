@@ -30,7 +30,7 @@ export function exportReportPdf(report: DocumentReport) {
   doc.rect(0, 0, pageWidth, 96, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
-  doc.text('LegalLens AI — Document Report', margin, 34);
+  doc.text('Clauzera AI — Document Report', margin, 34);
   doc.setFontSize(16);
   doc.text(report.documentType?.replace(/_/g, ' ') || 'Document', margin, 58);
   doc.setFontSize(9);
@@ -105,7 +105,7 @@ export function exportReportPdf(report: DocumentReport) {
     y += 11;
   });
 
-  doc.save(`LegalLensAI-Report-${report.fileName.replace(/\.[^/.]+$/, '')}.pdf`);
+  doc.save(`ClauzeraAI-Report-${report.fileName.replace(/\.[^/.]+$/, '')}.pdf`);
 }
 
 export function exportPlainTextPdf(fileName: string, title: string, content: string) {

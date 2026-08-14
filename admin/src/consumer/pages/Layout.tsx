@@ -42,7 +42,7 @@ export default function Layout() {
             <ScaleIcon />
           </span>
           <div>
-            <div className="cw-sidebar-brand-name">LegalLens AI</div>
+            <div className="cw-sidebar-brand-name">Clauzera AI</div>
             <div className="cw-sidebar-brand-sub">Web</div>
           </div>
         </NavLink>

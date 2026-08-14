@@ -303,16 +303,20 @@
 }
 
 .nav-login {
-  color: #B7C0D1;
+  color: white;
   text-decoration: none;
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
-  transition: color 0.15s ease;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .nav-login:hover {
-  color: white;
+  border-color: white;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-cta {
@@ -355,8 +359,8 @@
 }
 
 .btn-primary {
-  background: var(--site-navy);
-  color: white;
+  background: var(--site-gold);
+  color: var(--site-navy);
 }
 
 .btn-primary:hover {
@@ -364,18 +368,17 @@
   box-shadow: 0 10px 24px rgba(11, 18, 32, 0.25);
 }
 
-/* Primary action button. Kept the "gold" class name to avoid touching every
-   call site, but it's solid navy now — bronze is reserved for accents only,
-   not large fills, to read as enterprise-grade rather than consumer/retail. */
+/* Primary action button. Solid gold so it stays visible against the dark
+   navy sections it's used in (cta-section, hero) — navy-on-navy was
+   blending into the background and reading as disabled. */
 .btn-gold {
-  background: var(--site-navy);
-  color: white;
+  background: var(--site-gold);
+  color: var(--site-navy);
 }
 
 .btn-gold:hover {
   transform: translateY(-1px);
-  background: var(--site-navy-800);
-  box-shadow: 0 10px 24px rgba(11, 18, 32, 0.3);
+  box-shadow: 0 10px 24px rgba(176, 141, 87, 0.35);
 }
 
 .btn-white {

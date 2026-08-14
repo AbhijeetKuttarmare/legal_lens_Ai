@@ -62,7 +62,7 @@ export default function Templates() {
   function onDownload() {
     if (!content || !selectedType) return;
     const label = types?.find((t) => t.key === selectedType)?.label || 'Document';
-    exportPlainTextPdf(`LegalLensAI-${selectedType}`, label, content);
+    exportPlainTextPdf(`ClauzeraAI-${selectedType}`, label, content);
   }
 
   const activeFields = selectedType ? FIELD_SETS[selectedType] || [] : [];

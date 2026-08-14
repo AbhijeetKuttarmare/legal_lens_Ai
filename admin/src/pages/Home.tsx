@@ -96,7 +96,7 @@ const STEPS = [
   {
     n: '02',
     title: 'AI reads it for you',
-    body: 'LegalLens analyzes the full document in seconds — summary, risks, and key clauses.',
+    body: 'Clauzera analyzes the full document in seconds — summary, risks, and key clauses.',
   },
   {
     n: '03',
@@ -149,8 +149,8 @@ const PLANS = [
 
 const FAQS = [
   {
-    q: 'Is LegalLens AI a substitute for a lawyer?',
-    a: 'No. LegalLens AI is an informational tool that helps you understand a document faster. For important legal decisions, always consult a qualified lawyer.',
+    q: 'Is Clauzera AI a substitute for a lawyer?',
+    a: 'No. Clauzera AI is an informational tool that helps you understand a document faster. For important legal decisions, always consult a qualified lawyer.',
   },
   {
     q: 'What kinds of documents can I upload?',
@@ -232,7 +232,7 @@ export default function Home() {
               <ScaleIcon className="brand-mark-icon" />
             </span>
             <span className="brand-name">
-              LegalLens <span className="accent-gold">AI</span>
+              Clauzera <span className="accent-gold">AI</span>
             </span>
           </a>
           <nav className="site-nav-links">
@@ -269,7 +269,7 @@ export default function Home() {
                 <span className="accent-gold shimmer-text">before you sign it.</span>
               </h1>
               <p className="hero-sub hero-anim hero-anim-3">
-                Upload a contract, offer letter, or agreement. LegalLens AI explains it in plain
+                Upload a contract, offer letter, or agreement. Clauzera AI explains it in plain
                 language, flags what’s risky, and answers your questions — in 11 Indian
                 languages.
               </p>
@@ -319,7 +319,7 @@ export default function Home() {
           <div className="section-inner">
             <Reveal className="section-heading">
               <span className="eyebrow">Our Services</span>
-              <h2>What LegalLens AI does for you</h2>
+              <h2>What Clauzera AI does for you</h2>
             </Reveal>
             <div className="service-grid">
               {SERVICES.map((s, i) => (
@@ -475,7 +475,7 @@ export default function Home() {
               <CameraIcon className="cta-icon" />
             </span>
             <h2>Stop signing documents you don’t fully understand</h2>
-            <p>Get LegalLens AI and know exactly what you’re agreeing to, every time.</p>
+            <p>Get Clauzera AI and know exactly what you’re agreeing to, every time.</p>
             <div className="cta-actions">
               <a
                 className="btn btn-gold"
@@ -509,7 +509,7 @@ export default function Home() {
               <ScaleIcon className="brand-mark-icon" />
             </span>
             <span className="brand-name">
-              LegalLens <span className="accent-gold">AI</span>
+              Clauzera <span className="accent-gold">AI</span>
             </span>
           </div>
           <div className="footer-links">
@@ -525,10 +525,10 @@ export default function Home() {
             <a href="mailto:support@legallensai.app">Support</a>
           </div>
           <p className="footer-disclaimer">
-            LegalLens AI provides informational explanations, not professional legal advice.
+            Clauzera AI provides informational explanations, not professional legal advice.
             Consult a qualified lawyer for important decisions.
           </p>
-          <p className="footer-copy">&copy; {new Date().getFullYear()} LegalLens AI. All rights reserved.</p>
+          <p className="footer-copy">&copy; {new Date().getFullYear()} Clauzera AI. All rights reserved.</p>
         </div>
       </footer>
     </div>

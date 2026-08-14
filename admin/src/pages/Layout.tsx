@@ -36,7 +36,7 @@ export default function Layout() {
   const location = useLocation();
   const identity = getIdentity();
   const displayName = identity?.name || identity?.email || identity?.phone || 'Admin';
-  const page = PAGE_TITLES[location.pathname] ?? { title: 'LegalLens AI', crumb: '' };
+  const page = PAGE_TITLES[location.pathname] ?? { title: 'Clauzera AI', crumb: '' };
 
   function handleLogout() {
     clearToken();
@@ -47,9 +47,9 @@ export default function Layout() {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <div className="mark">LL</div>
+          <div className="mark">CA</div>
           <div>
-            <div className="name">LegalLens AI</div>
+            <div className="name">Clauzera AI</div>
             <div className="sub">Admin console</div>
           </div>
         </div>

@@ -63,7 +63,7 @@ export default function Login() {
           <div className="cw-auth-mark">
             <ShieldIcon />
           </div>
-          <div className="cw-auth-title">LegalLens AI</div>
+          <div className="cw-auth-title">Clauzera AI</div>
           <div className="cw-auth-sub">Understand. Analyze. Empower.</div>
         </div>
 

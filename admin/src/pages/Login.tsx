@@ -68,9 +68,9 @@ export default function Login() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-brand">
-          <div className="mark">LL</div>
+          <div className="mark">CA</div>
           <div>
-            <div className="title">LegalLens AI</div>
+            <div className="title">Clauzera AI</div>
             <div className="subtitle">Admin console</div>
           </div>
         </div>
