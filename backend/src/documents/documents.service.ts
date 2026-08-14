@@ -90,6 +90,7 @@ export class DocumentsService {
         userId,
         fileName: file.originalname,
         fileType: file.mimetype,
+        fileSize: file.size,
         storagePath: file.path,
         status: 'PROCESSING',
         language,

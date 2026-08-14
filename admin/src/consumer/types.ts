@@ -32,6 +32,7 @@ export interface DocumentSummary {
   id: string;
   fileName: string;
   fileType: string;
+  fileSize: number | null;
   status: 'UPLOADED' | 'PROCESSING' | 'READY' | 'FAILED';
   documentType: string | null;
   createdAt: string;

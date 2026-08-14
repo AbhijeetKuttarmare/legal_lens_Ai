@@ -72,7 +72,7 @@ export default function Templates() {
       <div className="cw-section-title" style={{ marginTop: 0 }}>
         Document Templates
       </div>
-      <p style={{ color: '#6B7280', fontSize: 13.5, marginTop: -6, marginBottom: 22 }}>
+      <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginTop: -6, marginBottom: 22 }}>
         Generate a draft document from a template. This is a starting point, not a final legal document.
       </p>
 
@@ -120,7 +120,7 @@ export default function Templates() {
 
       {selectedType && !content && (
         <div className="cw-card">
-          <button className="cw-link-btn" style={{ marginBottom: 12, padding: 0 }} onClick={() => selectType('')}>
+          <button className="cw-link-btn" style={{ marginBottom: 12, padding: 0, color: 'var(--cw-gold-bright)' }} onClick={() => selectType('')}>
             ← Choose a different template
           </button>
           {activeFields.map((label) => (
@@ -139,7 +139,7 @@ export default function Templates() {
               onChange={(e) => setConsent(e.target.checked)}
               style={{ marginTop: 3, flexShrink: 0 }}
             />
-            <span style={{ fontSize: 12.5, color: '#4B5563', lineHeight: 1.5 }}>
+            <span style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', lineHeight: 1.5 }}>
               I understand this is an AI-generated draft, not legal advice, and I will have it reviewed by a
               qualified lawyer before signing or using it.
             </span>
@@ -158,7 +158,7 @@ export default function Templates() {
               fontFamily: 'inherit',
               fontSize: 13,
               lineHeight: 1.6,
-              color: '#1F2937',
+              color: 'var(--cw-dark-text)',
               margin: 0,
               marginBottom: 16,
             }}

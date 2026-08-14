@@ -6,7 +6,6 @@ import {
   AlertIcon,
   CameraIcon,
   ChatIcon,
-  ClipboardIcon,
   CreditCardIcon,
   DocumentIcon,
   GridIcon,
@@ -18,20 +17,41 @@ function fileIcon(_fileType: string) {
   return { bg: '#EEF1F6', color: '#0B1220' };
 }
 
+function formatFileSize(bytes: number | null) {
+  if (!bytes) return null;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function statusMeta(status: DocumentSummary['status']) {
   if (status === 'READY') return { label: 'Analyzed', cls: 'cw-status-ready' };
   if (status === 'FAILED') return { label: 'Failed', cls: 'cw-status-failed' };
-  return { label: 'Processing', cls: 'cw-status-pending' };
+  if (status === 'PROCESSING') return { label: 'Analyzing', cls: 'cw-status-processing' };
+  return { label: 'Pending', cls: 'cw-status-pending' };
 }
 
 function riskMeta(level?: 'LOW' | 'MEDIUM' | 'HIGH') {
-  if (level === 'HIGH') return { label: 'High risk', cls: 'cw-status-failed' };
-  if (level === 'MEDIUM') return { label: 'Medium risk', cls: 'cw-status-pending' };
-  if (level === 'LOW') return { label: 'Low risk', cls: 'cw-status-ready' };
+  if (level === 'HIGH') return { label: 'High Risk', cls: 'cw-status-failed' };
+  if (level === 'MEDIUM') return { label: 'Medium Risk', cls: 'cw-status-pending' };
+  if (level === 'LOW') return { label: 'Low Risk', cls: 'cw-status-ready' };
   return null;
 }
 
+function trend(thisMonth: number, lastMonth: number) {
+  if (lastMonth === 0 && thisMonth === 0) return null;
+  if (lastMonth === 0) return { dir: 'up' as const, pct: 100 };
+  const pct = Math.round(((thisMonth - lastMonth) / lastMonth) * 100);
+  return { dir: pct >= 0 ? ('up' as const) : ('down' as const), pct: Math.abs(pct) };
+}
+
 const FREE_PLAN_LIMIT = 1;
+
+const FEATURES = [
+  { icon: <DocumentIcon />, title: 'Smart Analysis', desc: 'AI scans and understands legal language' },
+  { icon: <ShieldIcon />, title: 'Risk Detection', desc: 'Identifies risky clauses and red flags' },
+  { icon: <ChatIcon />, title: 'Plain Language', desc: 'Explains complex terms in simple words' },
+  { icon: <CreditCardIcon />, title: 'Secure & Private', desc: 'Your documents are 100% encrypted' },
+];
 
 export default function Home() {
   const navigate = useNavigate();
@@ -46,36 +66,58 @@ export default function Home() {
   }, []);
 
   const recent = (documents || []).slice(0, 6);
-  const total = documents?.length ?? 0;
-  const analyzed = documents?.filter((d) => d.status === 'READY').length ?? 0;
-  const highRisk = documents?.filter((d) => d.riskAnalysis?.level === 'HIGH').length ?? 0;
-  const thisMonth =
-    documents?.filter((d) => {
-      const created = new Date(d.createdAt);
-      const now = new Date();
-      return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
-    }).length ?? 0;
 
-  const isFree = (user?.plan ?? 'FREE') === 'FREE';
-  const usedOfFree = documents?.filter((d) => d.status !== 'FAILED').length ?? 0;
-  const usagePct = isFree ? Math.min(100, Math.round((usedOfFree / FREE_PLAN_LIMIT) * 100)) : 0;
+  const now = new Date();
+  const inMonth = (d: DocumentSummary, monthsAgo: number) => {
+    const created = new Date(d.createdAt);
+    const target = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
+    return created.getMonth() === target.getMonth() && created.getFullYear() === target.getFullYear();
+  };
+
+  const docs = documents || [];
+  const thisMonthDocs = docs.filter((d) => inMonth(d, 0));
+  const lastMonthDocs = docs.filter((d) => inMonth(d, 1));
+
+  const total = docs.length;
+  const analyzed = docs.filter((d) => d.status === 'READY').length;
+  const highRisk = docs.filter((d) => d.riskAnalysis?.level === 'HIGH').length;
+  const thisMonth = thisMonthDocs.length;
 
   const stats = [
-    { label: 'Total documents', value: total, icon: <DocumentIcon /> },
-    { label: 'Analyzed', value: analyzed, icon: <GridIcon /> },
-    { label: 'High-risk flags', value: highRisk, icon: <ShieldIcon /> },
-    { label: 'This month', value: thisMonth, icon: <TagIcon /> },
+    {
+      label: 'Total Documents',
+      value: total,
+      icon: <DocumentIcon />,
+      trend: trend(thisMonthDocs.length, lastMonthDocs.length),
+    },
+    {
+      label: 'Analyzed',
+      value: analyzed,
+      icon: <GridIcon />,
+      trend: trend(thisMonthDocs.filter((d) => d.status === 'READY').length, lastMonthDocs.filter((d) => d.status === 'READY').length),
+    },
+    {
+      label: 'High-Risk Flags',
+      value: highRisk,
+      icon: <ShieldIcon />,
+      trend: trend(thisMonthDocs.filter((d) => d.riskAnalysis?.level === 'HIGH').length, lastMonthDocs.filter((d) => d.riskAnalysis?.level === 'HIGH').length),
+    },
+    { label: 'This Month', value: thisMonth, icon: <TagIcon />, trend: trend(thisMonthDocs.length, lastMonthDocs.length) },
   ];
+
+  const isFree = (user?.plan ?? 'FREE') === 'FREE';
+  const usedOfFree = docs.filter((d) => d.status !== 'FAILED').length;
+  const usagePct = isFree ? Math.min(100, Math.round((usedOfFree / FREE_PLAN_LIMIT) * 100)) : 0;
 
   return (
     <div className="cw-container">
       <div className="cw-hero">
         <h1>Welcome back, {user?.firstName || 'there'}</h1>
         <p>Upload any legal document and get AI-powered insights in seconds.</p>
-        <button className="cw-btn cw-btn-outline" onClick={() => navigate('/app/upload')}>
+        <button className="cw-btn cw-btn-gold" onClick={() => navigate('/app/upload')}>
           Analyze a Document
         </button>
-        <div className="cw-hero-caption">Supports PDF, DOCX · Max 20MB</div>
+        <div className="cw-hero-caption">Supports PDF, DOCX · Max 20MB · Your data is secure and confidential</div>
       </div>
 
       <div className="cw-stat-row">
@@ -84,6 +126,11 @@ export default function Home() {
             <div className="cw-stat-icon">{s.icon}</div>
             <div className="cw-stat-value">{s.value}</div>
             <div className="cw-stat-label">{s.label}</div>
+            {s.trend && (
+              <div className={`cw-stat-trend ${s.trend.dir}`}>
+                {s.trend.dir === 'up' ? '↑' : '↓'} {s.trend.pct}% from last month
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -94,8 +141,8 @@ export default function Home() {
             <div id="recent" className="cw-section-title" style={{ marginTop: 0 }}>
               Recent Documents
             </div>
-            <Link to="/app/documents" style={{ color: '#B08D57', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>
-              See all
+            <Link to="/app/documents" style={{ color: 'var(--cw-gold-bright)', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>
+              View all →
             </Link>
           </div>
 
@@ -132,6 +179,7 @@ export default function Home() {
                     const icon = fileIcon(doc.fileType);
                     const status = statusMeta(doc.status);
                     const risk = riskMeta(doc.riskAnalysis?.level);
+                    const size = formatFileSize(doc.fileSize);
                     return (
                       <tr key={doc.id} onClick={() => navigate(`/app/report/${doc.id}`)}>
                         <td>
@@ -139,16 +187,19 @@ export default function Home() {
                             <div className="cw-doc-icon" style={{ background: icon.bg, color: icon.color }}>
                               <CameraIcon />
                             </div>
-                            <span className="cw-doc-name">{doc.fileName}</span>
+                            <div>
+                              <div className="cw-doc-name">{doc.fileName}</div>
+                              {size && <div className="cw-doc-size">{size}</div>}
+                            </div>
                           </div>
                         </td>
                         <td>
                           <span className={`cw-status-pill ${status.cls}`}>{status.label}</span>
                         </td>
                         <td>
-                          {risk ? <span className={`cw-status-pill ${risk.cls}`}>{risk.label}</span> : <span style={{ color: '#9CA3AF' }}>—</span>}
+                          {risk ? <span className={`cw-status-pill ${risk.cls}`}>{risk.label}</span> : <span style={{ color: 'var(--cw-dark-text-muted)' }}>—</span>}
                         </td>
-                        <td style={{ color: '#6B7280' }}>{doc.documentType?.replace(/_/g, ' ') || '—'}</td>
+                        <td style={{ color: 'var(--cw-dark-text-muted)' }}>{doc.documentType?.replace(/_/g, ' ') || '—'}</td>
                         <td className="cw-doc-date">
                           {new Date(doc.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
@@ -159,6 +210,16 @@ export default function Home() {
               </table>
             </div>
           )}
+
+          <div className="cw-stat-row" style={{ marginTop: 24, gridTemplateColumns: 'repeat(4, 1fr)' }}>
+            {FEATURES.map((f) => (
+              <div key={f.title} className="cw-stat-card">
+                <div className="cw-stat-icon">{f.icon}</div>
+                <div style={{ fontWeight: 700, color: 'white', fontSize: 13 }}>{f.title}</div>
+                <div className="cw-stat-label">{f.desc}</div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -166,14 +227,14 @@ export default function Home() {
             <div className="cw-side-card-title">Quick Actions</div>
             <Link to="/app/upload" className="cw-side-link-row">
               <DocumentIcon />
-              Analyze Document
+              Upload Document
             </Link>
             <Link to="/app/upload" className="cw-side-link-row">
               <ChatIcon />
-              Ask Legal Question
+              Analyze Document
             </Link>
             <Link to="/app/compare" className="cw-side-link-row">
-              <ClipboardIcon />
+              <GridIcon />
               Compare Documents
             </Link>
             <Link to="/app/templates" className="cw-side-link-row">
@@ -185,9 +246,9 @@ export default function Home() {
           <div className="cw-side-card" style={{ marginTop: 16 }}>
             <div className="cw-side-card-title">Your Plan</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isFree ? 12 : 4 }}>
-              <span style={{ fontSize: 15, fontWeight: 800, color: '#0B1220' }}>{user?.plan || 'FREE'}</span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: 'white' }}>{user?.plan || 'FREE'}</span>
               {isFree && (
-                <Link to="/app/subscription" style={{ fontSize: 12, fontWeight: 700, color: '#B08D57', textDecoration: 'none' }}>
+                <Link to="/app/subscription" style={{ fontSize: 12, fontWeight: 700, color: 'var(--cw-gold-bright)', textDecoration: 'none' }}>
                   Upgrade
                 </Link>
               )}
@@ -197,15 +258,19 @@ export default function Home() {
                 <div className="cw-usage-track">
                   <div className="cw-usage-fill" style={{ width: `${usagePct}%` }} />
                 </div>
-                <div style={{ fontSize: 11.5, color: '#6B7280', marginTop: 6 }}>
+                <div style={{ fontSize: 11.5, color: 'var(--cw-dark-text-muted)', marginTop: 6 }}>
                   {usedOfFree} of {FREE_PLAN_LIMIT} free document{FREE_PLAN_LIMIT === 1 ? '' : 's'} used
                   {user && user.documentCredits > 0 ? ` · ${user.documentCredits} credit${user.documentCredits === 1 ? '' : 's'} left` : ''}
                 </div>
               </>
             ) : (
-              <div style={{ fontSize: 12, color: '#6B7280' }}>Unlimited document analysis</div>
+              <div style={{ fontSize: 12, color: 'var(--cw-dark-text-muted)' }}>Unlimited document analysis</div>
             )}
-            <Link to="/app/subscription" className="cw-side-link-row" style={{ marginTop: 12, borderBottom: 'none', paddingTop: 12, borderTop: '1px solid #F1F2F5' }}>
+            <Link
+              to="/app/subscription"
+              className="cw-side-link-row"
+              style={{ marginTop: 12, borderBottom: 'none', paddingTop: 12, borderTop: '1px solid var(--cw-dark-border)' }}
+            >
               <CreditCardIcon />
               Manage subscription
             </Link>

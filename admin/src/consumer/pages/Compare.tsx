@@ -45,7 +45,7 @@ export default function Compare() {
       <div className="cw-section-title" style={{ marginTop: 0 }}>
         Compare Documents
       </div>
-      <p style={{ color: '#6B7280', fontSize: 13.5, marginTop: -6, marginBottom: 22 }}>
+      <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginTop: -6, marginBottom: 22 }}>
         Pick two analyzed documents — e.g. two job offers — to see the key differences side by side.
       </p>
 
@@ -69,7 +69,7 @@ export default function Compare() {
 
       {documents !== null && documents.length >= 2 && (
         <>
-          <label className="cw-field-label">Document A</label>
+          <label className="cw-field-label" style={{ color: 'white' }}>Document A</label>
           <select className="cw-input-plain" value={idA} onChange={(e) => setIdA(e.target.value)}>
             <option value="">Select a document…</option>
             {documents.map((d) => (
@@ -79,7 +79,7 @@ export default function Compare() {
             ))}
           </select>
 
-          <label className="cw-field-label">Document B</label>
+          <label className="cw-field-label" style={{ color: 'white' }}>Document B</label>
           <select className="cw-input-plain" value={idB} onChange={(e) => setIdB(e.target.value)}>
             <option value="">Select a document…</option>
             {documents.map((d) => (
@@ -97,32 +97,32 @@ export default function Compare() {
 
       {result && (
         <div style={{ marginTop: 28 }}>
-          <div className="cw-card" style={{ background: '#0B1220', color: 'white' }}>
-            <div style={{ color: '#B08D57', fontWeight: 700, fontSize: 12.5, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <div className="cw-card" style={{ background: 'var(--cw-dark-surface-2)' }}>
+            <div style={{ color: 'var(--cw-gold-bright)', fontWeight: 700, fontSize: 12.5, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Verdict
             </div>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: '#E5E7EB' }}>{result.verdict}</p>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--cw-dark-text)' }}>{result.verdict}</p>
           </div>
 
           <div className="cw-section-title">Key Differences</div>
           {result.differences.map((diff, idx) => (
             <div key={idx} className="cw-card">
-              <div style={{ fontWeight: 700, color: '#0B1220', fontSize: 13.5, marginBottom: 10 }}>{diff.aspect}</div>
+              <div style={{ fontWeight: 700, color: 'white', fontSize: 13.5, marginBottom: 10 }}>{diff.aspect}</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 10 }}>
                 <div>
-                  <div style={{ fontSize: 10.5, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div style={{ fontSize: 10.5, color: 'var(--cw-dark-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {result.documentA.fileName}
                   </div>
-                  <div style={{ fontSize: 13, color: '#374151', marginTop: 2 }}>{diff.documentAValue}</div>
+                  <div style={{ fontSize: 13, color: 'var(--cw-dark-text)', marginTop: 2 }}>{diff.documentAValue}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10.5, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  <div style={{ fontSize: 10.5, color: 'var(--cw-dark-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {result.documentB.fileName}
                   </div>
-                  <div style={{ fontSize: 13, color: '#374151', marginTop: 2 }}>{diff.documentBValue}</div>
+                  <div style={{ fontSize: 13, color: 'var(--cw-dark-text)', marginTop: 2 }}>{diff.documentBValue}</div>
                 </div>
               </div>
-              <div style={{ fontSize: 12.5, color: '#6B7280', borderTop: '1px solid #F1F2F5', paddingTop: 8 }}>{diff.note}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', borderTop: '1px solid var(--cw-dark-border)', paddingTop: 8 }}>{diff.note}</div>
             </div>
           ))}
         </div>

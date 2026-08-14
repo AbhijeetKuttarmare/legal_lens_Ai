@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { clearSession, getStoredUser } from '../api';
 import {
-  ChatIcon,
+  ChevronRightIcon,
   ClipboardIcon,
   CreditCardIcon,
+  CrownIcon,
   DocumentIcon,
+  DotsVerticalIcon,
   GridIcon,
   LogoutIcon,
   ScaleIcon,
   ShieldIcon,
   TagIcon,
+  UploadIcon,
 } from '../../icons';
 
 function BellIcon({ style }: { style?: React.CSSProperties }) {
@@ -26,6 +29,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const user = getStoredUser();
   const [notifOpen, setNotifOpen] = useState(false);
+  const isFree = (user?.plan ?? 'FREE') === 'FREE';
 
   function onLogout() {
     clearSession();
@@ -42,8 +46,10 @@ export default function Layout() {
             <ScaleIcon />
           </span>
           <div>
-            <div className="cw-sidebar-brand-name">Clauzera AI</div>
-            <div className="cw-sidebar-brand-sub">Web</div>
+            <div className="cw-sidebar-brand-name">
+              Clauzera <span>AI</span>
+            </div>
+            <div className="cw-sidebar-brand-sub">Understand Before You Sign.</div>
           </div>
         </NavLink>
 
@@ -52,7 +58,7 @@ export default function Layout() {
             <DocumentIcon /> Home
           </NavLink>
           <NavLink to="/app/upload" className={({ isActive }) => (isActive ? 'active' : '')}>
-            <ChatIcon /> Upload &amp; Analyze
+            <UploadIcon /> Upload &amp; Analyze
           </NavLink>
           <NavLink to="/app/documents" className={({ isActive }) => (isActive ? 'active' : '')}>
             <ClipboardIcon /> My Documents
@@ -72,13 +78,28 @@ export default function Layout() {
         </nav>
 
         <div className="cw-sidebar-footer">
+          <div className="cw-sidebar-plan-card">
+            <div className="cw-sidebar-plan-label">
+              <CrownIcon /> PREMIUM PLAN
+            </div>
+            <div className="cw-sidebar-plan-desc">
+              {isFree ? 'Unlock unlimited analysis and priority support.' : 'Unlimited document analysis.'}
+            </div>
+            <NavLink to="/app/subscription" className="cw-sidebar-plan-btn">
+              {isFree ? 'Upgrade Plan' : 'View Plan'}
+              <ChevronRightIcon />
+            </NavLink>
+          </div>
+
           <NavLink to="/app/profile" className="cw-sidebar-user" style={{ textDecoration: 'none' }}>
             <span className="cw-sidebar-avatar">{initials || 'U'}</span>
-            <div style={{ minWidth: 0 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div className="cw-sidebar-user-name">{user?.firstName || 'User'}</div>
               <div className="cw-sidebar-user-plan">{user?.plan || 'FREE'} plan</div>
             </div>
+            <DotsVerticalIcon />
           </NavLink>
+
           <button className="cw-sidebar-logout" onClick={onLogout}>
             <LogoutIcon /> Log out
           </button>
@@ -90,6 +111,7 @@ export default function Layout() {
           <div style={{ position: 'relative' }}>
             <button className="cw-bell-btn" onClick={() => setNotifOpen((o) => !o)}>
               <BellIcon style={{ width: 18, height: 18 }} />
+              <span className="cw-bell-dot" />
             </button>
             {notifOpen && (
               <div className="cw-bell-dropdown" onMouseLeave={() => setNotifOpen(false)}>

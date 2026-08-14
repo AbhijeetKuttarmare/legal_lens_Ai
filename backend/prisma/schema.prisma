@@ -96,6 +96,7 @@ model Document {
   userId        String
   fileName      String
   fileType      String
+  fileSize      Int?
   storagePath   String
   status        DocumentStatus @default(UPLOADED)
   documentType  DocumentType?

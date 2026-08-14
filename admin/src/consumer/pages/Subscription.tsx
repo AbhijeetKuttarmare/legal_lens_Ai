@@ -291,22 +291,43 @@ export default function Subscription() {
                   className="cw-card"
                   style={{
                     margin: 0,
-                    border: highlight ? '2px solid #B08D57' : '1px solid #E5E7EB',
-                    background: highlight ? '#0B1220' : 'white',
-                    color: highlight ? 'white' : '#111827',
+                    border: highlight ? '2px solid var(--cw-gold-bright)' : '1px solid var(--cw-dark-border)',
+                    background: 'var(--cw-dark-surface)',
+                    boxShadow: highlight ? '0 0 24px rgba(232,169,61,0.15)' : undefined,
+                    color: 'white',
                     display: 'flex',
                     flexDirection: 'column',
+                    position: 'relative',
                   }}
                 >
-                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: highlight ? '#B08D57' : '#0B1220' }}>{plan.name}</div>
+                  {highlight && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: -11,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: 'var(--cw-gold-bright)',
+                        color: 'var(--cw-navy)',
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        padding: '3px 12px',
+                        borderRadius: 999,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      MOST POPULAR
+                    </span>
+                  )}
+                  <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: highlight ? 'var(--cw-gold-bright)' : 'white' }}>{plan.name}</div>
                   <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 18 }}>
                     {plan.price}
-                    <span style={{ fontSize: 13, fontWeight: 500, color: highlight ? '#8D97A8' : '#6B7280' }}>{plan.period}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--cw-dark-text-muted)' }}>{plan.period}</span>
                   </div>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                     {plan.features.map((f) => (
-                      <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: highlight ? '#C6CCDA' : '#6B7280' }}>
-                        <CheckIcon style={{ width: 15, height: 15, color: '#B08D57', flexShrink: 0 }} />
+                      <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--cw-dark-text-muted)' }}>
+                        <CheckIcon style={{ width: 15, height: 15, color: 'var(--cw-gold-bright)', flexShrink: 0 }} />
                         {f}
                       </div>
                     ))}

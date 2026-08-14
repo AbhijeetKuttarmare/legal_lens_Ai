@@ -2,25 +2,33 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { deleteDocument, listDocuments } from '../api';
 import type { DocumentSummary } from '../types';
-import { AlertIcon, CameraIcon } from '../../icons';
+import { DotsVerticalIcon, DocumentIcon, FolderIcon } from '../../icons';
 
 type FilterKey = 'ALL' | 'READY' | 'FAILED' | 'PENDING';
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'ALL', label: 'All Documents' },
   { key: 'READY', label: 'Analyzed' },
-  { key: 'FAILED', label: 'Failed' },
-  { key: 'PENDING', label: 'Processing' },
+  { key: 'PENDING', label: 'Pending' },
+  { key: 'FAILED', label: 'Processing' },
 ];
 
-function fileIcon(_fileType: string) {
-  return { bg: '#EEF1F6', color: '#0B1220' };
+function fileBadge(fileType: string) {
+  if (fileType.includes('word') || fileType.includes('docx')) return { label: 'DOCX', bg: '#2563EB' };
+  return { label: 'PDF', bg: '#DC2626' };
+}
+
+function formatFileSize(bytes: number | null) {
+  if (!bytes) return null;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function statusMeta(status: DocumentSummary['status']) {
   if (status === 'READY') return { label: 'Analyzed', cls: 'cw-status-ready' };
   if (status === 'FAILED') return { label: 'Failed', cls: 'cw-status-failed' };
-  return { label: 'Processing', cls: 'cw-status-pending' };
+  if (status === 'PROCESSING') return { label: 'Analyzing', cls: 'cw-status-processing' };
+  return { label: 'Pending', cls: 'cw-status-pending' };
 }
 
 export default function History() {
@@ -31,6 +39,7 @@ export default function History() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'newest' | 'oldest' | 'name'>('newest');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   function reload() {
     listDocuments()
@@ -57,6 +66,7 @@ export default function History() {
 
   async function onDelete(id: string, e: React.MouseEvent) {
     e.stopPropagation();
+    setOpenMenuId(null);
     if (!window.confirm('Delete this document? This cannot be undone.')) return;
     setDeletingId(id);
     try {
@@ -76,7 +86,7 @@ export default function History() {
           <div className="cw-section-title" style={{ margin: '0 0 4px' }}>
             My Documents
           </div>
-          <div style={{ color: '#6B7280', fontSize: 13 }}>All your legal documents in one place</div>
+          <div style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13 }}>All your legal documents in one place</div>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <input
@@ -88,7 +98,7 @@ export default function History() {
           />
           <select
             className="cw-input-plain"
-            style={{ marginBottom: 0, width: 160 }}
+            style={{ marginBottom: 0, width: 170 }}
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
           >
@@ -122,14 +132,31 @@ export default function History() {
       )}
 
       {documents !== null && filtered.length === 0 && (
-        <div className="cw-empty">
-          <AlertIcon style={{ width: 32, height: 32, opacity: 0.4, marginBottom: 8 }} />
-          <div>No documents in this filter.</div>
+        <div className="cw-table-wrap" style={{ marginTop: 16 }}>
+          <div className="cw-empty" style={{ padding: '56px 20px' }}>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                margin: '0 auto 14px',
+                borderRadius: 14,
+                background: 'var(--cw-dark-surface-2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--cw-gold-bright)',
+              }}
+            >
+              <FolderIcon style={{ width: 26, height: 26 }} />
+            </div>
+            <div style={{ color: 'white', fontWeight: 600, marginBottom: 4 }}>More documents will appear here</div>
+            <div>Upload and analyze your legal documents</div>
+          </div>
         </div>
       )}
 
       {filtered.length > 0 && (
-        <div className="cw-table-wrap" style={{ marginTop: 16 }}>
+        <div className="cw-table-wrap" style={{ marginTop: 16, overflow: 'visible' }}>
           <table className="cw-table">
             <thead>
               <tr>
@@ -137,39 +164,90 @@ export default function History() {
                 <th>Status</th>
                 <th>Type</th>
                 <th>Uploaded</th>
-                <th></th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((doc) => {
-                const icon = fileIcon(doc.fileType);
+                const badge = fileBadge(doc.fileType);
                 const status = statusMeta(doc.status);
+                const size = formatFileSize(doc.fileSize);
                 return (
                   <tr key={doc.id} onClick={() => navigate(`/app/report/${doc.id}`)}>
                     <td>
                       <div className="cw-doc-name-cell">
-                        <div className="cw-doc-icon" style={{ background: icon.bg, color: icon.color }}>
-                          <CameraIcon />
+                        <div className="cw-doc-icon" style={{ background: 'var(--cw-dark-surface-2)', color: 'white', position: 'relative' }}>
+                          <DocumentIcon style={{ width: 18, height: 18 }} />
+                          <span
+                            style={{
+                              position: 'absolute',
+                              bottom: -3,
+                              left: -3,
+                              background: badge.bg,
+                              color: 'white',
+                              fontSize: 8,
+                              fontWeight: 800,
+                              padding: '1px 4px',
+                              borderRadius: 4,
+                            }}
+                          >
+                            {badge.label}
+                          </span>
                         </div>
-                        <span className="cw-doc-name">{doc.fileName}</span>
+                        <div>
+                          <div className="cw-doc-name">{doc.fileName}</div>
+                          {size && <div className="cw-doc-size">{size}</div>}
+                        </div>
                       </div>
                     </td>
                     <td>
                       <span className={`cw-status-pill ${status.cls}`}>{status.label}</span>
                     </td>
-                    <td style={{ color: '#6B7280' }}>{doc.documentType?.replace(/_/g, ' ') || '—'}</td>
+                    <td style={{ color: 'var(--cw-dark-text-muted)' }}>{doc.documentType?.replace(/_/g, ' ') || '—'}</td>
                     <td className="cw-doc-date">
                       {new Date(doc.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
                     </td>
-                    <td>
+                    <td style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
                       <button
                         className="cw-link-btn"
-                        style={{ color: '#DC2626' }}
-                        disabled={deletingId === doc.id}
-                        onClick={(e) => onDelete(doc.id, e)}
+                        style={{ padding: 6 }}
+                        onClick={() => setOpenMenuId(openMenuId === doc.id ? null : doc.id)}
                       >
-                        {deletingId === doc.id ? 'Deleting…' : 'Delete'}
+                        <DotsVerticalIcon style={{ width: 16, height: 16 }} />
                       </button>
+                      {openMenuId === doc.id && (
+                        <div
+                          onMouseLeave={() => setOpenMenuId(null)}
+                          style={{
+                            position: 'absolute',
+                            right: 18,
+                            top: 36,
+                            background: 'var(--cw-dark-surface-2)',
+                            border: '1px solid var(--cw-dark-border)',
+                            borderRadius: 10,
+                            padding: 6,
+                            zIndex: 10,
+                            minWidth: 130,
+                            boxShadow: '0 10px 24px rgba(0,0,0,0.4)',
+                          }}
+                        >
+                          <button
+                            className="cw-link-btn"
+                            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px' }}
+                            onClick={() => navigate(`/app/report/${doc.id}`)}
+                          >
+                            View Report
+                          </button>
+                          <button
+                            className="cw-link-btn"
+                            style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', color: '#F87171' }}
+                            disabled={deletingId === doc.id}
+                            onClick={(e) => onDelete(doc.id, e)}
+                          >
+                            {deletingId === doc.id ? 'Deleting…' : 'Delete'}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );
