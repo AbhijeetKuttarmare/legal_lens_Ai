@@ -234,6 +234,7 @@
 
 .cw-chat-bubble-rich .cw-chat-p {
   margin: 0 0 10px;
+  color: #C6CCDA;
 }
 
 .cw-chat-bubble-rich .cw-chat-p:last-child {
@@ -254,10 +255,11 @@
 
 .cw-chat-bubble-rich .cw-chat-list li {
   padding-left: 2px;
+  color: #C6CCDA;
 }
 
 .cw-chat-bubble-rich strong {
-  color: white;
+  color: var(--cw-gold-bright);
   font-weight: 700;
 }
 
