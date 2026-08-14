@@ -5,16 +5,20 @@ declare global {
 }
 
 export interface RazorpaySuccessResponse {
-  razorpay_order_id: string;
+  razorpay_order_id?: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
+  razorpay_subscription_id?: string;
 }
 
 export interface RazorpayOptions {
   key: string;
-  amount: number;
-  currency: string;
-  order_id: string;
+  amount?: number;
+  currency?: string;
+  // One-time checkout uses order_id; recurring Team plan checkout uses
+  // subscription_id instead — Razorpay infers the amount from the plan.
+  order_id?: string;
+  subscription_id?: string;
   name: string;
   description?: string;
   prefill?: { contact?: string | null };

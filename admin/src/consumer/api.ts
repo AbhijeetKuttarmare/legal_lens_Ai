@@ -7,9 +7,12 @@ import type {
   DocumentReport,
   DocumentSummary,
   KeyDate,
+  Organization,
   PayablePlan,
   RazorpayOrder,
+  SeatTier,
   TemplateTypeOption,
+  TeamSubscriptionOrder,
 } from './types';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -187,6 +190,41 @@ export function generateTemplate(
     method: 'POST',
     body: JSON.stringify({ templateType, fields, consentAccepted, language }),
   });
+}
+
+export function getMyOrganization() {
+  return request<Organization | null>('/organizations/me');
+}
+
+export function createOrganization(seatTier: SeatTier, seatCount: number, name?: string) {
+  return request<TeamSubscriptionOrder>('/organizations', {
+    method: 'POST',
+    body: JSON.stringify({ seatTier, seatCount, name }),
+  });
+}
+
+export interface VerifySubscriptionPayload {
+  razorpaySubscriptionId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}
+
+export function verifyTeamSubscription(payload: VerifySubscriptionPayload) {
+  return request<{ success: true }>('/organizations/verify', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function addTeamMember(phone: string) {
+  return request<{ success: true }>('/organizations/members', {
+    method: 'POST',
+    body: JSON.stringify({ phone }),
+  });
+}
+
+export function removeTeamMember(userId: string) {
+  return request<{ success: true }>(`/organizations/members/${userId}`, { method: 'DELETE' });
 }
 
 export function getChatHistory(documentId: string) {

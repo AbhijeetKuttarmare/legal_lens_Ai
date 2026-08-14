@@ -92,3 +92,30 @@ export interface TemplateTypeOption {
   key: string;
   label: string;
 }
+
+export type SeatTier = 'STANDARD' | 'PREMIUM';
+
+export interface OrganizationMember {
+  userId: string;
+  role: 'OWNER' | 'MEMBER';
+  joinedAt: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  role: 'OWNER' | 'MEMBER';
+  seatTier: SeatTier;
+  seatCount: number;
+  subscriptionStatus: 'CREATED' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
+  members: OrganizationMember[];
+}
+
+export interface TeamSubscriptionOrder {
+  organizationId: string;
+  razorpaySubscriptionId: string;
+  keyId: string;
+}

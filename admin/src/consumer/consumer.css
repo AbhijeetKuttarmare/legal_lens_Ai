@@ -160,6 +160,31 @@
   margin-bottom: 16px;
 }
 
+.cw-plan-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: #F4F5F9;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.cw-plan-tabs span {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6B7280;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cw-plan-tabs span.active {
+  background: white;
+  color: #0B1220;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 .cw-link-row {
   display: flex;
   justify-content: space-between;
