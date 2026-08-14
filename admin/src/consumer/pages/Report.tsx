@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, checkExportAccess, getDocumentReport, getKeyDates, getMe, getStoredUser, hasFeatureAccess, setStoredUser } from '../api';
 import type { DocumentReport, KeyDate } from '../types';
 import { exportReportPdf } from '../exportPdf';
@@ -10,6 +10,7 @@ const FLAG_COLOR: Record<string, string> = { low: '#16A34A', medium: '#D97706', 
 
 export default function Report() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [report, setReport] = useState<DocumentReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<number | null>(null);
@@ -81,6 +82,15 @@ export default function Report() {
     } finally {
       setExporting(false);
     }
+  }
+
+  function onSuggestFix(flagTitle: string, flagDetail: string) {
+    if (!report) return;
+    navigate(`/app/chat/${report.id}`, {
+      state: {
+        prefill: `How can I address or negotiate this risk: "${flagTitle}"? Context: ${flagDetail}`,
+      },
+    });
   }
 
   async function onShare() {
@@ -203,6 +213,14 @@ export default function Report() {
                   <div>
                     <div className="cw-flag-title">{flag.title}</div>
                     <div className="cw-flag-detail">{flag.detail}</div>
+                    <button
+                      type="button"
+                      className="cw-link-btn"
+                      style={{ padding: 0, marginTop: 6, color: 'var(--cw-gold-bright)', fontSize: 12, fontWeight: 700 }}
+                      onClick={() => onSuggestFix(flag.title, flag.detail)}
+                    >
+                      Suggest a Fix →
+                    </button>
                   </div>
                 </div>
               ))}

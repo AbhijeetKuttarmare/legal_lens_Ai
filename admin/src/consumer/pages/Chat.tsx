@@ -1,5 +1,5 @@
 import { FormEvent, Fragment, ReactNode, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { ApiError, askQuestion, getChatHistory } from '../api';
 import type { ChatMessage } from '../types';
 import { ChatIcon } from '../../icons';
@@ -67,8 +67,9 @@ function renderMessage(text: string): ReactNode[] {
 
 export default function Chat() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [question, setQuestion] = useState('');
+  const [question, setQuestion] = useState(() => (location.state as { prefill?: string } | null)?.prefill || '');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
