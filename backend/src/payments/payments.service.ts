@@ -144,18 +144,29 @@ export class PaymentsService {
       throw new BadRequestException('Payment verification failed');
     }
 
-    const pack = CREDIT_PACKS[dto.pack];
+    // The signature only proves razorpayOrderId/razorpayPaymentId are a real,
+    // matched pair — it says nothing about which pack was paid for. Trusting
+    // dto.pack here would let a client claim a bigger pack than it paid for.
+    // The order row written in createCreditOrder() is the source of truth.
+    const order = await this.prisma.creditOrder.findUnique({ where: { razorpayOrderId: dto.razorpayOrderId } });
+    if (!order || order.userId !== userId) {
+      throw new BadRequestException('Payment verification failed');
+    }
+
+    // Atomically claim the order so a replayed/duplicate verify call (same
+    // valid signature) can't grant the credits twice.
+    const claimed = await this.prisma.creditOrder.updateMany({
+      where: { razorpayOrderId: dto.razorpayOrderId, status: 'CREATED' },
+      data: { status: 'PAID', razorpayPaymentId: dto.razorpayPaymentId },
+    });
+    if (claimed.count === 0) {
+      throw new BadRequestException('Payment already verified');
+    }
+
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { documentCredits: { increment: pack.credits } },
+      data: { documentCredits: { increment: order.credits } },
     });
-
-    await this.prisma.creditOrder
-      .update({
-        where: { razorpayOrderId: dto.razorpayOrderId },
-        data: { status: 'PAID', razorpayPaymentId: dto.razorpayPaymentId },
-      })
-      .catch(() => undefined);
 
     this.auditLog.record({
       actorType: 'USER',
@@ -164,7 +175,7 @@ export class PaymentsService {
       action: 'CREDIT_ORDER_VERIFIED',
       targetType: 'CreditOrder',
       targetId: dto.razorpayOrderId,
-      metadata: { pack: dto.pack, credits: pack.credits },
+      metadata: { credits: order.credits },
     });
 
     return toSafeUser(user);
@@ -263,17 +274,29 @@ export class PaymentsService {
       throw new BadRequestException('Payment verification failed');
     }
 
+    // The signature only proves razorpayOrderId/razorpayPaymentId are a real,
+    // matched pair — it says nothing about which plan was paid for. Trusting
+    // dto.plan here would let a client claim a higher plan than it paid for.
+    // The order row written in createOrder() is the source of truth.
+    const order = await this.prisma.payment.findUnique({ where: { razorpayOrderId: dto.razorpayOrderId } });
+    if (!order || order.userId !== userId) {
+      throw new BadRequestException('Payment verification failed');
+    }
+
+    // Atomically claim the order so a replayed/duplicate verify call (same
+    // valid signature) can't re-apply it.
+    const claimed = await this.prisma.payment.updateMany({
+      where: { razorpayOrderId: dto.razorpayOrderId, status: 'CREATED' },
+      data: { status: 'PAID', razorpayPaymentId: dto.razorpayPaymentId },
+    });
+    if (claimed.count === 0) {
+      throw new BadRequestException('Payment already verified');
+    }
+
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { plan: dto.plan },
+      data: { plan: order.plan },
     });
-
-    await this.prisma.payment
-      .update({
-        where: { razorpayOrderId: dto.razorpayOrderId },
-        data: { status: 'PAID', razorpayPaymentId: dto.razorpayPaymentId },
-      })
-      .catch(() => undefined); // order row may predate this tracking table
 
     this.auditLog.record({
       actorType: 'USER',
@@ -282,7 +305,7 @@ export class PaymentsService {
       action: 'PAYMENT_VERIFIED',
       targetType: 'Payment',
       targetId: dto.razorpayOrderId,
-      metadata: { plan: dto.plan },
+      metadata: { plan: order.plan },
     });
 
     return toSafeUser(user);
