@@ -264,6 +264,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .brand-mark-sm {
@@ -276,6 +277,12 @@
   width: 19px;
   height: 19px;
   color: var(--site-navy);
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .brand-name {

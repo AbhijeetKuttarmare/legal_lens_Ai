@@ -47,7 +47,7 @@ export default function Layout() {
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-brand">
-          <div className="mark">CA</div>
+          <div className="mark"><img src="/logo.png" alt="Clauzera AI" /></div>
           <div>
             <div className="name">Clauzera AI</div>
             <div className="sub">Admin console</div>

@@ -68,7 +68,7 @@ export default function Login() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-brand">
-          <div className="mark">CA</div>
+          <div className="mark"><img src="/logo.png" alt="Clauzera AI" /></div>
           <div>
             <div className="title">Clauzera AI</div>
             <div className="subtitle">Admin console</div>

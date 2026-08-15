@@ -448,12 +448,19 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .cw-sidebar-mark svg {
   width: 20px;
   height: 20px;
   color: var(--cw-gold-bright);
+}
+
+.cw-sidebar-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .cw-sidebar-brand-name {

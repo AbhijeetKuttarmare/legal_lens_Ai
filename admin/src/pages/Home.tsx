@@ -8,7 +8,6 @@ import {
   ClipboardIcon,
   DocumentIcon,
   GlobeIcon,
-  ScaleIcon,
   ShieldIcon,
 } from '../icons';
 import Hero3D from './Hero3D';
@@ -198,7 +197,7 @@ export default function Home() {
         <div className="site-nav-inner">
           <a href="#top" className="brand">
             <span className="brand-mark">
-              <ScaleIcon className="brand-mark-icon" />
+              <img src="/logo.png" alt="Clauzera AI" />
             </span>
             <span className="brand-name">
               Clauzera <span className="accent-gold">AI</span>
@@ -444,7 +443,7 @@ export default function Home() {
         <div className="footer-inner">
           <div className="footer-brand">
             <span className="brand-mark brand-mark-sm">
-              <ScaleIcon className="brand-mark-icon" />
+              <img src="/logo.png" alt="Clauzera AI" />
             </span>
             <span className="brand-name">
               Clauzera <span className="accent-gold">AI</span>

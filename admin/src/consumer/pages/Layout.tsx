@@ -12,7 +12,6 @@ import {
   GridIcon,
   LogoutIcon,
   MenuIcon,
-  ScaleIcon,
   ShieldIcon,
   TagIcon,
   UploadIcon,
@@ -49,7 +48,7 @@ export default function Layout() {
         <div className="cw-sidebar-brand-row">
           <NavLink to="/app" className="cw-sidebar-brand" onClick={() => setNavOpen(false)}>
             <span className="cw-sidebar-mark">
-              <ScaleIcon />
+              <img src="/logo.png" alt="Clauzera AI" />
             </span>
             <div>
               <div className="cw-sidebar-brand-name">
