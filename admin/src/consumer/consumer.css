@@ -11,14 +11,24 @@
   /* Dark-theme tokens — used by the sidebar (always dark) and by pages
      that have been given the new dark redesign (Home, Upload, My
      Documents). Other consumer pages haven't been converted yet and
-     stay on the light --cw-bg tokens above, so nothing there breaks. */
-  --cw-dark-bg: #0A101E;
-  --cw-dark-surface: #121B2E;
-  --cw-dark-surface-2: #0E1626;
-  --cw-dark-border: rgba(255, 255, 255, 0.08);
-  --cw-dark-text: #F5F7FA;
-  --cw-dark-text-muted: #8D97A8;
-  --cw-gold-bright: #E8A93D;
+     stay on the light --cw-bg tokens above, so nothing there breaks.
+
+     Each falls back through a --cw-user-* custom property so the theme
+     settings panel can override them by setting --cw-user-* on
+     <html> — see consumer/theme.ts. A property declared directly on
+     this element always wins over an inherited one, so the indirection
+     through --cw-user-* is what lets an ancestor-level override apply. */
+  --cw-dark-bg: var(--cw-user-dark-bg, #0A101E);
+  --cw-dark-surface: var(--cw-user-dark-surface, #121B2E);
+  --cw-dark-surface-2: var(--cw-user-dark-surface-2, #0E1626);
+  --cw-dark-border: var(--cw-user-dark-border, rgba(255, 255, 255, 0.08));
+  --cw-dark-text: var(--cw-user-dark-text, #F5F7FA);
+  --cw-dark-text-muted: var(--cw-user-dark-text-muted, #8D97A8);
+  --cw-dark-tint-03: var(--cw-user-dark-tint-03, rgba(255, 255, 255, 0.03));
+  --cw-dark-tint-04: var(--cw-user-dark-tint-04, rgba(255, 255, 255, 0.04));
+  --cw-dark-tint-06: var(--cw-user-dark-tint-06, rgba(255, 255, 255, 0.06));
+  --cw-gold-bright: var(--cw-user-accent, #E8A93D);
+  --cw-btn-bg: var(--cw-user-btn-color, var(--cw-gold-bright));
 
   min-height: 100vh;
   background: var(--cw-bg);
@@ -341,7 +351,7 @@
 
 .cw-btn-navy {
   background: var(--cw-dark-surface-2);
-  color: white;
+  color: var(--cw-dark-text);
   border: 1px solid var(--cw-gold-bright);
 }
 
@@ -352,7 +362,7 @@
 /* Primary action button — bright gold, matches the dark theme's CTAs
    (Analyze a Document, Upgrade Plan, View Plans...). */
 .cw-btn-gold {
-  background: var(--cw-gold-bright);
+  background: var(--cw-btn-bg);
   color: var(--cw-navy);
 }
 
@@ -362,7 +372,7 @@
 
 .cw-btn-outline {
   background: var(--cw-dark-surface);
-  color: white;
+  color: var(--cw-dark-text);
   border: 1.5px solid var(--cw-dark-border);
 }
 
@@ -427,7 +437,7 @@
   border-radius: 50%;
   background: var(--cw-dark-surface);
   border: 1px solid var(--cw-dark-border);
-  color: white;
+  color: var(--cw-dark-text);
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -464,7 +474,7 @@
 }
 
 .cw-sidebar-brand-name {
-  color: white;
+  color: var(--cw-dark-text);
   font-weight: 800;
   font-size: 15px;
   line-height: 1.2;
@@ -506,13 +516,13 @@
 }
 
 .cw-sidebar-nav a:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: white;
+  background: var(--cw-dark-tint-04);
+  color: var(--cw-dark-text);
 }
 
 .cw-sidebar-nav a.active {
-  background: rgba(232, 169, 61, 0.1);
-  border-color: rgba(232, 169, 61, 0.4);
+  background: color-mix(in srgb, var(--cw-gold-bright) 10%, transparent);
+  border-color: color-mix(in srgb, var(--cw-gold-bright) 40%, transparent);
   color: var(--cw-gold-bright);
 }
 
@@ -558,7 +568,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: rgba(232, 169, 61, 0.12);
+  background: color-mix(in srgb, var(--cw-gold-bright) 12%, transparent);
   border: none;
   color: var(--cw-gold-bright);
   padding: 8px 12px;
@@ -599,7 +609,7 @@
 }
 
 .cw-sidebar-user-name {
-  color: white;
+  color: var(--cw-dark-text);
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
@@ -641,8 +651,8 @@
 }
 
 .cw-sidebar-logout:hover {
-  background: rgba(255, 255, 255, 0.04);
-  color: white;
+  background: var(--cw-dark-tint-04);
+  color: var(--cw-dark-text);
 }
 
 .cw-main {
@@ -668,12 +678,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: white;
+  color: var(--cw-dark-text);
   position: relative;
 }
 
 .cw-bell-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--cw-dark-tint-06);
 }
 
 .cw-bell-dot {
@@ -702,6 +712,123 @@
   z-index: 20;
 }
 
+/* ---------- Theme settings ---------- */
+
+.cw-settings-dropdown {
+  position: absolute;
+  right: 0;
+  top: 46px;
+  width: 240px;
+  background: var(--cw-dark-surface);
+  border: 1px solid var(--cw-dark-border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  z-index: 20;
+}
+
+.cw-settings-section {
+  margin-bottom: 16px;
+}
+
+.cw-settings-section:last-of-type {
+  margin-bottom: 14px;
+}
+
+.cw-settings-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cw-dark-text-muted);
+  margin-bottom: 10px;
+}
+
+.cw-settings-toggle-row {
+  display: flex;
+  gap: 6px;
+  background: var(--cw-dark-surface-2);
+  border-radius: 9px;
+  padding: 3px;
+}
+
+.cw-settings-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cw-dark-text-muted);
+  cursor: pointer;
+}
+
+.cw-settings-toggle-btn.active {
+  background: var(--cw-dark-surface);
+  color: var(--cw-dark-text);
+}
+
+.cw-settings-swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cw-settings-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--cw-dark-border);
+}
+
+.cw-settings-swatch.active {
+  border-color: var(--cw-dark-surface);
+  box-shadow: 0 0 0 2px var(--cw-dark-text);
+}
+
+.cw-settings-swatch-custom {
+  position: relative;
+  overflow: hidden;
+  background: conic-gradient(from 180deg, red, yellow, lime, cyan, blue, magenta, red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cw-settings-swatch-custom input {
+  position: absolute;
+  inset: -4px;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.cw-settings-reset-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--cw-dark-border);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cw-dark-text-muted);
+  cursor: pointer;
+}
+
+.cw-settings-reset-btn:hover {
+  color: var(--cw-dark-text);
+  border-color: var(--cw-gold-bright);
+}
+
 /* ---------- Content container ---------- */
 
 .cw-container {
@@ -714,7 +841,7 @@
 .cw-container h1,
 .cw-container h2,
 .cw-container h3 {
-  color: white;
+  color: var(--cw-dark-text);
 }
 
 .cw-container-narrow {
@@ -743,7 +870,7 @@
 
 .cw-side-card-title {
   font-weight: 700;
-  color: white;
+  color: var(--cw-dark-text);
   font-size: 13px;
   margin-bottom: 12px;
 }
@@ -760,7 +887,7 @@
 }
 
 .cw-side-link-row:hover {
-  color: white;
+  color: var(--cw-dark-text);
 }
 
 .cw-side-link-row:last-child {
@@ -787,7 +914,7 @@
   border: 1px solid var(--cw-dark-border);
   border-radius: 20px;
   padding: 36px 40px;
-  color: white;
+  color: var(--cw-dark-text);
   margin-bottom: 28px;
 }
 
@@ -798,7 +925,7 @@
 }
 
 .cw-hero p {
-  color: #B7C0D1;
+  color: var(--cw-dark-text-muted);
   font-size: 14px;
   line-height: 1.55;
   margin: 0 0 18px;
@@ -811,7 +938,7 @@
 }
 
 .cw-hero-caption {
-  color: #8D97A8;
+  color: var(--cw-dark-text-muted);
   font-size: 11.5px;
   margin-top: 10px;
 }
@@ -821,7 +948,7 @@
 .cw-section-title {
   font-weight: 700;
   font-size: 16px;
-  color: white;
+  color: var(--cw-dark-text);
   margin: 24px 0 12px;
 }
 
@@ -915,7 +1042,7 @@
 
 .cw-action-title {
   font-weight: 700;
-  color: white;
+  color: var(--cw-dark-text);
   font-size: 13.5px;
 }
 
@@ -976,7 +1103,7 @@
 .cw-stat-value {
   font-size: 24px;
   font-weight: 800;
-  color: white;
+  color: var(--cw-dark-text);
   line-height: 1.15;
 }
 
@@ -1050,7 +1177,7 @@
 }
 
 .cw-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--cw-dark-tint-03);
 }
 
 .cw-table tbody tr:last-child td {
@@ -1082,7 +1209,7 @@
 
 .cw-doc-name {
   font-weight: 700;
-  color: white;
+  color: var(--cw-dark-text);
   font-size: 13.5px;
   max-width: 320px;
   white-space: nowrap;
@@ -1194,7 +1321,7 @@
 }
 
 .cw-lang-chip.active {
-  background: rgba(232, 169, 61, 0.1);
+  background: color-mix(in srgb, var(--cw-gold-bright) 10%, transparent);
   border-color: var(--cw-gold-bright);
   color: var(--cw-gold-bright);
 }
@@ -1213,7 +1340,7 @@
 }
 
 .cw-report-back:hover {
-  color: white;
+  color: var(--cw-dark-text);
 }
 
 .cw-report-back svg {
@@ -1266,14 +1393,14 @@
 }
 
 .cw-report-type-label {
-  color: #B7C0D1;
+  color: var(--cw-dark-text-muted);
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .cw-report-type-value {
-  color: white;
+  color: var(--cw-dark-text);
   font-size: 22px;
   font-weight: 800;
   margin: 4px 0 0;
@@ -1291,7 +1418,7 @@
   border-radius: 50%;
   border-width: 3px;
   border-style: solid;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--cw-dark-tint-06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1301,13 +1428,13 @@
 }
 
 .cw-score-level {
-  color: white;
+  color: var(--cw-dark-text);
   font-weight: 700;
   letter-spacing: 0.4px;
 }
 
 .cw-score-sub {
-  color: #B7C0D1;
+  color: var(--cw-dark-text-muted);
   font-size: 11.5px;
   margin-top: 2px;
 }
@@ -1327,7 +1454,7 @@
 
 .cw-card-title {
   font-weight: 700;
-  color: white;
+  color: var(--cw-dark-text);
   font-size: 15px;
 }
 
@@ -1353,7 +1480,7 @@
 
 .cw-flag-title {
   font-weight: 700;
-  color: white;
+  color: var(--cw-dark-text);
   font-size: 13.5px;
 }
 
@@ -1385,7 +1512,7 @@
 }
 
 .cw-clause-value {
-  color: white;
+  color: var(--cw-dark-text);
   font-weight: 700;
   font-size: 14.5px;
   margin-top: 4px;

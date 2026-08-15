@@ -75,7 +75,7 @@ export default function Profile() {
       <div className="cw-two-col">
         <div>
       <div className="cw-card">
-        <div className="cw-field-label" style={{ marginBottom: 4, color: 'white' }}>
+        <div className="cw-field-label" style={{ marginBottom: 4, color: 'var(--cw-dark-text)' }}>
           Phone
         </div>
         <div style={{ color: 'var(--cw-dark-text)', fontSize: 14, marginBottom: 16 }}>{user?.phone ? `+91 ${user.phone}` : '—'}</div>
@@ -86,7 +86,7 @@ export default function Profile() {
             <input className="cw-input-plain" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
           </div>
 
-          <label className="cw-field-label" style={{ color: 'white' }}>Gender</label>
+          <label className="cw-field-label" style={{ color: 'var(--cw-dark-text)' }}>Gender</label>
           <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
             {(['MALE', 'FEMALE', 'OTHER'] as Gender[]).map((g) => (
               <button
@@ -101,7 +101,7 @@ export default function Profile() {
             ))}
           </div>
 
-          <label className="cw-field-label" style={{ color: 'white' }}>Date of birth</label>
+          <label className="cw-field-label" style={{ color: 'var(--cw-dark-text)' }}>Date of birth</label>
           <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
             <input
               className="cw-input-plain"
@@ -151,17 +151,17 @@ export default function Profile() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
                 <div style={{ fontSize: 11, color: 'var(--cw-dark-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Plan</div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'white', marginTop: 2 }}>{user?.plan || 'FREE'}</div>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--cw-dark-text)', marginTop: 2 }}>{user?.plan || 'FREE'}</div>
               </div>
               <div>
                 <div style={{ fontSize: 11, color: 'var(--cw-dark-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Phone</div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'white', marginTop: 2 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--cw-dark-text)', marginTop: 2 }}>
                   {user?.phone ? `+91 ${user.phone}` : '—'}
                 </div>
               </div>
               <div>
                 <div style={{ fontSize: 11, color: 'var(--cw-dark-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Name</div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'white', marginTop: 2 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--cw-dark-text)', marginTop: 2 }}>
                   {user?.firstName || ''} {user?.lastName || ''}
                 </div>
               </div>

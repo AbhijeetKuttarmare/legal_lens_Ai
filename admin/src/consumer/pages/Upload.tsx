@@ -45,7 +45,7 @@ export default function Upload() {
     return (
       <div className="cw-container" style={{ textAlign: 'center', paddingTop: 80 }}>
         <div className="cw-spinner" style={{ margin: '0 auto 20px' }} />
-        <div style={{ fontWeight: 700, color: 'white', marginBottom: 6 }}>Analyzing your document</div>
+        <div style={{ fontWeight: 700, color: 'var(--cw-dark-text)', marginBottom: 6 }}>Analyzing your document</div>
         <div style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5 }}>
           Extracting text and analyzing with Clauzera. This can take up to a minute…
         </div>
@@ -64,7 +64,7 @@ export default function Upload() {
 
       {error && <div className="cw-error">{error}</div>}
 
-      <div className="cw-field-label" style={{ color: 'white' }}>
+      <div className="cw-field-label" style={{ color: 'var(--cw-dark-text)' }}>
         Explain the analysis in:
       </div>
       <div className="cw-lang-row">
@@ -132,7 +132,7 @@ export default function Upload() {
             <ShieldIcon />
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 700, color: 'white', fontSize: 13.5 }}>Your data is 100% secure and confidential</div>
+            <div style={{ fontWeight: 700, color: 'var(--cw-dark-text)', fontSize: 13.5 }}>Your data is 100% secure and confidential</div>
             <div style={{ color: 'var(--cw-dark-text-muted)', fontSize: 12 }}>We use bank-level encryption to protect your documents and data.</div>
           </div>
         </div>

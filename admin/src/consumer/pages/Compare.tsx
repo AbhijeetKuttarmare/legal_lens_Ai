@@ -78,7 +78,7 @@ export default function Compare() {
 
       {documents !== null && documents.length >= 2 && (
         <>
-          <label className="cw-field-label" style={{ color: 'white' }}>Document A</label>
+          <label className="cw-field-label" style={{ color: 'var(--cw-dark-text)' }}>Document A</label>
           <select className="cw-input-plain" value={idA} onChange={(e) => setIdA(e.target.value)}>
             <option value="">Select a document…</option>
             {documents.map((d) => (
@@ -88,7 +88,7 @@ export default function Compare() {
             ))}
           </select>
 
-          <label className="cw-field-label" style={{ color: 'white' }}>Document B</label>
+          <label className="cw-field-label" style={{ color: 'var(--cw-dark-text)' }}>Document B</label>
           <select className="cw-input-plain" value={idB} onChange={(e) => setIdB(e.target.value)}>
             <option value="">Select a document…</option>
             {documents.map((d) => (
@@ -116,7 +116,7 @@ export default function Compare() {
           <div className="cw-section-title">Key Differences</div>
           {result.differences.map((diff, idx) => (
             <div key={idx} className="cw-card">
-              <div style={{ fontWeight: 700, color: 'white', fontSize: 13.5, marginBottom: 10 }}>{diff.aspect}</div>
+              <div style={{ fontWeight: 700, color: 'var(--cw-dark-text)', fontSize: 13.5, marginBottom: 10 }}>{diff.aspect}</div>
               <div className="cw-diff-grid">
                 <div>
                   <div style={{ fontSize: 10.5, color: 'var(--cw-dark-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>

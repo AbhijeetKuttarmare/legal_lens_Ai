@@ -28,6 +28,7 @@ import ConsumerSubscription from './consumer/pages/Subscription';
 import ConsumerHelp from './consumer/pages/Help';
 import ConsumerCompare from './consumer/pages/Compare';
 import ConsumerTemplates from './consumer/pages/Templates';
+import { useApplyStoredTheme } from './consumer/theme';
 
 function RequireAuth({ children }: { children: ReactNode }) {
   if (!getToken()) return <Navigate to="/login" replace />;
@@ -42,6 +43,8 @@ function RequireConsumerAuth({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  useApplyStoredTheme();
+
   return (
     <Routes>
       <Route path="/" element={<Home />} />

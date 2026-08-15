@@ -294,7 +294,7 @@ export default function Subscription() {
                     border: highlight ? '2px solid var(--cw-gold-bright)' : '1px solid var(--cw-dark-border)',
                     background: 'var(--cw-dark-surface)',
                     boxShadow: highlight ? '0 0 24px rgba(232,169,61,0.15)' : undefined,
-                    color: 'white',
+                    color: 'var(--cw-dark-text)',
                     display: 'flex',
                     flexDirection: 'column',
                     position: 'relative',
@@ -360,16 +360,16 @@ export default function Subscription() {
               <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginTop: -6, marginBottom: 18 }}>
                 Don't need a subscription? Buy one-time credits to analyze extra documents on the Free plan.
                 {user && user.documentCredits > 0 && (
-                  <strong style={{ color: 'white' }}> You have {user.documentCredits} credit{user.documentCredits === 1 ? '' : 's'}.</strong>
+                  <strong style={{ color: 'var(--cw-dark-text)' }}> You have {user.documentCredits} credit{user.documentCredits === 1 ? '' : 's'}.</strong>
                 )}
               </p>
               <div className="cw-plan-grid-2">
                 {CREDIT_PACKS.map((pack) => (
                   <div key={pack.key} className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: 'white' }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: 'var(--cw-dark-text)' }}>
                       {pack.credits} document credits
                     </div>
-                    <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 16, color: 'white' }}>{pack.price}</div>
+                    <div style={{ fontSize: 24, fontWeight: 800, marginBottom: 16, color: 'var(--cw-dark-text)' }}>{pack.price}</div>
                     <p style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', marginBottom: 18, flex: 1 }}>
                       Each credit lets you upload and analyze one document beyond your plan's limit. Credits never
                       expire.
@@ -397,7 +397,7 @@ export default function Subscription() {
             <div className="cw-plan-grid-2">
               <div className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: 11.5, color: 'var(--cw-dark-text-muted)', marginBottom: 4 }}>2–150 users</div>
-                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: 'white' }}>Team</div>
+                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: 'var(--cw-dark-text)' }}>Team</div>
                 <div style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', marginBottom: 18 }}>Predictable pricing per seat</div>
 
                 <div className="cw-plan-tabs" style={{ marginBottom: 16 }}>
@@ -409,13 +409,13 @@ export default function Subscription() {
                   </span>
                 </div>
 
-                <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4, color: 'white' }}>
+                <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 4, color: 'var(--cw-dark-text)' }}>
                   {SEAT_PRICES[seatTier].price}
                   <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--cw-dark-text-muted)' }}>/seat/mo</span>
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--cw-dark-text-muted)', marginBottom: 18 }}>{SEAT_PRICES[seatTier].label}, billed monthly</div>
 
-                <label style={{ fontSize: 12.5, fontWeight: 600, color: 'white', marginBottom: 6, display: 'block' }}>
+                <label style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--cw-dark-text)', marginBottom: 6, display: 'block' }}>
                   Number of seats
                 </label>
                 <input
@@ -450,7 +450,7 @@ export default function Subscription() {
 
               <div className="cw-card" style={{ margin: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontSize: 11.5, color: 'var(--cw-dark-text-muted)', marginBottom: 4 }}>20+ users</div>
-                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: 'white' }}>Enterprise</div>
+                <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4, color: 'var(--cw-dark-text)' }}>Enterprise</div>
                 <div style={{ fontSize: 12.5, color: 'var(--cw-dark-text-muted)', marginBottom: 18 }}>Custom volume &amp; support</div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                   {[
@@ -481,7 +481,7 @@ export default function Subscription() {
           {org && (
             <div className="cw-card" style={{ margin: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <div style={{ fontWeight: 700, fontSize: 16, color: 'white' }}>{org.name}</div>
+                <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--cw-dark-text)' }}>{org.name}</div>
                 <span
                   style={{
                     fontSize: 11,
@@ -526,7 +526,7 @@ export default function Subscription() {
                   {org.members.map((m) => (
                     <tr key={m.userId} style={{ borderTop: '1px solid var(--cw-dark-border)' }}>
                       <td style={{ padding: '10px 0' }}>
-                        <div style={{ fontSize: 13.5, fontWeight: 600, color: 'white' }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--cw-dark-text)' }}>
                           {m.name || m.email || m.phone || 'Unnamed'}
                           {m.role === 'OWNER' && (
                             <span style={{ marginLeft: 6, fontSize: 10.5, fontWeight: 700, color: 'var(--cw-gold-bright)' }}>OWNER</span>

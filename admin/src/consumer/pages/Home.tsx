@@ -14,7 +14,7 @@ import {
 } from '../../icons';
 
 function fileIcon(_fileType: string) {
-  return { bg: 'var(--cw-dark-surface-2)', color: 'white' };
+  return { bg: 'var(--cw-dark-surface-2)', color: 'var(--cw-dark-text)' };
 }
 
 function formatFileSize(bytes: number | null) {
@@ -215,7 +215,7 @@ export default function Home() {
             {FEATURES.map((f) => (
               <div key={f.title} className="cw-stat-card">
                 <div className="cw-stat-icon">{f.icon}</div>
-                <div style={{ fontWeight: 700, color: 'white', fontSize: 13 }}>{f.title}</div>
+                <div style={{ fontWeight: 700, color: 'var(--cw-dark-text)', fontSize: 13 }}>{f.title}</div>
                 <div className="cw-stat-label">{f.desc}</div>
               </div>
             ))}
@@ -246,7 +246,7 @@ export default function Home() {
           <div className="cw-side-card" style={{ marginTop: 16 }}>
             <div className="cw-side-card-title">Your Plan</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isFree ? 12 : 4 }}>
-              <span style={{ fontSize: 15, fontWeight: 800, color: 'white' }}>{user?.plan || 'FREE'}</span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--cw-dark-text)' }}>{user?.plan || 'FREE'}</span>
               {isFree && (
                 <Link to="/app/subscription" style={{ fontSize: 12, fontWeight: 700, color: 'var(--cw-gold-bright)', textDecoration: 'none' }}>
                   Upgrade

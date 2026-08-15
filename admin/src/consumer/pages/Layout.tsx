@@ -16,6 +16,7 @@ import {
   TagIcon,
   UploadIcon,
 } from '../../icons';
+import ThemeSettingsButton from '../ThemeSettingsButton';
 
 function BellIcon({ style }: { style?: React.CSSProperties }) {
   return (
@@ -120,6 +121,7 @@ export default function Layout() {
           <button className="cw-hamburger-btn" onClick={() => setNavOpen(true)} aria-label="Open menu">
             <MenuIcon style={{ width: 20, height: 20 }} />
           </button>
+          <ThemeSettingsButton />
           <div style={{ position: 'relative' }}>
             <button className="cw-bell-btn" onClick={() => setNotifOpen((o) => !o)}>
               <BellIcon style={{ width: 18, height: 18 }} />

@@ -52,7 +52,7 @@ export default function UpgradeGate({ feature }: { feature: string }) {
         <StarIcon style={{ width: 12, height: 12 }} /> PRO FEATURE
       </span>
 
-      <div style={{ fontWeight: 800, color: 'white', fontSize: 19, marginBottom: 8 }}>
+      <div style={{ fontWeight: 800, color: 'var(--cw-dark-text)', fontSize: 19, marginBottom: 8 }}>
         {feature} is a Pro feature
       </div>
       <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginBottom: 24, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>

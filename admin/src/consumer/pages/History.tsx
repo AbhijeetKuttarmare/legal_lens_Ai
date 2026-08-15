@@ -149,7 +149,7 @@ export default function History() {
             >
               <FolderIcon style={{ width: 26, height: 26 }} />
             </div>
-            <div style={{ color: 'white', fontWeight: 600, marginBottom: 4 }}>More documents will appear here</div>
+            <div style={{ color: 'var(--cw-dark-text)', fontWeight: 600, marginBottom: 4 }}>More documents will appear here</div>
             <div>Upload and analyze your legal documents</div>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function History() {
                   <tr key={doc.id} onClick={() => navigate(`/app/report/${doc.id}`)}>
                     <td>
                       <div className="cw-doc-name-cell">
-                        <div className="cw-doc-icon" style={{ background: 'var(--cw-dark-surface-2)', color: 'white', position: 'relative' }}>
+                        <div className="cw-doc-icon" style={{ background: 'var(--cw-dark-surface-2)', color: 'var(--cw-dark-text)', position: 'relative' }}>
                           <DocumentIcon style={{ width: 18, height: 18 }} />
                           <span
                             style={{
@@ -184,7 +184,7 @@ export default function History() {
                               bottom: -3,
                               left: -3,
                               background: badge.bg,
-                              color: 'white',
+                              color: 'var(--cw-dark-text)',
                               fontSize: 8,
                               fontWeight: 800,
                               padding: '1px 4px',
