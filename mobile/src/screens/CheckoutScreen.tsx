@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
@@ -11,7 +11,7 @@ import { persistSession } from '../auth/session';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setAuthenticated } from '../store/authSlice';
 import { buildRazorpayCheckoutHtml } from '../utils/razorpayCheckoutHtml';
-import { NAVY, GOLD } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Checkout'>;
 
@@ -21,6 +21,8 @@ export default function CheckoutScreen({ route, navigation }: Props) {
   const { plan, planName } = route.params;
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const [stage, setStage] = useState<Stage>('creating');
   const [html, setHtml] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -103,8 +105,8 @@ export default function CheckoutScreen({ route, navigation }: Props) {
   if (stage === 'creating' || !html) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={NAVY} />
-        <Text style={{ marginTop: 16, color: NAVY }}>Preparing checkout...</Text>
+        <ActivityIndicator size="large" color={t.text} />
+        <Text style={{ marginTop: 16, color: t.text }}>Preparing checkout...</Text>
       </View>
     );
   }
@@ -124,19 +126,20 @@ export default function CheckoutScreen({ route, navigation }: Props) {
       />
       {stage === 'verifying' && (
         <View style={[StyleSheet.absoluteFill, styles.overlay]}>
-          <ActivityIndicator size="large" color={GOLD} />
-          <Text style={{ marginTop: 16, color: 'white' }}>Confirming your payment...</Text>
+          <ActivityIndicator size="large" color={t.accent} />
+          <Text style={{ marginTop: 16, color: t.textOnHeader }}>Confirming your payment...</Text>
         </View>
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F4F5F9' },
-  overlay: {
-    backgroundColor: 'rgba(11,18,32,0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: t.bg },
+    overlay: {
+      backgroundColor: 'rgba(11,18,32,0.85)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

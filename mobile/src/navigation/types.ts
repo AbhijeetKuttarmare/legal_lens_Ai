@@ -16,7 +16,7 @@ export type MainStackParamList = {
   Tabs: undefined;
   Upload: undefined;
   Report: { documentId: string };
-  Chat: { documentId: string; fileName: string; language?: string };
+  Chat: { documentId: string; fileName: string; language?: string; prefill?: string };
   EditProfile: undefined;
   PrivacyPolicy: undefined;
   Terms: undefined;
@@ -25,6 +25,7 @@ export type MainStackParamList = {
   CreditCheckout: { pack: 'PACK_5' | 'PACK_10'; credits: number; price: string };
   Compare: undefined;
   Templates: undefined;
+  ThemeSettings: undefined;
 };
 
 // Screens nested inside the bottom tabs need to navigate to stack-only routes

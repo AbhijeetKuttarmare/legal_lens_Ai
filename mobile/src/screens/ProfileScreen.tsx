@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, View, StyleSheet, Pressable, Alert } from 'react-native';
 import { Avatar, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setUnauthenticated } from '../store/authSlice';
 import { deleteAccount } from '../api/users';
 import { extractErrorMessage } from '../api/client';
-import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 
 interface Props {
   navigation: NavigationProp<RootNavigationParamList>;
@@ -32,6 +32,8 @@ const comingSoon = (title: string, message: string) => Alert.alert(title, messag
 export default function ProfileScreen({ navigation }: Props) {
   const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.auth.user);
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
 
   const onLogout = async () => {
     await clearSession();
@@ -177,36 +179,36 @@ export default function ProfileScreen({ navigation }: Props) {
           <Avatar.Text
             size={88}
             label={initials(user?.firstName, user?.lastName, user?.phone || user?.email)}
-            style={{ backgroundColor: GOLD }}
-            labelStyle={{ color: NAVY, fontWeight: '700' }}
+            style={{ backgroundColor: t.accent }}
+            labelStyle={{ color: t.onAccent, fontWeight: '700' }}
           />
           <Pressable
             hitSlop={12}
             style={styles.editButton}
             onPress={() => navigation.navigate('EditProfile')}
           >
-            <MaterialCommunityIcons name="pencil" size={14} color={NAVY} />
+            <MaterialCommunityIcons name="pencil" size={14} color={t.text} />
           </Pressable>
         </View>
         <Text style={styles.name}>{fullName || 'Your profile'}</Text>
         <View style={styles.planPill}>
-          <MaterialCommunityIcons name="crown" size={12} color={GOLD} />
+          <MaterialCommunityIcons name="crown" size={12} color={t.accent} />
           <Text style={styles.planText}>{user?.plan} PLAN</Text>
         </View>
 
         <Pressable
           style={styles.settingsButton}
-          onPress={() => comingSoon('Settings', 'App settings coming soon.')}
+          onPress={() => navigation.navigate('ThemeSettings')}
         >
           <MaterialCommunityIcons name="cog-outline" size={20} color="white" />
         </Pressable>
       </View>
 
-      <View style={[styles.card, cardShadow]}>
+      <View style={[styles.card, t.cardShadow]}>
         <View style={styles.cardTitleRow}>
           <Text style={styles.cardTitle}>Account Information</Text>
           <View style={styles.secureBadge}>
-            <MaterialCommunityIcons name="shield-check-outline" size={13} color={TEXT_MUTED} />
+            <MaterialCommunityIcons name="shield-check-outline" size={13} color={t.textMuted} />
             <Text style={styles.secureBadgeText}>Your data is secure</Text>
           </View>
         </View>
@@ -231,7 +233,7 @@ export default function ProfileScreen({ navigation }: Props) {
         ))}
       </View>
 
-      <View style={[styles.card, cardShadow]}>
+      <View style={[styles.card, t.cardShadow]}>
         <Text style={[styles.cardTitle, { marginBottom: 4 }]}>Account Actions</Text>
         {actionRows.map((row, idx) => (
           <Pressable
@@ -246,7 +248,7 @@ export default function ProfileScreen({ navigation }: Props) {
               <Text style={styles.rowValue}>{row.title}</Text>
               <Text style={styles.rowLabel}>{row.subtitle}</Text>
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={20} color={TEXT_MUTED} />
+            <MaterialCommunityIcons name="chevron-right" size={20} color={t.textMuted} />
           </Pressable>
         ))}
       </View>
@@ -274,116 +276,117 @@ export default function ProfileScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  header: {
-    alignItems: 'center',
-    backgroundColor: NAVY,
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    paddingBottom: 32,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    marginBottom: 24,
-  },
-  headerTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    width: '100%',
-    marginBottom: 20,
-  },
-  headerTitle: { color: 'white', fontSize: 22, fontWeight: '800' },
-  headerSubtitle: { color: '#B7C0D1', fontSize: 12, marginTop: 2 },
-  bellDot: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: GOLD,
-  },
-  avatarWrap: { position: 'relative' },
-  editButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: -4,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  name: { marginTop: 14, fontWeight: '700', fontSize: 18, color: 'white' },
-  planPill: {
-    marginTop: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(212,175,55,0.16)',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  planText: { color: GOLD, fontWeight: '700', fontSize: 11 },
-  settingsButton: {
-    position: 'absolute',
-    right: 20,
-    bottom: 32,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    marginHorizontal: 20,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    marginBottom: 20,
-  },
-  cardTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  cardTitle: { fontWeight: '700', color: NAVY, fontSize: 15 },
-  secureBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  secureBadgeText: { color: TEXT_MUTED, fontSize: 10.5 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F1F5',
-  },
-  rowIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rowLabel: { color: TEXT_MUTED, fontSize: 12 },
-  rowValue: { fontWeight: '600', color: NAVY, fontSize: 14, marginTop: 2 },
-  logoutButton: {
-    backgroundColor: '#FEF2F2',
-    marginHorizontal: 20,
-    borderRadius: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  logoutTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  logoutText: { color: '#DC2626', fontWeight: '700', fontSize: 15 },
-  logoutSubtitle: { color: '#B91C1C', fontSize: 11, marginTop: 4, opacity: 0.8 },
-  deleteAccountButton: {
-    marginHorizontal: 20,
-    marginTop: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  deleteAccountText: { color: '#9CA3AF', fontWeight: '700', fontSize: 14 },
-  deleteAccountSubtitle: { color: '#9CA3AF', fontSize: 11, marginTop: 4, opacity: 0.8 },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    header: {
+      alignItems: 'center',
+      backgroundColor: t.headerBg,
+      paddingTop: 20,
+      paddingHorizontal: 20,
+      paddingBottom: 32,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      marginBottom: 24,
+    },
+    headerTopRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      width: '100%',
+      marginBottom: 20,
+    },
+    headerTitle: { color: t.textOnHeader, fontSize: 22, fontWeight: '800' },
+    headerSubtitle: { color: t.textMutedOnHeader, fontSize: 12, marginTop: 2 },
+    bellDot: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: t.accent,
+    },
+    avatarWrap: { position: 'relative' },
+    editButton: {
+      position: 'absolute',
+      bottom: 0,
+      right: -4,
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: t.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    name: { marginTop: 14, fontWeight: '700', fontSize: 18, color: t.textOnHeader },
+    planPill: {
+      marginTop: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: 'rgba(212,175,55,0.16)',
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderRadius: 12,
+    },
+    planText: { color: t.accent, fontWeight: '700', fontSize: 11 },
+    settingsButton: {
+      position: 'absolute',
+      right: 20,
+      bottom: 32,
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: 'rgba(255,255,255,0.14)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    card: {
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      marginHorizontal: 20,
+      paddingHorizontal: 16,
+      paddingTop: 14,
+      marginBottom: 20,
+    },
+    cardTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+    cardTitle: { fontWeight: '700', color: t.text, fontSize: 15 },
+    secureBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    secureBadgeText: { color: t.textMuted, fontSize: 10.5 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderBottomColor: t.border,
+    },
+    rowIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rowLabel: { color: t.textMuted, fontSize: 12 },
+    rowValue: { fontWeight: '600', color: t.text, fontSize: 14, marginTop: 2 },
+    logoutButton: {
+      backgroundColor: '#FEF2F2',
+      marginHorizontal: 20,
+      borderRadius: 16,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    logoutTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    logoutText: { color: '#DC2626', fontWeight: '700', fontSize: 15 },
+    logoutSubtitle: { color: '#B91C1C', fontSize: 11, marginTop: 4, opacity: 0.8 },
+    deleteAccountButton: {
+      marginHorizontal: 20,
+      marginTop: 12,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    deleteAccountText: { color: '#9CA3AF', fontWeight: '700', fontSize: 14 },
+    deleteAccountSubtitle: { color: '#9CA3AF', fontSize: 11, marginTop: 4, opacity: 0.8 },
+  });

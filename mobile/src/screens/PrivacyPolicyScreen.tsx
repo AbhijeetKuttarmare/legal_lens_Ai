@@ -44,7 +44,7 @@ const SECTIONS = [
   },
   {
     heading: '11. Contact Us',
-    body: 'If you have questions about this policy or your data, contact us at support@legallensai.app.',
+    body: 'If you have questions about this policy or your data, contact us at Support@clauzera.com.',
   },
 ];
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Pressable, Alert } from 'react-native';
 import { Text, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -11,7 +11,7 @@ import axios from 'axios';
 import { MainStackParamList, RootNavigationParamList } from '../navigation/types';
 import { uploadDocument, PickedFile } from '../api/documents';
 import { extractErrorMessage } from '../api/client';
-import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Upload'>;
 
@@ -32,6 +32,8 @@ const LANGUAGES: { code: string; label: string }[] = [
 export default function UploadScreen({ navigation }: Props) {
   const nav = navigation as unknown as NavigationProp<RootNavigationParamList>;
   const queryClient = useQueryClient();
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const [error, setError] = useState<string | null>(null);
   const [statusText, setStatusText] = useState('');
   const [language, setLanguage] = useState('en');
@@ -100,7 +102,7 @@ export default function UploadScreen({ navigation }: Props) {
     return (
       <View style={styles.loadingPage}>
         <View style={styles.loadingIconWrap}>
-          <ActivityIndicator animating size="large" color={GOLD} />
+          <ActivityIndicator animating size="large" color={t.accent} />
         </View>
         <Text style={styles.loadingTitle}>Analyzing your document</Text>
         <Text style={styles.loadingSubtitle}>{statusText}</Text>
@@ -111,7 +113,7 @@ export default function UploadScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.heroIconWrap}>
-        <MaterialCommunityIcons name="file-search-outline" size={36} color={GOLD} />
+        <MaterialCommunityIcons name="file-search-outline" size={36} color={t.accent} />
       </View>
       <Text style={styles.title}>Upload a Document</Text>
       <Text style={styles.subtitle}>
@@ -136,26 +138,26 @@ export default function UploadScreen({ navigation }: Props) {
         })}
       </View>
 
-      <Pressable style={[styles.optionCard, cardShadow]} onPress={pickAndUploadFile}>
-        <View style={[styles.optionIcon, { backgroundColor: NAVY }]}>
-          <MaterialCommunityIcons name="file-pdf-box" size={24} color={GOLD} />
+      <Pressable style={[styles.optionCard, t.cardShadow]} onPress={pickAndUploadFile}>
+        <View style={[styles.optionIcon, { backgroundColor: t.headerBg }]}>
+          <MaterialCommunityIcons name="file-pdf-box" size={24} color={t.accent} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.optionTitle}>Choose PDF / DOCX</Text>
           <Text style={styles.optionSub}>From your files</Text>
         </View>
-        <MaterialCommunityIcons name="chevron-right" size={22} color={TEXT_MUTED} />
+        <MaterialCommunityIcons name="chevron-right" size={22} color={t.textMuted} />
       </Pressable>
 
-      <Pressable style={[styles.optionCard, cardShadow]} onPress={pickAndUploadImage}>
+      <Pressable style={[styles.optionCard, t.cardShadow]} onPress={pickAndUploadImage}>
         <View style={[styles.optionIcon, { backgroundColor: '#FFF7E0' }]}>
-          <MaterialCommunityIcons name="camera-outline" size={24} color={NAVY} />
+          <MaterialCommunityIcons name="camera-outline" size={24} color={t.text} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.optionTitle}>Scan with Camera</Text>
           <Text style={styles.optionSub}>JPG / PNG · Read instantly by Clauzera</Text>
         </View>
-        <MaterialCommunityIcons name="chevron-right" size={22} color={TEXT_MUTED} />
+        <MaterialCommunityIcons name="chevron-right" size={22} color={t.textMuted} />
       </Pressable>
 
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -163,74 +165,75 @@ export default function UploadScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#F4F5F9' },
-  heroIconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 20,
-    backgroundColor: NAVY,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: 12,
-    marginBottom: 20,
-  },
-  title: { textAlign: 'center', fontSize: 20, fontWeight: '700', color: NAVY, marginBottom: 6 },
-  subtitle: { textAlign: 'center', color: TEXT_MUTED, marginBottom: 20, paddingHorizontal: 8 },
-  languageLabel: { color: NAVY, fontWeight: '700', fontSize: 12.5, marginBottom: 10 },
-  languageRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 22,
-  },
-  languageChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  languageChipActive: { backgroundColor: NAVY, borderColor: NAVY },
-  languageChipText: { fontSize: 12.5, fontWeight: '600', color: NAVY },
-  languageChipTextActive: { color: GOLD },
-  optionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    gap: 14,
-  },
-  optionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  optionTitle: { fontWeight: '700', color: NAVY, fontSize: 15 },
-  optionSub: { color: TEXT_MUTED, fontSize: 12, marginTop: 2 },
-  errorText: { color: '#DC2626', marginTop: 16, textAlign: 'center' },
-  loadingPage: {
-    flex: 1,
-    backgroundColor: NAVY,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-  },
-  loadingIconWrap: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: 'rgba(212,175,55,0.14)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  loadingTitle: { color: 'white', fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  loadingSubtitle: { color: '#B7C0D1', textAlign: 'center' },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    container: { flex: 1, padding: 24, backgroundColor: t.bg },
+    heroIconWrap: {
+      width: 72,
+      height: 72,
+      borderRadius: 20,
+      backgroundColor: t.headerBg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      alignSelf: 'center',
+      marginTop: 12,
+      marginBottom: 20,
+    },
+    title: { textAlign: 'center', fontSize: 20, fontWeight: '700', color: t.text, marginBottom: 6 },
+    subtitle: { textAlign: 'center', color: t.textMuted, marginBottom: 20, paddingHorizontal: 8 },
+    languageLabel: { color: t.text, fontWeight: '700', fontSize: 12.5, marginBottom: 10 },
+    languageRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginBottom: 22,
+    },
+    languageChip: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 18,
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+    },
+    languageChipActive: { backgroundColor: t.headerBg, borderColor: t.headerBg },
+    languageChipText: { fontSize: 12.5, fontWeight: '600', color: t.text },
+    languageChipTextActive: { color: t.accent },
+    optionCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 14,
+      gap: 14,
+    },
+    optionIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    optionTitle: { fontWeight: '700', color: t.text, fontSize: 15 },
+    optionSub: { color: t.textMuted, fontSize: 12, marginTop: 2 },
+    errorText: { color: '#DC2626', marginTop: 16, textAlign: 'center' },
+    loadingPage: {
+      flex: 1,
+      backgroundColor: t.headerBg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 32,
+    },
+    loadingIconWrap: {
+      width: 88,
+      height: 88,
+      borderRadius: 44,
+      backgroundColor: 'rgba(212,175,55,0.14)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 24,
+    },
+    loadingTitle: { color: t.textOnHeader, fontSize: 18, fontWeight: '700', marginBottom: 8 },
+    loadingSubtitle: { color: t.textMutedOnHeader, textAlign: 'center' },
+  });

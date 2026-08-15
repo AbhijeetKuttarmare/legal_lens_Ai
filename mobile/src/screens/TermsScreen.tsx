@@ -52,7 +52,7 @@ const SECTIONS = [
   },
   {
     heading: '13. Contact Us',
-    body: 'Questions about these terms can be sent to support@legallensai.app.',
+    body: 'Questions about these terms can be sent to Support@clauzera.com.',
   },
 ];
 

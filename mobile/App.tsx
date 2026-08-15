@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from './src/store/store';
-import { theme } from './src/theme/theme';
+import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
 const queryClient = new QueryClient({
@@ -20,15 +20,27 @@ const paperSettings = {
   ),
 };
 
+function ThemedApp() {
+  const t = useAppTheme();
+  return (
+    <PaperProvider theme={t.paper} settings={paperSettings}>
+      {/* Header/hero blocks stay dark navy at the top of nearly every screen
+          in both theme modes, so light (white) status bar icons are always
+          the right contrast choice here — this isn't theme-reactive. */}
+      <StatusBar style="light" />
+      <RootNavigator />
+    </PaperProvider>
+  );
+}
+
 export default function App() {
   return (
     <ReduxProvider store={store}>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
-          <PaperProvider theme={theme} settings={paperSettings}>
-            <StatusBar style="light" />
-            <RootNavigator />
-          </PaperProvider>
+          <ThemeProvider>
+            <ThemedApp />
+          </ThemeProvider>
         </SafeAreaProvider>
       </QueryClientProvider>
     </ReduxProvider>

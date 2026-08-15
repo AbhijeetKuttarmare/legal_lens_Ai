@@ -20,17 +20,23 @@ import { extractErrorMessage } from '../api/client';
 import { persistSession } from '../auth/session';
 import { useAppDispatch } from '../store/hooks';
 import { setAuthenticated } from '../store/authSlice';
+import { useAppTheme } from '../theme/ThemeContext';
 
 const LOGO = require('../../assets/icon-glyph.png');
 
+// This screen's gradient hero + white card are a fixed brand treatment
+// (like web's .cw-auth-page/.cw-auth-card) — intentionally not part of the
+// dark/light toggle. Only the accent color (GOLD below) follows the user's
+// theme customization, since it's chosen independently of light/dark mode.
 const NAVY = '#0B1220';
-const GOLD = '#B08D57';
 
 type Step = 'phone' | 'otp';
 
 export default function PhoneAuthScreen() {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+  const t = useAppTheme();
+  const GOLD = t.accent;
   const { width } = useWindowDimensions();
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
@@ -162,6 +168,7 @@ export default function PhoneAuthScreen() {
                   style={[
                     styles.phoneRow,
                     phoneFocused && styles.phoneRowFocused,
+                    phoneFocused && { borderColor: GOLD },
                   ]}
                 >
                   <Text style={styles.countryCode}>🇮🇳 +91</Text>
@@ -404,7 +411,6 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   phoneRowFocused: {
-    borderColor: GOLD,
     backgroundColor: 'white',
   },
   countryCode: { fontSize: 15, fontWeight: '700', color: NAVY },

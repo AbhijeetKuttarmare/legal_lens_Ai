@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, FlatList, Alert, Pressable } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootNavigationParamList } from '../navigation/types';
 import { deleteDocument, listDocuments } from '../api/documents';
 import { extractErrorMessage } from '../api/client';
-import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 import { useAppSelector } from '../store/hooks';
 import { DocumentSummary } from '../api/types';
 
@@ -15,7 +15,7 @@ interface Props {
   navigation: NavigationProp<RootNavigationParamList>;
 }
 
-function fileTypeMeta(fileType: string) {
+function fileTypeMeta(fileType: string, defaultColor: string) {
   if (fileType === 'application/pdf') {
     return { icon: 'file-pdf-box' as const, bg: '#FEE2E2', color: '#DC2626' };
   }
@@ -25,7 +25,7 @@ function fileTypeMeta(fileType: string) {
   if (fileType.startsWith('image/')) {
     return { icon: 'file-image' as const, bg: '#DCFCE7', color: '#16A34A' };
   }
-  return { icon: 'file-document-outline' as const, bg: '#EEF1F6', color: NAVY };
+  return { icon: 'file-document-outline' as const, bg: '#EEF1F6', color: defaultColor };
 }
 
 function statusMeta(status: DocumentSummary['status']) {
@@ -38,6 +38,8 @@ const comingSoon = (title: string, message: string) => Alert.alert(title, messag
 
 export default function HomeScreen({ navigation }: Props) {
   const user = useAppSelector((s) => s.auth.user);
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const queryClient = useQueryClient();
   const { data: documents, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['documents'],
@@ -86,9 +88,9 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={styles.topBar}>
             <View style={styles.topBarSpacer} />
             <View style={styles.brand}>
-              <MaterialCommunityIcons name="text-box-search-outline" size={20} color={GOLD} />
+              <MaterialCommunityIcons name="text-box-search-outline" size={20} color={t.accent} />
               <Text style={styles.brandTitle}>
-                Clauzera <Text style={{ color: GOLD }}>AI</Text>
+                Clauzera <Text style={{ color: t.accent }}>AI</Text>
               </Text>
               <Text style={styles.brandTagline}>Understand. Analyze. Empower.</Text>
             </View>
@@ -97,7 +99,7 @@ export default function HomeScreen({ navigation }: Props) {
               style={styles.bellWrap}
               onPress={() => comingSoon('Notifications', 'No new notifications.')}
             >
-              <MaterialCommunityIcons name="bell-outline" size={24} color={NAVY} />
+              <MaterialCommunityIcons name="bell-outline" size={24} color={t.text} />
               <View style={styles.bellDot} />
             </Pressable>
           </View>
@@ -114,7 +116,7 @@ export default function HomeScreen({ navigation }: Props) {
               Upload any legal document and get Clauzera-powered insights in seconds.
             </Text>
             <Pressable style={styles.scanButton} onPress={() => navigation.navigate('Upload')}>
-              <MaterialCommunityIcons name="tray-arrow-up" size={20} color={NAVY} />
+              <MaterialCommunityIcons name="tray-arrow-up" size={20} color={t.onAccent} />
               <Text style={styles.scanButtonText}>Scan Document</Text>
             </Pressable>
             <Text style={styles.heroCaption}>Supports PDF, DOCX · Max 20MB</Text>
@@ -126,36 +128,48 @@ export default function HomeScreen({ navigation }: Props) {
 
           <View style={styles.actionsGrid}>
             <QuickAction
+              t={t}
+              styles={styles}
               icon="file-document-outline"
               title="Analyze Document"
               subtitle="Get Clauzera insights and summaries"
               onPress={() => navigation.navigate('Upload')}
             />
             <QuickAction
+              t={t}
+              styles={styles}
               icon="chat-question-outline"
               title="Ask Legal Question"
               subtitle="Chat about one of your documents"
               onPress={() => navigation.navigate('History')}
             />
             <QuickAction
+              t={t}
+              styles={styles}
               icon="folder-multiple-outline"
               title="My Documents"
               subtitle="View all analyzed documents"
               onPress={() => navigation.navigate('History')}
             />
             <QuickAction
+              t={t}
+              styles={styles}
               icon="crown-outline"
               title="Subscription"
               subtitle="Manage your plan"
               onPress={() => navigation.navigate('Subscription')}
             />
             <QuickAction
+              t={t}
+              styles={styles}
               icon="file-compare"
               title="Compare Documents"
               subtitle="See two documents side by side"
               onPress={() => navigation.navigate('Compare')}
             />
             <QuickAction
+              t={t}
+              styles={styles}
               icon="file-outline"
               title="Templates"
               subtitle="Generate a draft document"
@@ -164,7 +178,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
 
           <Pressable
-            style={[styles.insightsBanner, cardShadow]}
+            style={[styles.insightsBanner, t.cardShadow]}
             onPress={() =>
               comingSoon(
                 'Clauzera-Powered Insights',
@@ -173,7 +187,7 @@ export default function HomeScreen({ navigation }: Props) {
             }
           >
             <View style={styles.insightsIcon}>
-              <MaterialCommunityIcons name="shield-check-outline" size={22} color={NAVY} />
+              <MaterialCommunityIcons name="shield-check-outline" size={22} color={t.text} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.insightsTitle}>Clauzera-Powered Insights</Text>
@@ -181,7 +195,7 @@ export default function HomeScreen({ navigation }: Props) {
                 Highlights key points, risks and clauses from your documents.
               </Text>
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={20} color={TEXT_MUTED} />
+            <MaterialCommunityIcons name="chevron-right" size={20} color={t.textMuted} />
           </Pressable>
 
           <View style={styles.rowBetween}>
@@ -195,17 +209,17 @@ export default function HomeScreen({ navigation }: Props) {
       ListEmptyComponent={
         !isLoading ? (
           <View style={styles.emptyState}>
-            <MaterialCommunityIcons name="file-search-outline" size={40} color={TEXT_MUTED} />
+            <MaterialCommunityIcons name="file-search-outline" size={40} color={t.textMuted} />
             <Text style={styles.emptyText}>No documents yet. Scan your first one above.</Text>
           </View>
         ) : null
       }
       renderItem={({ item }: { item: DocumentSummary }) => {
-        const file = fileTypeMeta(item.fileType);
+        const file = fileTypeMeta(item.fileType, t.text);
         const status = statusMeta(item.status);
         return (
           <Pressable
-            style={[styles.docCard, cardShadow]}
+            style={[styles.docCard, t.cardShadow]}
             onPress={() => navigation.navigate('Report', { documentId: item.id })}
           >
             <View style={[styles.docIconWrap, { backgroundColor: file.bg }]}>
@@ -229,7 +243,7 @@ export default function HomeScreen({ navigation }: Props) {
                 })}
               </Text>
               <Pressable hitSlop={8} onPress={() => openDocumentActions(item)}>
-                <MaterialCommunityIcons name="dots-vertical" size={18} color={TEXT_MUTED} />
+                <MaterialCommunityIcons name="dots-vertical" size={18} color={t.textMuted} />
               </Pressable>
             </View>
           </Pressable>
@@ -241,20 +255,24 @@ export default function HomeScreen({ navigation }: Props) {
 }
 
 function QuickAction({
+  t,
+  styles,
   icon,
   title,
   subtitle,
   onPress,
 }: {
+  t: AppTheme;
+  styles: ReturnType<typeof makeStyles>;
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
   title: string;
   subtitle: string;
   onPress: () => void;
 }) {
   return (
-    <Pressable style={[styles.actionCard, cardShadow]} onPress={onPress}>
+    <Pressable style={[styles.actionCard, t.cardShadow]} onPress={onPress}>
       <View style={styles.actionIcon}>
-        <MaterialCommunityIcons name={icon} size={22} color={NAVY} />
+        <MaterialCommunityIcons name={icon} size={22} color={t.text} />
       </View>
       <Text style={styles.actionTitle}>{title}</Text>
       <Text style={styles.actionSubtitle}>{subtitle}</Text>
@@ -262,129 +280,130 @@ function QuickAction({
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  topBarSpacer: { width: 26 },
-  brand: { alignItems: 'center' },
-  brandTitle: { fontWeight: '800', fontSize: 17, color: NAVY },
-  brandTagline: { fontSize: 10, color: TEXT_MUTED, marginTop: 1 },
-  bellWrap: { padding: 2 },
-  bellDot: {
-    position: 'absolute',
-    top: 1,
-    right: 1,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: GOLD,
-  },
-  hero: {
-    backgroundColor: NAVY,
-    borderRadius: 24,
-    marginHorizontal: 20,
-    marginTop: 12,
-    padding: 22,
-    overflow: 'hidden',
-  },
-  heroDecoration: { position: 'absolute', right: -10, top: 10 },
-  heroGreeting: { color: 'white', fontSize: 20, fontWeight: '700' },
-  heroSubtitle: { color: '#B7C0D1', marginTop: 8, maxWidth: '85%', lineHeight: 19 },
-  scanButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: GOLD,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginTop: 18,
-  },
-  scanButtonText: { color: NAVY, fontWeight: '700', fontSize: 14 },
-  heroCaption: { color: '#8D97A8', fontSize: 11, marginTop: 10 },
-  rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  sectionTitle: { fontWeight: '700', fontSize: 16, color: NAVY },
-  seeAll: { color: GOLD, fontWeight: '600' },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  actionCard: {
-    width: '47%',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 14,
-  },
-  actionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#EEF1F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  actionTitle: { fontWeight: '700', color: NAVY, fontSize: 13.5 },
-  actionSubtitle: { color: TEXT_MUTED, fontSize: 11.5, marginTop: 3 },
-  insightsBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 16,
-  },
-  insightsIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#FFF7E0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  insightsTitle: { fontWeight: '700', color: NAVY, fontSize: 14 },
-  insightsSubtitle: { color: TEXT_MUTED, fontSize: 11.5, marginTop: 2 },
-  docCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 14,
-    marginHorizontal: 20,
-    marginBottom: 12,
-    gap: 12,
-  },
-  docIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  docName: { fontWeight: '700', color: NAVY, fontSize: 14 },
-  docStatusRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  docStatusText: { fontSize: 12, fontWeight: '600' },
-  docMetaCol: { alignItems: 'flex-end', gap: 8 },
-  docDate: { color: TEXT_MUTED, fontSize: 11 },
-  emptyState: { alignItems: 'center', paddingVertical: 40, paddingHorizontal: 20 },
-  emptyText: { color: TEXT_MUTED, marginTop: 12, textAlign: 'center' },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    topBar: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 8,
+    },
+    topBarSpacer: { width: 26 },
+    brand: { alignItems: 'center' },
+    brandTitle: { fontWeight: '800', fontSize: 17, color: t.text },
+    brandTagline: { fontSize: 10, color: t.textMuted, marginTop: 1 },
+    bellWrap: { padding: 2 },
+    bellDot: {
+      position: 'absolute',
+      top: 1,
+      right: 1,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: t.accent,
+    },
+    hero: {
+      backgroundColor: t.headerBg,
+      borderRadius: 24,
+      marginHorizontal: 20,
+      marginTop: 12,
+      padding: 22,
+      overflow: 'hidden',
+    },
+    heroDecoration: { position: 'absolute', right: -10, top: 10 },
+    heroGreeting: { color: t.textOnHeader, fontSize: 20, fontWeight: '700' },
+    heroSubtitle: { color: t.textMutedOnHeader, marginTop: 8, maxWidth: '85%', lineHeight: 19 },
+    scanButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: t.buttonColor,
+      alignSelf: 'flex-start',
+      paddingHorizontal: 18,
+      paddingVertical: 12,
+      borderRadius: 12,
+      marginTop: 18,
+    },
+    scanButtonText: { color: t.onAccent, fontWeight: '700', fontSize: 14 },
+    heroCaption: { color: t.textMutedOnHeader, fontSize: 11, marginTop: 10 },
+    rowBetween: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      marginTop: 24,
+      marginBottom: 12,
+    },
+    sectionTitle: { fontWeight: '700', fontSize: 16, color: t.text },
+    seeAll: { color: t.accent, fontWeight: '600' },
+    actionsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      paddingHorizontal: 20,
+      gap: 12,
+    },
+    actionCard: {
+      width: '47%',
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      padding: 14,
+    },
+    actionIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: t.surfaceAlt,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 10,
+    },
+    actionTitle: { fontWeight: '700', color: t.text, fontSize: 13.5 },
+    actionSubtitle: { color: t.textMuted, fontSize: 11.5, marginTop: 3 },
+    insightsBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      marginHorizontal: 20,
+      marginTop: 20,
+      padding: 16,
+    },
+    insightsIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      backgroundColor: '#FFF7E0',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    insightsTitle: { fontWeight: '700', color: t.text, fontSize: 14 },
+    insightsSubtitle: { color: t.textMuted, fontSize: 11.5, marginTop: 2 },
+    docCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      padding: 14,
+      marginHorizontal: 20,
+      marginBottom: 12,
+      gap: 12,
+    },
+    docIconWrap: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    docName: { fontWeight: '700', color: t.text, fontSize: 14 },
+    docStatusRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+    docStatusText: { fontSize: 12, fontWeight: '600' },
+    docMetaCol: { alignItems: 'flex-end', gap: 8 },
+    docDate: { color: t.textMuted, fontSize: 11 },
+    emptyState: { alignItems: 'center', paddingVertical: 40, paddingHorizontal: 20 },
+    emptyText: { color: t.textMuted, marginTop: 12, textAlign: 'center' },
+  });

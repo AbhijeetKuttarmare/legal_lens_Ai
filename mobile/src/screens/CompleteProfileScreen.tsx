@@ -8,15 +8,19 @@ import { useAppDispatch } from '../store/hooks';
 import { setAuthenticated } from '../store/authSlice';
 import { TOKEN_KEY } from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppTheme } from '../theme/ThemeContext';
 
 const LOGO = require('../../assets/Logo.png');
+// Fixed brand chrome (navy page, white card), matching PhoneAuthScreen —
+// intentionally not part of the dark/light toggle. Only the primary
+// button's color follows the user's theme customization.
 const NAVY = '#0B1220';
-const GOLD = '#B08D57';
 
 type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
 export default function CompleteProfileScreen() {
   const dispatch = useAppDispatch();
+  const t = useAppTheme();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [gender, setGender] = useState<Gender>('MALE');
@@ -154,7 +158,7 @@ export default function CompleteProfileScreen() {
 
         <Button
           mode="contained"
-          buttonColor={GOLD}
+          buttonColor={t.buttonColor}
           textColor={NAVY}
           style={styles.primaryButton}
           contentStyle={styles.primaryButtonContent}

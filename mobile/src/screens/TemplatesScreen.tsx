@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { ActivityIndicator, Text, TextInput, Button, Checkbox } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { listTemplateTypes, generateTemplate } from '../api/templates';
 import { extractErrorMessage } from '../api/client';
 import { TemplateTypeOption } from '../api/types';
-import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 import { useAppSelector } from '../store/hooks';
 import UpgradeGate from '../components/UpgradeGate';
 
@@ -72,6 +72,8 @@ function escapeHtml(s: string): string {
 export default function TemplatesScreen() {
   const user = useAppSelector((s) => s.auth.user);
   const isPaid = user?.plan === 'PRO' || user?.plan === 'ENTERPRISE';
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const [types, setTypes] = useState<TemplateTypeOption[] | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -113,7 +115,7 @@ export default function TemplatesScreen() {
 
   const onDownload = async () => {
     if (!content) return;
-    const label = types?.find((t) => t.key === selectedType)?.label || 'Document';
+    const label = types?.find((t2) => t2.key === selectedType)?.label || 'Document';
     setExporting(true);
     try {
       const html = `<html><head><meta charset="utf-8" /></head><body style="font-family:-apple-system,Helvetica,Arial,sans-serif;padding:32px;color:#111827;white-space:pre-wrap;line-height:1.6;font-size:13px;"><h2 style="color:#0B1220;">${escapeHtml(
@@ -151,7 +153,7 @@ export default function TemplatesScreen() {
   if (types === null) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={NAVY} />
+        <ActivityIndicator size="large" color={t.text} />
       </View>
     );
   }
@@ -176,12 +178,12 @@ export default function TemplatesScreen() {
 
       {!selectedType && (
         <View style={styles.typeGrid}>
-          {types.map((t) => (
-            <Pressable key={t.key} style={[styles.typeCard, cardShadow]} onPress={() => selectType(t.key)}>
+          {types.map((tt) => (
+            <Pressable key={tt.key} style={[styles.typeCard, t.cardShadow]} onPress={() => selectType(tt.key)}>
               <View style={styles.typeIcon}>
-                <MaterialCommunityIcons name="file-document-outline" size={22} color={NAVY} />
+                <MaterialCommunityIcons name="file-document-outline" size={22} color={t.text} />
               </View>
-              <Text style={styles.typeTitle}>{t.label}</Text>
+              <Text style={styles.typeTitle}>{tt.label}</Text>
               <Text style={styles.typeSub}>Generate a draft</Text>
             </Pressable>
           ))}
@@ -189,7 +191,7 @@ export default function TemplatesScreen() {
       )}
 
       {selectedType && !content && (
-        <View style={[styles.formCard, cardShadow]}>
+        <View style={[styles.formCard, t.cardShadow]}>
           <Pressable onPress={() => selectType('')}>
             <Text style={styles.backLink}>← Choose a different template</Text>
           </Pressable>
@@ -199,13 +201,13 @@ export default function TemplatesScreen() {
               mode="outlined"
               label={label}
               style={styles.input}
-              activeOutlineColor={NAVY}
+              activeOutlineColor={t.text}
               value={fields[label] || ''}
               onChangeText={(v) => setFields((f) => ({ ...f, [label]: v }))}
             />
           ))}
           <Pressable style={styles.consentRow} onPress={() => setConsent((c) => !c)}>
-            <Checkbox status={consent ? 'checked' : 'unchecked'} color={NAVY} onPress={() => setConsent((c) => !c)} />
+            <Checkbox status={consent ? 'checked' : 'unchecked'} color={t.text} onPress={() => setConsent((c) => !c)} />
             <Text style={styles.consentText}>
               I understand this is a Clauzera-generated draft, not legal advice, and I will have it reviewed by a
               qualified lawyer before signing or using it.
@@ -213,8 +215,8 @@ export default function TemplatesScreen() {
           </Pressable>
           <Button
             mode="contained"
-            buttonColor={GOLD}
-            textColor={NAVY}
+            buttonColor={t.buttonColor}
+            textColor={t.onAccent}
             style={styles.generateButton}
             onPress={onGenerate}
             loading={loading}
@@ -226,12 +228,12 @@ export default function TemplatesScreen() {
       )}
 
       {content && (
-        <View style={[styles.formCard, cardShadow]}>
+        <View style={[styles.formCard, t.cardShadow]}>
           <Text style={styles.contentText}>{content}</Text>
           <Button
             mode="contained"
-            buttonColor={GOLD}
-            textColor={NAVY}
+            buttonColor={t.buttonColor}
+            textColor={t.onAccent}
             style={styles.generateButton}
             onPress={onDownload}
             loading={exporting}
@@ -239,7 +241,7 @@ export default function TemplatesScreen() {
           >
             Download as PDF
           </Button>
-          <Button mode="outlined" textColor={NAVY} style={{ marginTop: 10, borderRadius: 10 }} onPress={() => setContent(null)}>
+          <Button mode="outlined" textColor={t.text} style={{ marginTop: 10, borderRadius: 10 }} onPress={() => setContent(null)}>
             Edit Details
           </Button>
         </View>
@@ -248,40 +250,41 @@ export default function TemplatesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F4F5F9' },
-  subtitle: { color: TEXT_MUTED, fontSize: 13, lineHeight: 19, marginBottom: 16 },
-  warningBanner: {
-    flexDirection: 'row',
-    gap: 10,
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
-  },
-  warningText: { flex: 1, color: '#92400E', fontSize: 12, lineHeight: 17 },
-  errorText: { color: '#DC2626', marginBottom: 14, fontSize: 12.5 },
-  typeGrid: { gap: 12 },
-  typeCard: { backgroundColor: 'white', borderRadius: 16, padding: 16 },
-  typeIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#EEF1F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  typeTitle: { fontWeight: '700', color: NAVY, fontSize: 14.5 },
-  typeSub: { color: TEXT_MUTED, fontSize: 12, marginTop: 3 },
-  formCard: { backgroundColor: 'white', borderRadius: 16, padding: 18 },
-  backLink: { color: NAVY, fontWeight: '600', fontSize: 12.5, marginBottom: 14 },
-  input: { marginBottom: 12, backgroundColor: 'white' },
-  consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 4, marginBottom: 6 },
-  consentText: { flex: 1, color: TEXT_MUTED, fontSize: 12, lineHeight: 17, marginTop: 10 },
-  generateButton: { marginTop: 6, borderRadius: 10 },
-  contentText: { color: '#1F2937', fontSize: 13, lineHeight: 20, marginBottom: 18 },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: t.bg },
+    subtitle: { color: t.textMuted, fontSize: 13, lineHeight: 19, marginBottom: 16 },
+    warningBanner: {
+      flexDirection: 'row',
+      gap: 10,
+      backgroundColor: '#FEF3C7',
+      borderWidth: 1,
+      borderColor: '#FDE68A',
+      borderRadius: 12,
+      padding: 14,
+      marginBottom: 20,
+    },
+    warningText: { flex: 1, color: '#92400E', fontSize: 12, lineHeight: 17 },
+    errorText: { color: '#DC2626', marginBottom: 14, fontSize: 12.5 },
+    typeGrid: { gap: 12 },
+    typeCard: { backgroundColor: t.surface, borderRadius: 16, padding: 16 },
+    typeIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: t.surfaceAlt,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 10,
+    },
+    typeTitle: { fontWeight: '700', color: t.text, fontSize: 14.5 },
+    typeSub: { color: t.textMuted, fontSize: 12, marginTop: 3 },
+    formCard: { backgroundColor: t.surface, borderRadius: 16, padding: 18 },
+    backLink: { color: t.text, fontWeight: '600', fontSize: 12.5, marginBottom: 14 },
+    input: { marginBottom: 12, backgroundColor: t.surface },
+    consentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 4, marginBottom: 6 },
+    consentText: { flex: 1, color: t.textMuted, fontSize: 12, lineHeight: 17, marginTop: 10 },
+    generateButton: { marginTop: 6, borderRadius: 10 },
+    contentText: { color: t.bodyText, fontSize: 13, lineHeight: 20, marginBottom: 18 },
+  });

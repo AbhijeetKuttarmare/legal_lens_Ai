@@ -7,7 +7,7 @@ import { NavigationProp } from '@react-navigation/native';
 import { RootNavigationParamList } from '../navigation/types';
 import { deleteDocument, listDocuments } from '../api/documents';
 import { extractErrorMessage } from '../api/client';
-import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 import { DocumentSummary } from '../api/types';
 
 interface Props {
@@ -23,13 +23,13 @@ const FILTERS: { key: FilterKey; label: string; icon: keyof typeof MaterialCommu
   { key: 'PENDING', label: 'Processing', icon: 'progress-clock' },
 ];
 
-function fileTypeMeta(fileType: string) {
+function fileTypeMeta(fileType: string, defaultColor: string) {
   if (fileType === 'application/pdf') return { icon: 'file-pdf-box' as const, bg: '#FEE2E2', color: '#DC2626', label: 'PDF' };
   if (fileType.includes('wordprocessingml')) return { icon: 'file-word-box' as const, bg: '#DBEAFE', color: '#2563EB', label: 'DOCX' };
   if (fileType.includes('spreadsheetml')) return { icon: 'file-excel-box' as const, bg: '#DCFCE7', color: '#16A34A', label: 'XLSX' };
   if (fileType.includes('presentationml')) return { icon: 'file-powerpoint-box' as const, bg: '#FFEDD5', color: '#EA580C', label: 'PPTX' };
   if (fileType.startsWith('image/')) return { icon: 'file-image' as const, bg: '#DCFCE7', color: '#16A34A', label: 'IMG' };
-  return { icon: 'file-document-outline' as const, bg: '#EEF1F6', color: NAVY, label: 'DOC' };
+  return { icon: 'file-document-outline' as const, bg: '#EEF1F6', color: defaultColor, label: 'DOC' };
 }
 
 function statusPill(status: DocumentSummary['status']) {
@@ -48,6 +48,8 @@ const SORT_LABELS: Record<SortKey, string> = {
 
 export default function HistoryScreen({ navigation }: Props) {
   const queryClient = useQueryClient();
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const [filter, setFilter] = useState<FilterKey>('ALL');
   const [sortKey, setSortKey] = useState<SortKey>('newest');
   const [searchVisible, setSearchVisible] = useState(false);
@@ -122,7 +124,7 @@ export default function HistoryScreen({ navigation }: Props) {
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color={NAVY} />
+        <ActivityIndicator size="large" color={t.text} />
       </View>
     );
   }
@@ -148,20 +150,20 @@ export default function HistoryScreen({ navigation }: Props) {
                 if (searchVisible) setSearchQuery('');
               }}
             >
-              <MaterialCommunityIcons name={searchVisible ? 'close' : 'magnify'} size={20} color={NAVY} />
+              <MaterialCommunityIcons name={searchVisible ? 'close' : 'magnify'} size={20} color={t.text} />
             </Pressable>
             <Pressable style={styles.iconButton} onPress={openSortPicker}>
-              <MaterialCommunityIcons name="tune-variant" size={20} color={NAVY} />
+              <MaterialCommunityIcons name="tune-variant" size={20} color={t.text} />
             </Pressable>
           </View>
 
           {searchVisible && (
             <View style={styles.searchRow}>
-              <MaterialCommunityIcons name="magnify" size={18} color={TEXT_MUTED} />
+              <MaterialCommunityIcons name="magnify" size={18} color={t.textMuted} />
               <RNTextInput
                 style={styles.searchInput}
                 placeholder="Search by file name..."
-                placeholderTextColor={TEXT_MUTED}
+                placeholderTextColor={t.textMuted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 autoFocus
@@ -185,9 +187,9 @@ export default function HistoryScreen({ navigation }: Props) {
                   <MaterialCommunityIcons
                     name={item.icon}
                     size={15}
-                    color={active ? 'white' : NAVY}
+                    color={active ? t.textOnHeader : t.text}
                   />
-                  <Text style={[styles.filterChipText, active && { color: 'white' }]}>
+                  <Text style={[styles.filterChipText, active && { color: t.textOnHeader }]}>
                     {item.label}
                   </Text>
                 </Pressable>
@@ -195,14 +197,14 @@ export default function HistoryScreen({ navigation }: Props) {
             }}
           />
 
-          <View style={[styles.statsCard, cardShadow]}>
-            <StatItem icon="file-document-outline" iconBg="#DBEAFE" iconColor="#2563EB" value={stats.total} label="Total" />
+          <View style={[styles.statsCard, t.cardShadow]}>
+            <StatItem styles={styles} icon="file-document-outline" iconBg="#DBEAFE" iconColor="#2563EB" value={stats.total} label="Total" />
             <View style={styles.statDivider} />
-            <StatItem icon="check-circle" iconBg="#DCFCE7" iconColor="#16A34A" value={stats.ready} label="Analyzed" />
+            <StatItem styles={styles} icon="check-circle" iconBg="#DCFCE7" iconColor="#16A34A" value={stats.ready} label="Analyzed" />
             <View style={styles.statDivider} />
-            <StatItem icon="alert-circle" iconBg="#FEE2E2" iconColor="#DC2626" value={stats.failed} label="Failed" />
+            <StatItem styles={styles} icon="alert-circle" iconBg="#FEE2E2" iconColor="#DC2626" value={stats.failed} label="Failed" />
             <View style={styles.statDivider} />
-            <StatItem icon="progress-clock" iconBg="#FEF3C7" iconColor="#D97706" value={stats.pending} label="Pending" />
+            <StatItem styles={styles} icon="progress-clock" iconBg="#FEF3C7" iconColor="#D97706" value={stats.pending} label="Pending" />
           </View>
 
           <View style={styles.rowBetween}>
@@ -215,17 +217,17 @@ export default function HistoryScreen({ navigation }: Props) {
       }
       ListEmptyComponent={
         <View style={styles.emptyState}>
-          <MaterialCommunityIcons name="folder-search-outline" size={40} color={TEXT_MUTED} />
+          <MaterialCommunityIcons name="folder-search-outline" size={40} color={t.textMuted} />
           <Text style={styles.emptyText}>No documents in this filter yet.</Text>
         </View>
       }
       renderItem={({ item }) => {
-        const file = fileTypeMeta(item.fileType);
+        const file = fileTypeMeta(item.fileType, t.text);
         const status = statusPill(item.status);
         const created = new Date(item.createdAt);
         return (
           <Pressable
-            style={[styles.card, cardShadow]}
+            style={[styles.card, t.cardShadow]}
             onPress={() => navigation.navigate('Report', { documentId: item.id })}
           >
             <View style={[styles.iconWrap, { backgroundColor: file.bg }]}>
@@ -240,7 +242,7 @@ export default function HistoryScreen({ navigation }: Props) {
                 <Text style={styles.typeLabel}>{item.documentType.replace(/_/g, ' ')}</Text>
               )}
               <View style={styles.dateRow}>
-                <MaterialCommunityIcons name="calendar-blank-outline" size={12} color={TEXT_MUTED} />
+                <MaterialCommunityIcons name="calendar-blank-outline" size={12} color={t.textMuted} />
                 <Text style={styles.dateText}>
                   {created.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
                   {' · '}
@@ -254,7 +256,7 @@ export default function HistoryScreen({ navigation }: Props) {
                 <MaterialCommunityIcons name={status.icon} size={13} color={status.color} />
               </View>
               <Pressable hitSlop={8} onPress={() => openDocumentActions(item)}>
-                <MaterialCommunityIcons name="dots-vertical" size={18} color={TEXT_MUTED} />
+                <MaterialCommunityIcons name="dots-vertical" size={18} color={t.textMuted} />
               </Pressable>
             </View>
           </Pressable>
@@ -262,9 +264,9 @@ export default function HistoryScreen({ navigation }: Props) {
       }}
       ListFooterComponent={
         (filtered?.length || 0) > 0 ? (
-          <View style={[styles.trustBanner, cardShadow]}>
+          <View style={[styles.trustBanner, t.cardShadow]}>
             <View style={styles.trustIcon}>
-              <MaterialCommunityIcons name="shield-lock-outline" size={22} color={GOLD} />
+              <MaterialCommunityIcons name="shield-lock-outline" size={22} color={t.accent} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.trustTitle}>Your documents are safe and secure</Text>
@@ -281,12 +283,14 @@ export default function HistoryScreen({ navigation }: Props) {
 }
 
 function StatItem({
+  styles,
   icon,
   iconBg,
   iconColor,
   value,
   label,
 }: {
+  styles: ReturnType<typeof makeStyles>;
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
   iconBg: string;
   iconColor: string;
@@ -304,118 +308,119 @@ function StatItem({
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F4F5F9' },
-  header: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 16 },
-  title: { fontWeight: '800', fontSize: 24, color: NAVY },
-  subtitle: { color: TEXT_MUTED, fontSize: 12, marginTop: 2 },
-  iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  searchInput: { flex: 1, paddingVertical: 10, color: NAVY, fontSize: 14 },
-  filterRow: { gap: 8, paddingBottom: 16 },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 20,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  filterChipActive: { backgroundColor: NAVY, borderColor: NAVY },
-  filterChipText: { fontSize: 12.5, fontWeight: '600', color: NAVY },
-  statsCard: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginBottom: 20,
-  },
-  statItem: { flex: 1, alignItems: 'center' },
-  statDivider: { width: 1, backgroundColor: '#EEF1F6' },
-  statIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  statValue: { fontWeight: '800', fontSize: 18, color: NAVY },
-  statLabel: { color: TEXT_MUTED, fontSize: 11, marginTop: 2 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { fontWeight: '700', fontSize: 16, color: NAVY },
-  sortText: { color: TEXT_MUTED, fontSize: 11.5 },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
-    gap: 12,
-  },
-  iconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconLabel: { fontSize: 8, fontWeight: '800', marginTop: 1 },
-  name: { fontWeight: '700', color: NAVY, fontSize: 14 },
-  typeLabel: { color: TEXT_MUTED, fontSize: 10.5, marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.3 },
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  dateText: { color: TEXT_MUTED, fontSize: 11 },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  statusPillText: { fontSize: 11, fontWeight: '700' },
-  trustBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 8,
-  },
-  trustIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: NAVY,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  trustTitle: { fontWeight: '700', color: NAVY, fontSize: 13.5 },
-  trustSubtitle: { color: TEXT_MUTED, fontSize: 11.5, marginTop: 2 },
-  emptyState: { alignItems: 'center', paddingVertical: 60 },
-  emptyText: { color: TEXT_MUTED, marginTop: 12 },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: t.bg },
+    header: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 16 },
+    title: { fontWeight: '800', fontSize: 24, color: t.text },
+    subtitle: { color: t.textMuted, fontSize: 12, marginTop: 2 },
+    iconButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: t.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    searchRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: t.surface,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 4,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: t.border,
+    },
+    searchInput: { flex: 1, paddingVertical: 10, color: t.text, fontSize: 14 },
+    filterRow: { gap: 8, paddingBottom: 16 },
+    filterChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+      borderRadius: 20,
+      backgroundColor: t.surface,
+      borderWidth: 1,
+      borderColor: t.border,
+    },
+    filterChipActive: { backgroundColor: t.headerBg, borderColor: t.headerBg },
+    filterChipText: { fontSize: 12.5, fontWeight: '600', color: t.text },
+    statsCard: {
+      flexDirection: 'row',
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      paddingVertical: 16,
+      marginBottom: 20,
+    },
+    statItem: { flex: 1, alignItems: 'center' },
+    statDivider: { width: 1, backgroundColor: t.surfaceAlt },
+    statIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 6,
+    },
+    statValue: { fontWeight: '800', fontSize: 18, color: t.text },
+    statLabel: { color: t.textMuted, fontSize: 11, marginTop: 2 },
+    rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    sectionTitle: { fontWeight: '700', fontSize: 16, color: t.text },
+    sortText: { color: t.textMuted, fontSize: 11.5 },
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      padding: 14,
+      marginBottom: 12,
+      gap: 12,
+    },
+    iconWrap: {
+      width: 48,
+      height: 48,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    iconLabel: { fontSize: 8, fontWeight: '800', marginTop: 1 },
+    name: { fontWeight: '700', color: t.text, fontSize: 14 },
+    typeLabel: { color: t.textMuted, fontSize: 10.5, marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.3 },
+    dateRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
+    dateText: { color: t.textMuted, fontSize: 11 },
+    statusPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 12,
+    },
+    statusPillText: { fontSize: 11, fontWeight: '700' },
+    trustBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      padding: 16,
+      marginTop: 8,
+    },
+    trustIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      backgroundColor: t.headerBg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    trustTitle: { fontWeight: '700', color: t.text, fontSize: 13.5 },
+    trustSubtitle: { color: t.textMuted, fontSize: 11.5, marginTop: 2 },
+    emptyState: { alignItems: 'center', paddingVertical: 60 },
+    emptyText: { color: t.textMuted, marginTop: 12 },
+  });

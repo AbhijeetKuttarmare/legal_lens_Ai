@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "LegalLens AI",
+    "name": "Clauzera AI",
     "slug": "legallens-ai",
     "owner": "rakshandakumar2027s-team",
     "version": "1.0.0",
@@ -8,8 +8,8 @@
     "icon": "./assets/icon-glyph.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/SplashscreenAI.png",
-      "resizeMode": "cover",
+      "image": "./assets/icon-glyph.png",
+      "resizeMode": "contain",
       "backgroundColor": "#0B1220"
     },
     "ios": {
@@ -17,13 +17,13 @@
       "bundleIdentifier": "com.legallensai.app",
       "buildNumber": "2",
       "infoPlist": {
-        "NSCameraUsageDescription": "LegalLens AI needs camera access so you can scan a physical document for AI analysis.",
+        "NSCameraUsageDescription": "Clauzera AI needs camera access so you can scan a physical document for AI analysis.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.legallensai.app",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#0B1220",
         "foregroundImage": "./assets/icon-adaptive-foreground.png",

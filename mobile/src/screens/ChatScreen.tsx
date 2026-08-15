@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, FlatList, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { ActivityIndicator, Text, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../navigation/types';
-import { askQuestion, getChatHistory } from '../api/chat';
+import { getChatHistory, streamAskQuestion, ChatUsage } from '../api/chat';
+import { extractErrorMessage } from '../api/client';
 import { ChatMessage } from '../api/types';
-import { NAVY, GOLD, TEXT_MUTED } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
+import Markdown from '../components/Markdown';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Chat'>;
 
@@ -118,29 +120,56 @@ const CHAT_STRINGS: Record<string, ChatStrings> = {
 };
 
 export default function ChatScreen({ route }: Props) {
-  const { documentId, language } = route.params;
+  const { documentId, language, prefill } = route.params;
   const strings = CHAT_STRINGS[language || 'en'] || CHAT_STRINGS.en;
-  const queryClient = useQueryClient();
-  const [question, setQuestion] = useState('');
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [question, setQuestion] = useState(prefill || '');
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [tokenUsage, setTokenUsage] = useState<Record<string, ChatUsage>>({});
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
+  const listRef = useRef<FlatList>(null);
 
-  const { data: messages } = useQuery({
+  const { data: history } = useQuery({
     queryKey: ['chat', documentId],
     queryFn: () => getChatHistory(documentId),
   });
 
-  const mutation = useMutation({
-    mutationFn: (q: string) => askQuestion(documentId, q),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chat', documentId] });
-    },
-  });
+  useEffect(() => {
+    if (history) setMessages(history);
+  }, [history]);
 
-  const send = (q: string) => {
-    if (!q.trim() || mutation.isPending) return;
+  const send = async (q: string) => {
+    if (!q.trim() || sending) return;
+    const trimmed = q.trim();
     setQuestion('');
-    mutation.mutate(q.trim());
+    setSending(true);
+    setError(null);
+    const assistantId = `local-${Date.now()}-a`;
+    setMessages((prev) => [
+      ...prev,
+      { id: `local-${Date.now()}`, role: 'user', content: trimmed, createdAt: new Date().toISOString() },
+      { id: assistantId, role: 'assistant', content: '', createdAt: new Date().toISOString() },
+    ]);
+    try {
+      const usage = await streamAskQuestion(documentId, trimmed, (chunk) => {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + chunk } : m)),
+        );
+      });
+      if (usage) {
+        setTokenUsage((prev) => ({ ...prev, [assistantId]: usage }));
+      }
+    } catch (e) {
+      setMessages((prev) => prev.slice(0, -2));
+      setQuestion(trimmed);
+      setError(extractErrorMessage(e));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -150,14 +179,16 @@ export default function ChatScreen({ route }: Props) {
       keyboardVerticalOffset={headerHeight}
     >
       <FlatList
+        ref={listRef}
         style={styles.list}
         contentContainerStyle={{ paddingVertical: 12 }}
-        data={messages || []}
+        data={messages}
         keyExtractor={(item: ChatMessage) => item.id}
+        onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
         ListEmptyComponent={
           <View style={styles.suggestions}>
             <View style={styles.assistantIconWrap}>
-              <MaterialCommunityIcons name="robot-outline" size={22} color={NAVY} />
+              <MaterialCommunityIcons name="robot-outline" size={22} color={t.text} />
             </View>
             <Text style={styles.suggestionsLabel}>{strings.tryAsking}</Text>
             {strings.questions.map((q) => (
@@ -167,22 +198,36 @@ export default function ChatScreen({ route }: Props) {
             ))}
           </View>
         }
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.bubble,
-              item.role === 'user' ? styles.userBubble : styles.assistantBubble,
-            ]}
-          >
-            <Text style={item.role === 'user' ? styles.userText : styles.assistantText}>
-              {item.content}
-            </Text>
-          </View>
-        )}
+        renderItem={({ item, index }) => {
+          const isStreamingPlaceholder =
+            item.role === 'assistant' && item.content === '' && sending && index === messages.length - 1;
+          const usage = tokenUsage[item.id];
+          return (
+            <View style={{ alignItems: item.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              <View
+                style={[
+                  styles.bubble,
+                  item.role === 'user' ? styles.userBubble : styles.assistantBubble,
+                ]}
+              >
+                {item.role === 'user' ? (
+                  <Text style={styles.userText}>{item.content}</Text>
+                ) : isStreamingPlaceholder ? (
+                  <ActivityIndicator size="small" color={t.textMuted} />
+                ) : (
+                  <Markdown text={item.content} color={t.text} boldColor={t.text} />
+                )}
+              </View>
+              {usage && (
+                <Text style={styles.usageText}>
+                  {usage.inputTokens + usage.outputTokens} tokens ({usage.inputTokens} in · {usage.outputTokens} out)
+                </Text>
+              )}
+            </View>
+          );
+        }}
       />
-      {mutation.isPending && (
-        <ActivityIndicator style={{ marginBottom: 8 }} color={NAVY} />
-      )}
+      {error && <Text style={styles.errorText}>{error}</Text>}
       <View style={[styles.inputRow, { paddingBottom: 12 + insets.bottom }]}>
         <TextInput
           style={styles.input}
@@ -194,54 +239,61 @@ export default function ChatScreen({ route }: Props) {
           onSubmitEditing={() => send(question)}
         />
         <Pressable
-          style={[styles.sendButton, (mutation.isPending || !question.trim()) && { opacity: 0.5 }]}
+          style={[styles.sendButton, (sending || !question.trim()) && { opacity: 0.5 }]}
           onPress={() => send(question)}
-          disabled={mutation.isPending || !question.trim()}
+          disabled={sending || !question.trim()}
         >
-          <MaterialCommunityIcons name="send" size={20} color={NAVY} />
+          <MaterialCommunityIcons name="send" size={20} color={t.onAccent} />
         </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  list: { flex: 1, paddingHorizontal: 14 },
-  suggestions: { padding: 12, alignItems: 'center', marginTop: 20 },
-  assistantIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#EEF1F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  suggestionsLabel: { color: TEXT_MUTED, marginBottom: 12 },
-  suggestionChip: {
-    backgroundColor: 'white',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-    width: '100%',
-  },
-  suggestionChipText: { color: NAVY, fontWeight: '600', textAlign: 'center' },
-  bubble: { padding: 13, borderRadius: 16, marginBottom: 10, maxWidth: '85%' },
-  userBubble: { backgroundColor: NAVY, alignSelf: 'flex-end', borderBottomRightRadius: 4 },
-  assistantBubble: { backgroundColor: 'white', alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
-  userText: { color: 'white' },
-  assistantText: { color: '#1F2937' },
-  inputRow: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 8 },
-  input: { flex: 1, backgroundColor: 'white' },
-  inputOutline: { borderRadius: 24 },
-  sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: GOLD,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    list: { flex: 1, paddingHorizontal: 14 },
+    suggestions: { padding: 12, alignItems: 'center', marginTop: 20 },
+    assistantIconWrap: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: t.surfaceAlt,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 12,
+    },
+    suggestionsLabel: { color: t.textMuted, marginBottom: 12 },
+    suggestionChip: {
+      backgroundColor: t.surface,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      marginBottom: 10,
+      width: '100%',
+    },
+    suggestionChipText: { color: t.text, fontWeight: '600', textAlign: 'center' },
+    bubble: { padding: 13, borderRadius: 16, marginBottom: 4, maxWidth: '85%' },
+    userBubble: { backgroundColor: t.buttonColor, borderBottomRightRadius: 4 },
+    assistantBubble: {
+      backgroundColor: t.surfaceAlt,
+      borderWidth: 1,
+      borderColor: t.border,
+      borderBottomLeftRadius: 4,
+    },
+    userText: { color: t.onAccent },
+    usageText: { fontSize: 10.5, color: t.textMuted, marginBottom: 10, paddingHorizontal: 4 },
+    errorText: { color: '#DC2626', fontSize: 12.5, paddingHorizontal: 14, marginBottom: 8 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 8 },
+    input: { flex: 1, backgroundColor: t.surface },
+    inputOutline: { borderRadius: 24 },
+    sendButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: t.buttonColor,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

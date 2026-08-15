@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'https://legallens-backend-twbd.onrender.com/api';
+export const API_BASE_URL = 'https://api.clauzera.com/api';

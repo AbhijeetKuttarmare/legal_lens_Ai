@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, View, StyleSheet, Alert, Pressable } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationProp } from '@react-navigation/native';
 import { RootNavigationParamList } from '../navigation/types';
 import { useAppSelector } from '../store/hooks';
-import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 
 interface Props {
   navigation: NavigationProp<RootNavigationParamList>;
@@ -24,48 +24,50 @@ interface Plan {
   highlight?: boolean;
 }
 
-const PLANS: Plan[] = [
-  {
-    id: 'FREE',
-    name: 'Free',
-    price: '₹0',
-    features: ['1 document', 'Clauzera summary', 'Document history'],
-    icon: 'send-outline',
-    iconBg: '#DBEAFE',
-    iconColor: '#2563EB',
-    decoration: 'file-lock-outline',
-  },
-  {
-    id: 'PRO',
-    name: 'Pro',
-    price: '₹299',
-    period: '/month',
-    features: ['Unlimited uploads', 'Unlimited Clauzera chat', 'Risk detection'],
-    icon: 'diamond-stone',
-    iconBg: '#FFF7E0',
-    iconColor: GOLD,
-    decoration: 'chart-line',
-  },
-  {
-    id: 'ENTERPRISE',
-    name: 'Premium',
-    price: '₹599',
-    period: '/month',
-    highlight: true,
-    icon: 'crown',
-    iconBg: 'rgba(212,175,55,0.2)',
-    iconColor: GOLD,
-    decoration: 'shield-check',
-    features: [
-      'Unlimited uploads',
-      'Unlimited Clauzera chat',
-      'Risk detection',
-      'Priority support',
-      'Advanced Clauzera insights',
-      'Export & download reports',
-    ],
-  },
-];
+function buildPlans(accent: string): Plan[] {
+  return [
+    {
+      id: 'FREE',
+      name: 'Free',
+      price: '₹0',
+      features: ['1 document', 'Clauzera summary', 'Document history'],
+      icon: 'send-outline',
+      iconBg: '#DBEAFE',
+      iconColor: '#2563EB',
+      decoration: 'file-lock-outline',
+    },
+    {
+      id: 'PRO',
+      name: 'Pro',
+      price: '₹299',
+      period: '/month',
+      features: ['Unlimited uploads', 'Unlimited Clauzera chat', 'Risk detection'],
+      icon: 'diamond-stone',
+      iconBg: '#FFF7E0',
+      iconColor: accent,
+      decoration: 'chart-line',
+    },
+    {
+      id: 'ENTERPRISE',
+      name: 'Premium',
+      price: '₹599',
+      period: '/month',
+      highlight: true,
+      icon: 'crown',
+      iconBg: 'rgba(212,175,55,0.2)',
+      iconColor: accent,
+      decoration: 'shield-check',
+      features: [
+        'Unlimited uploads',
+        'Unlimited Clauzera chat',
+        'Risk detection',
+        'Priority support',
+        'Advanced Clauzera insights',
+        'Export & download reports',
+      ],
+    },
+  ];
+}
 
 const comingSoon = (title: string, message: string) => Alert.alert(title, message);
 
@@ -77,6 +79,9 @@ const CREDIT_PACKS: { pack: 'PACK_5' | 'PACK_10'; credits: number; price: string
 export default function SubscriptionScreen({ navigation }: Props) {
   const user = useAppSelector((s) => s.auth.user);
   const currentPlan = user?.plan || 'FREE';
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
+  const PLANS = useMemo(() => buildPlans(t.accent), [t.accent]);
 
   const onSelectPlan = (plan: Plan) => {
     if (plan.id === currentPlan) return;
@@ -96,17 +101,17 @@ export default function SubscriptionScreen({ navigation }: Props) {
             style={styles.circleButton}
             onPress={() => navigation.navigate('Home')}
           >
-            <MaterialCommunityIcons name="chevron-left" size={22} color="white" />
+            <MaterialCommunityIcons name="chevron-left" size={22} color={t.textOnHeader} />
           </Pressable>
           <Pressable
             hitSlop={10}
             style={styles.circleButtonOutline}
             onPress={() => comingSoon('Plans', 'Compare plan features and billing FAQs here.')}
           >
-            <MaterialCommunityIcons name="help-circle-outline" size={20} color="white" />
+            <MaterialCommunityIcons name="help-circle-outline" size={20} color={t.textOnHeader} />
           </Pressable>
         </View>
-        <MaterialCommunityIcons name="crown" size={70} color={GOLD} style={styles.headerCrown} />
+        <MaterialCommunityIcons name="crown" size={70} color={t.accent} style={styles.headerCrown} />
         <Text style={styles.headerTitle}>Choose your plan</Text>
         <View style={styles.headerUnderline} />
         <Text style={styles.headerSubtitle}>Unlock unlimited documents and deeper Clauzera insights.</Text>
@@ -120,14 +125,14 @@ export default function SubscriptionScreen({ navigation }: Props) {
               key={plan.id}
               style={[
                 styles.planCard,
-                cardShadow,
+                t.cardShadow,
                 plan.highlight && styles.planCardHighlight,
                 plan.id === 'PRO' && styles.planCardPro,
               ]}
             >
               {plan.highlight && (
                 <View style={styles.popularBadge}>
-                  <MaterialCommunityIcons name="star" size={11} color={NAVY} />
+                  <MaterialCommunityIcons name="star" size={11} color={t.onAccent} />
                   <Text style={styles.popularBadgeText}>MOST POPULAR</Text>
                 </View>
               )}
@@ -144,15 +149,15 @@ export default function SubscriptionScreen({ navigation }: Props) {
                   <MaterialCommunityIcons name={plan.icon} size={22} color={plan.iconColor} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.planName, plan.highlight && { color: 'white' }]}>
+                  <Text style={[styles.planName, plan.highlight && { color: t.textOnHeader }]}>
                     {plan.name}
                   </Text>
                   <View style={styles.priceRow}>
-                    <Text style={[styles.price, plan.highlight && { color: 'white' }]}>
+                    <Text style={[styles.price, plan.highlight && { color: t.textOnHeader }]}>
                       {plan.price}
                     </Text>
                     {plan.period && (
-                      <Text style={[styles.period, plan.highlight && { color: '#B7C0D1' }]}>
+                      <Text style={[styles.period, plan.highlight && { color: t.textMutedOnHeader }]}>
                         {plan.period}
                       </Text>
                     )}
@@ -171,9 +176,9 @@ export default function SubscriptionScreen({ navigation }: Props) {
                     <MaterialCommunityIcons
                       name="check-circle"
                       size={16}
-                      color={plan.highlight ? GOLD : '#16A34A'}
+                      color={plan.highlight ? t.accent : '#16A34A'}
                     />
-                    <Text style={[styles.featureText, plan.highlight && { color: '#E5E9F0' }]}>
+                    <Text style={[styles.featureText, plan.highlight && { color: t.textMutedOnHeader }]}>
                       {f}
                     </Text>
                   </View>
@@ -185,7 +190,7 @@ export default function SubscriptionScreen({ navigation }: Props) {
                   style={[styles.planButton, plan.highlight && styles.planButtonGold]}
                   onPress={() => onSelectPlan(plan)}
                 >
-                  <Text style={[styles.planButtonText, plan.highlight && { color: NAVY }]}>
+                  <Text style={[styles.planButtonText, plan.highlight && { color: t.onAccent }]}>
                     Upgrade
                   </Text>
                 </Pressable>
@@ -211,7 +216,7 @@ export default function SubscriptionScreen({ navigation }: Props) {
           </Text>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             {CREDIT_PACKS.map((p) => (
-              <View key={p.pack} style={[styles.creditCard, cardShadow]}>
+              <View key={p.pack} style={[styles.creditCard, t.cardShadow]}>
                 <Text style={styles.creditCount}>{p.credits} credits</Text>
                 <Text style={styles.creditPrice}>{p.price}</Text>
                 <Pressable
@@ -226,9 +231,9 @@ export default function SubscriptionScreen({ navigation }: Props) {
         </View>
       )}
 
-      <View style={[styles.footerBanner, cardShadow]}>
+      <View style={[styles.footerBanner, t.cardShadow]}>
         <View style={styles.footerIcon}>
-          <MaterialCommunityIcons name="shield-check-outline" size={20} color={NAVY} />
+          <MaterialCommunityIcons name="shield-check-outline" size={20} color={t.text} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.footerTitle}>Cancel anytime</Text>
@@ -238,152 +243,153 @@ export default function SubscriptionScreen({ navigation }: Props) {
           style={styles.footerArrow}
           onPress={() => comingSoon('Manage plan', 'Plan management coming soon.')}
         >
-          <MaterialCommunityIcons name="arrow-right" size={18} color={NAVY} />
+          <MaterialCommunityIcons name="arrow-right" size={18} color={t.text} />
         </Pressable>
       </View>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  header: {
-    backgroundColor: NAVY,
-    paddingTop: 20,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    marginBottom: 20,
-    overflow: 'hidden',
-  },
-  headerTopRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  circleButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  circleButtonOutline: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerCrown: { position: 'absolute', right: 8, top: 44, opacity: 0.9 },
-  headerTitle: { color: 'white', fontSize: 26, fontWeight: '800', marginTop: 8 },
-  headerUnderline: { width: 36, height: 3, backgroundColor: GOLD, borderRadius: 2, marginTop: 6 },
-  headerSubtitle: { color: '#B7C0D1', marginTop: 12, maxWidth: '80%', lineHeight: 19 },
-  plansWrap: { paddingHorizontal: 20, gap: 16 },
-  planCard: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-    overflow: 'hidden',
-  },
-  planCardPro: { backgroundColor: '#FFFBEF', borderWidth: 1, borderColor: '#F3E3B5' },
-  planCardHighlight: { backgroundColor: NAVY },
-  cardDecoration: { position: 'absolute', right: -6, bottom: -6 },
-  popularBadge: {
-    position: 'absolute',
-    top: -12,
-    right: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: GOLD,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  popularBadgeText: { color: NAVY, fontWeight: '800', fontSize: 10 },
-  planTopRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 16 },
-  planIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  planName: { fontWeight: '700', fontSize: 16, color: NAVY },
-  priceRow: { flexDirection: 'row', alignItems: 'flex-end', marginTop: 4 },
-  price: { fontWeight: '800', fontSize: 26, color: NAVY },
-  period: { color: TEXT_MUTED, marginLeft: 4, marginBottom: 4 },
-  currentBadge: {
-    backgroundColor: '#DBEAFE',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  currentBadgeText: { color: '#2563EB', fontWeight: '700', fontSize: 11 },
-  featureList: { gap: 10, marginBottom: 20 },
-  featureRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  featureText: { color: '#374151', fontSize: 13.5 },
-  planButton: {
-    borderWidth: 1.5,
-    borderColor: NAVY,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  planButtonGold: { backgroundColor: GOLD, borderColor: GOLD },
-  planButtonText: { fontWeight: '700', color: NAVY },
-  currentPlanBar: {
-    backgroundColor: '#EEF1F6',
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  currentPlanBarText: { fontWeight: '700', color: TEXT_MUTED },
-  creditsSection: { paddingHorizontal: 20, marginTop: 24 },
-  creditsTitle: { fontWeight: '700', fontSize: 16, color: NAVY, marginBottom: 4 },
-  creditsSubtitle: { color: TEXT_MUTED, fontSize: 12.5, lineHeight: 18, marginBottom: 14 },
-  creditCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-  },
-  creditCount: { fontWeight: '700', fontSize: 14.5, color: NAVY, marginBottom: 4 },
-  creditPrice: { fontWeight: '800', fontSize: 20, color: NAVY, marginBottom: 12 },
-  creditButton: {
-    backgroundColor: NAVY,
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  creditButtonText: { color: 'white', fontWeight: '700', fontSize: 12.5 },
-  footerBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    marginHorizontal: 20,
-    marginTop: 20,
-    padding: 16,
-  },
-  footerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EEF1F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  footerTitle: { fontWeight: '700', color: NAVY, fontSize: 14 },
-  footerSubtitle: { color: TEXT_MUTED, fontSize: 11.5, marginTop: 2 },
-  footerArrow: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#DBEAFE',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    header: {
+      backgroundColor: t.headerBg,
+      paddingTop: 20,
+      paddingBottom: 30,
+      paddingHorizontal: 20,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      marginBottom: 20,
+      overflow: 'hidden',
+    },
+    headerTopRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    circleButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: 'rgba(255,255,255,0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    circleButtonOutline: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.3)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerCrown: { position: 'absolute', right: 8, top: 44, opacity: 0.9 },
+    headerTitle: { color: t.textOnHeader, fontSize: 26, fontWeight: '800', marginTop: 8 },
+    headerUnderline: { width: 36, height: 3, backgroundColor: t.accent, borderRadius: 2, marginTop: 6 },
+    headerSubtitle: { color: t.textMutedOnHeader, marginTop: 12, maxWidth: '80%', lineHeight: 19 },
+    plansWrap: { paddingHorizontal: 20, gap: 16 },
+    planCard: {
+      backgroundColor: t.surface,
+      borderRadius: 20,
+      padding: 20,
+      overflow: 'hidden',
+    },
+    planCardPro: { backgroundColor: '#FFFBEF', borderWidth: 1, borderColor: '#F3E3B5' },
+    planCardHighlight: { backgroundColor: t.headerBg },
+    cardDecoration: { position: 'absolute', right: -6, bottom: -6 },
+    popularBadge: {
+      position: 'absolute',
+      top: -12,
+      right: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: t.accent,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    popularBadgeText: { color: t.onAccent, fontWeight: '800', fontSize: 10 },
+    planTopRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 16 },
+    planIcon: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    planName: { fontWeight: '700', fontSize: 16, color: t.text },
+    priceRow: { flexDirection: 'row', alignItems: 'flex-end', marginTop: 4 },
+    price: { fontWeight: '800', fontSize: 26, color: t.text },
+    period: { color: t.textMuted, marginLeft: 4, marginBottom: 4 },
+    currentBadge: {
+      backgroundColor: '#DBEAFE',
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+    },
+    currentBadgeText: { color: '#2563EB', fontWeight: '700', fontSize: 11 },
+    featureList: { gap: 10, marginBottom: 20 },
+    featureRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    featureText: { color: t.bodyText, fontSize: 13.5 },
+    planButton: {
+      borderWidth: 1.5,
+      borderColor: t.text,
+      borderRadius: 12,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    planButtonGold: { backgroundColor: t.buttonColor, borderColor: t.buttonColor },
+    planButtonText: { fontWeight: '700', color: t.text },
+    currentPlanBar: {
+      backgroundColor: t.surfaceAlt,
+      borderRadius: 12,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    currentPlanBarText: { fontWeight: '700', color: t.textMuted },
+    creditsSection: { paddingHorizontal: 20, marginTop: 24 },
+    creditsTitle: { fontWeight: '700', fontSize: 16, color: t.text, marginBottom: 4 },
+    creditsSubtitle: { color: t.textMuted, fontSize: 12.5, lineHeight: 18, marginBottom: 14 },
+    creditCard: {
+      flex: 1,
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      padding: 16,
+    },
+    creditCount: { fontWeight: '700', fontSize: 14.5, color: t.text, marginBottom: 4 },
+    creditPrice: { fontWeight: '800', fontSize: 20, color: t.text, marginBottom: 12 },
+    creditButton: {
+      backgroundColor: t.headerBg,
+      borderRadius: 10,
+      paddingVertical: 10,
+      alignItems: 'center',
+    },
+    creditButtonText: { color: t.textOnHeader, fontWeight: '700', fontSize: 12.5 },
+    footerBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      marginHorizontal: 20,
+      marginTop: 20,
+      padding: 16,
+    },
+    footerIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: t.surfaceAlt,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    footerTitle: { fontWeight: '700', color: t.text, fontSize: 14 },
+    footerSubtitle: { color: t.textMuted, fontSize: 11.5, marginTop: 2 },
+    footerArrow: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: '#DBEAFE',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });

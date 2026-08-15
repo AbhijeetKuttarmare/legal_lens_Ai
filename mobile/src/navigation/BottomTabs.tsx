@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,9 +8,7 @@ import HomeScreen from '../screens/HomeScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-
-const NAVY = '#0B1220';
-const GOLD = '#B08D57';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -30,11 +28,13 @@ function ScanTabPlaceholder() {
 
 export default function BottomTabs() {
   const insets = useSafeAreaInsets();
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: GOLD,
+        tabBarActiveTintColor: t.accent,
         tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: [
           styles.tabBar,
@@ -58,7 +58,7 @@ export default function BottomTabs() {
           tabBarLabel: 'Scan',
           tabBarIcon: () => (
             <View style={styles.fab}>
-              <MaterialCommunityIcons name="line-scan" size={26} color={NAVY} />
+              <MaterialCommunityIcons name="line-scan" size={26} color={t.onAccent} />
             </View>
           ),
         }}
@@ -75,20 +75,21 @@ export default function BottomTabs() {
   );
 }
 
-const styles = StyleSheet.create({
-  tabBar: { backgroundColor: NAVY, borderTopWidth: 0, paddingTop: 8 },
-  fab: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: GOLD,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -22,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
-  },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    tabBar: { backgroundColor: t.headerBg, borderTopWidth: 0, paddingTop: 8 },
+    fab: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: t.buttonColor,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: -22,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 6,
+      elevation: 6,
+    },
+  });

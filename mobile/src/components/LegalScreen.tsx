@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, View, StyleSheet, Pressable } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { NAVY, TEXT_MUTED } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 
 export interface LegalSection {
   heading: string;
@@ -18,12 +18,14 @@ interface Props {
 
 export default function LegalScreen({ title, updatedLabel, sections }: Props) {
   const navigation = useNavigation();
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
 
   return (
     <View style={styles.page}>
       <View style={styles.header}>
         <Pressable hitSlop={10} style={styles.backButton} onPress={() => navigation.goBack()}>
-          <MaterialCommunityIcons name="chevron-left" size={24} color="white" />
+          <MaterialCommunityIcons name="chevron-left" size={24} color={t.textOnHeader} />
         </Pressable>
         <Text style={styles.headerTitle}>{title}</Text>
         <View style={{ width: 34 }} />
@@ -41,29 +43,30 @@ export default function LegalScreen({ title, updatedLabel, sections }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: NAVY,
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
-  },
-  backButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
-  body: { padding: 20, paddingBottom: 40 },
-  updated: { color: TEXT_MUTED, fontSize: 12, marginBottom: 16 },
-  section: { marginBottom: 20 },
-  heading: { fontWeight: '700', color: NAVY, fontSize: 15, marginBottom: 6 },
-  text: { color: '#374151', fontSize: 13.5, lineHeight: 20 },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: t.headerBg,
+      paddingTop: 20,
+      paddingBottom: 20,
+      paddingHorizontal: 16,
+    },
+    backButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: 'rgba(255,255,255,0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: { color: t.textOnHeader, fontSize: 18, fontWeight: '700' },
+    body: { padding: 20, paddingBottom: 40 },
+    updated: { color: t.textMuted, fontSize: 12, marginBottom: 16 },
+    section: { marginBottom: 20 },
+    heading: { fontWeight: '700', color: t.text, fontSize: 15, marginBottom: 6 },
+    text: { color: t.bodyText, fontSize: 13.5, lineHeight: 20 },
+  });

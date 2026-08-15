@@ -33,6 +33,20 @@ export async function getKeyDates(documentId: string): Promise<KeyDate[]> {
   return data.keyDates;
 }
 
+// Isolated one-off suggestion for a single risk flag — doesn't touch the
+// document's chat history or count against the Free plan's message limit.
+export async function suggestFix(
+  documentId: string,
+  flagTitle: string,
+  flagDetail: string,
+): Promise<{ suggestion: string }> {
+  const { data } = await apiClient.post<{ suggestion: string }>(`/documents/${documentId}/suggest-fix`, {
+    flagTitle,
+    flagDetail,
+  });
+  return data;
+}
+
 export interface PickedFile {
   uri: string;
   name: string;

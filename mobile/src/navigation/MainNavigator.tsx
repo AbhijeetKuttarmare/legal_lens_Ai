@@ -13,12 +13,22 @@ import CheckoutScreen from '../screens/CheckoutScreen';
 import CreditCheckoutScreen from '../screens/CreditCheckoutScreen';
 import CompareScreen from '../screens/CompareScreen';
 import TemplatesScreen from '../screens/TemplatesScreen';
+import ThemeSettingsScreen from '../screens/ThemeSettingsScreen';
+import { useAppTheme } from '../theme/ThemeContext';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
 export default function MainNavigator() {
+  const t = useAppTheme();
+
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: t.headerBg },
+        headerTintColor: t.textOnHeader,
+        headerTitleStyle: { color: t.textOnHeader },
+      }}
+    >
       <Stack.Screen name="Tabs" component={BottomTabs} options={{ headerShown: false }} />
       <Stack.Screen name="Upload" component={UploadScreen} options={{ title: 'Upload Document' }} />
       <Stack.Screen name="Report" component={ReportScreen} options={{ title: 'Document Report' }} />
@@ -55,6 +65,11 @@ export default function MainNavigator() {
       />
       <Stack.Screen name="Compare" component={CompareScreen} options={{ title: 'Compare Documents' }} />
       <Stack.Screen name="Templates" component={TemplatesScreen} options={{ title: 'Document Templates' }} />
+      <Stack.Screen
+        name="ThemeSettings"
+        component={ThemeSettingsScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setAuthenticated, setUnauthenticated } from '../store/authSlice';
 import { loadSession } from '../auth/session';
@@ -8,19 +8,21 @@ import AppLoadingSplash from '../components/AppLoadingSplash';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import CompleteProfileScreen from '../screens/CompleteProfileScreen';
+import { useAppTheme } from '../theme/ThemeContext';
 
-const SPLASH_IMAGE = require('../../assets/SplashscreenAI.png');
+const SPLASH_ICON = require('../../assets/icon-glyph.png');
 
 function SessionCheckSplash() {
   return (
     <View style={styles.checkSplash}>
-      <Image source={SPLASH_IMAGE} style={styles.checkSplashImage} resizeMode="cover" />
+      <Image source={SPLASH_ICON} style={styles.checkSplashIcon} resizeMode="contain" />
     </View>
   );
 }
 
 export default function RootNavigator() {
   const dispatch = useAppDispatch();
+  const t = useAppTheme();
   const status = useAppSelector((s) => s.auth.status);
   const user = useAppSelector((s) => s.auth.user);
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -59,10 +61,22 @@ export default function RootNavigator() {
     content = <AuthNavigator />;
   }
 
-  return <NavigationContainer>{content}</NavigationContainer>;
+  const navTheme = {
+    ...(t.mode === 'dark' ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(t.mode === 'dark' ? DarkTheme.colors : DefaultTheme.colors),
+      background: t.bg,
+      card: t.headerBg,
+      text: t.text,
+      border: t.border,
+      primary: t.accent,
+    },
+  };
+
+  return <NavigationContainer theme={navTheme}>{content}</NavigationContainer>;
 }
 
 const styles = StyleSheet.create({
-  checkSplash: { flex: 1, backgroundColor: '#0B1220' },
-  checkSplashImage: { width: '100%', height: '100%' },
+  checkSplash: { flex: 1, backgroundColor: '#0B1220', alignItems: 'center', justifyContent: 'center' },
+  checkSplashIcon: { width: 120, height: 120 },
 });

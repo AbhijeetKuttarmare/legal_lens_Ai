@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, View, StyleSheet, Pressable, Linking } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { NAVY, GOLD, TEXT_MUTED, cardShadow } from '../theme/theme';
+import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 
-const SUPPORT_EMAIL = 'support@legallensai.app';
+const SUPPORT_EMAIL = 'Support@clauzera.com';
 
 const FAQS = [
   {
@@ -40,13 +40,15 @@ const FAQS = [
 
 export default function HelpSupportScreen() {
   const navigation = useNavigation();
+  const t = useAppTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
     <View style={styles.page}>
       <View style={styles.header}>
         <Pressable hitSlop={10} style={styles.backButton} onPress={() => navigation.goBack()}>
-          <MaterialCommunityIcons name="chevron-left" size={24} color="white" />
+          <MaterialCommunityIcons name="chevron-left" size={24} color={t.textOnHeader} />
         </Pressable>
         <Text style={styles.headerTitle}>Help & Support</Text>
         <View style={{ width: 34 }} />
@@ -54,17 +56,17 @@ export default function HelpSupportScreen() {
 
       <ScrollView contentContainerStyle={styles.body}>
         <Pressable
-          style={[styles.contactCard, cardShadow]}
+          style={[styles.contactCard, t.cardShadow]}
           onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=Clauzera AI Support`)}
         >
           <View style={styles.contactIcon}>
-            <MaterialCommunityIcons name="email-outline" size={20} color={NAVY} />
+            <MaterialCommunityIcons name="email-outline" size={20} color={t.text} />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.contactTitle}>Email us</Text>
             <Text style={styles.contactSubtitle}>{SUPPORT_EMAIL}</Text>
           </View>
-          <MaterialCommunityIcons name="chevron-right" size={20} color={TEXT_MUTED} />
+          <MaterialCommunityIcons name="chevron-right" size={20} color={t.textMuted} />
         </Pressable>
 
         <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
@@ -73,7 +75,7 @@ export default function HelpSupportScreen() {
           return (
             <Pressable
               key={item.q}
-              style={[styles.faqCard, cardShadow]}
+              style={[styles.faqCard, t.cardShadow]}
               onPress={() => setOpenIndex(isOpen ? null : idx)}
             >
               <View style={styles.faqHeaderRow}>
@@ -81,7 +83,7 @@ export default function HelpSupportScreen() {
                 <MaterialCommunityIcons
                   name={isOpen ? 'chevron-up' : 'chevron-down'}
                   size={20}
-                  color={TEXT_MUTED}
+                  color={t.textMuted}
                 />
               </View>
               {isOpen && <Text style={styles.faqAnswer}>{item.a}</Text>}
@@ -93,59 +95,60 @@ export default function HelpSupportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: '#F4F5F9' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: NAVY,
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
-  },
-  backButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
-  body: { padding: 20, paddingBottom: 40 },
-  contactCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 24,
-  },
-  contactIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#FFF7E0',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  contactTitle: { fontWeight: '700', color: NAVY, fontSize: 14 },
-  contactSubtitle: { color: TEXT_MUTED, fontSize: 12, marginTop: 2 },
-  sectionTitle: { fontWeight: '700', fontSize: 16, color: NAVY, marginBottom: 12 },
-  faqCard: {
-    backgroundColor: 'white',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 10,
-  },
-  faqHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
-  },
-  faqQuestion: { flex: 1, fontWeight: '600', color: NAVY, fontSize: 13.5 },
-  faqAnswer: { color: '#374151', fontSize: 13, lineHeight: 19, marginTop: 10 },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    page: { flex: 1, backgroundColor: t.bg },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: t.headerBg,
+      paddingTop: 20,
+      paddingBottom: 20,
+      paddingHorizontal: 16,
+    },
+    backButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: 'rgba(255,255,255,0.12)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: { color: t.textOnHeader, fontSize: 18, fontWeight: '700' },
+    body: { padding: 20, paddingBottom: 40 },
+    contactCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: t.surface,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 24,
+    },
+    contactIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      backgroundColor: '#FFF7E0',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    contactTitle: { fontWeight: '700', color: t.text, fontSize: 14 },
+    contactSubtitle: { color: t.textMuted, fontSize: 12, marginTop: 2 },
+    sectionTitle: { fontWeight: '700', fontSize: 16, color: t.text, marginBottom: 12 },
+    faqCard: {
+      backgroundColor: t.surface,
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 10,
+    },
+    faqHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 10,
+    },
+    faqQuestion: { flex: 1, fontWeight: '600', color: t.text, fontSize: 13.5 },
+    faqAnswer: { color: t.bodyText, fontSize: 13, lineHeight: 19, marginTop: 10 },
+  });
