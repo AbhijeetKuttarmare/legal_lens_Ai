@@ -15,6 +15,7 @@ import { LegalModule } from './legal/legal.module';
 import { AdminModule } from './admin/admin.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { TemplatesModule } from './templates/templates.module';
+import { PersonalTemplatesModule } from './personal-templates/personal-templates.module';
 import { PlanGuardModule } from './common/plan-guard.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 
@@ -34,6 +35,7 @@ import { OrganizationsModule } from './organizations/organizations.module';
     AdminModule,
     ReviewsModule,
     TemplatesModule,
+    PersonalTemplatesModule,
     PlanGuardModule,
     OrganizationsModule,
   ],

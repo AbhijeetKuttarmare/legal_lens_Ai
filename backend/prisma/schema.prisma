@@ -71,6 +71,7 @@ model User {
   lastName     String?
   gender       Gender?
   dob          DateTime?
+  occupation   String?
   plan         PlanTier  @default(FREE)
   isAdmin      Boolean   @default(false)
   // Admin testing override for documents.service upload limit checks.
@@ -94,6 +95,26 @@ model User {
   auditLogs    AuditLog[]
   ownedOrganization   Organization?        @relation("OrganizationOwner")
   organizationMember  OrganizationMember?
+  personalTemplates   PersonalTemplate[]
+}
+
+// A user's own reusable document (e.g. a lawyer's standard divorce
+// petition, a doctor's standard consent form). Uploaded once; the
+// case-specific values (names, dates, amounts) are detected by AI so
+// the user can swap them in for a new case without redrafting the
+// whole document from scratch.
+model PersonalTemplate {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  name           String
+  sourceFileName String
+  extractedText  String   @db.Text
+  fields         Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Document {

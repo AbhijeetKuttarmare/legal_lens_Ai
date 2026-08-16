@@ -212,6 +212,38 @@ const KEY_DATES_SCHEMA = {
   additionalProperties: false,
 };
 
+const TEMPLATE_FIELD_DETECTION_SCHEMA = {
+  type: 'object',
+  properties: {
+    fields: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          key: { type: 'string' },
+          label: { type: 'string' },
+          originalValue: { type: 'string' },
+        },
+        required: ['key', 'label', 'originalValue'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['fields'],
+  additionalProperties: false,
+};
+
+const TEMPLATE_FIELD_DETECTION_PROMPT = `You are Clauzera AI. The user has uploaded a document THEY previously used for one case/client/situation, and wants to reuse it as a personal template for a new case — swapping out the case-specific details while keeping the rest of the document (boilerplate legal/business language, structure, clauses) unchanged.
+
+Identify every case-specific value in the document that would need to change if this exact document were reused for a different person, date, amount, or situation — e.g. names, addresses, dates, phone numbers, email addresses, monetary amounts, case/reference numbers, company names, durations. Do NOT flag standard boilerplate legal language, section headings, or clauses that would stay the same across cases.
+
+For each one, return:
+- key: a short snake_case identifier (e.g. "client_name", "agreement_date")
+- label: a short human-readable label (e.g. "Client Name", "Agreement Date")
+- originalValue: the exact value as it currently appears in the document
+
+Return at most 20 fields — merge duplicates (if the same value like a name appears in five places, list it once). Return them in the order they first appear in the document.`;
+
 export const TEMPLATE_TYPES: Record<string, string> = {
   RENTAL_AGREEMENT: 'Rental Agreement (India)',
   RENTAL_AGREEMENT_US: 'Residential Lease Agreement (US)',
@@ -446,6 +478,61 @@ export class AiService {
     } catch (err) {
       throw new InternalServerErrorException(
         `AI template generation failed: ${(err as Error).message}. Check ANTHROPIC_API_KEY in backend/.env`,
+      );
+    }
+  }
+
+  async detectPersonalTemplateFields(
+    text: string,
+  ): Promise<{ key: string; label: string; originalValue: string }[]> {
+    try {
+      const response = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 2000,
+        thinking: { type: 'disabled' },
+        system: TEMPLATE_FIELD_DETECTION_PROMPT,
+        messages: [{ role: 'user', content: text.slice(0, 20000) }],
+        output_config: {
+          format: { type: 'json_schema', schema: TEMPLATE_FIELD_DETECTION_SCHEMA },
+        },
+      } as Anthropic.MessageCreateParamsNonStreaming);
+
+      const raw = firstText(response.content) || '{}';
+      const parsed = JSON.parse(raw);
+      return parsed.fields || [];
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `AI field detection failed: ${(err as Error).message}. Check ANTHROPIC_API_KEY in backend/.env`,
+      );
+    }
+  }
+
+  async fillPersonalTemplate(
+    text: string,
+    fieldValues: Record<string, string>,
+  ): Promise<string> {
+    try {
+      const substitutions =
+        Object.entries(fieldValues)
+          .filter(([, v]) => v && v.trim())
+          .map(([k, v]) => `${k}: ${v}`)
+          .join('\n') || '(no changes requested)';
+      const response = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 4096,
+        thinking: { type: 'disabled' },
+        system: `You are Clauzera AI. Below is a document the user previously used for one case, followed by a list of new values to substitute in place of the original case-specific details. Produce the FULL document again with ONLY those values swapped in — keep every other word, clause, heading, and the overall structure and formatting exactly as in the original. Do not add commentary, notes, or a preamble. Output only the resulting document text.`,
+        messages: [
+          {
+            role: 'user',
+            content: `ORIGINAL DOCUMENT:\n${text.slice(0, 20000)}\n\nNEW VALUES TO SUBSTITUTE:\n${substitutions}`,
+          },
+        ],
+      });
+      return firstText(response.content) || '';
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `AI template fill failed: ${(err as Error).message}. Check ANTHROPIC_API_KEY in backend/.env`,
       );
     }
   }

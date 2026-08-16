@@ -7,6 +7,7 @@ interface RawUser {
   lastName: string | null;
   gender: string | null;
   dob: Date | null;
+  occupation?: string | null;
   plan: string;
   documentCredits?: number;
   compareTrialUntil?: Date | null;
@@ -25,6 +26,7 @@ export function toSafeUser(user: RawUser) {
     lastName: user.lastName,
     gender: user.gender,
     dob: user.dob,
+    occupation: user.occupation ?? null,
     plan: user.plan,
     documentCredits: user.documentCredits ?? 0,
     profileComplete: Boolean(user.firstName && user.lastName && user.gender && user.dob),

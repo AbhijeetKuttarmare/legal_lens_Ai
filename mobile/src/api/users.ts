@@ -6,6 +6,7 @@ export interface UpdateProfilePayload {
   lastName: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';
   dob: string;
+  occupation?: string;
 }
 
 export async function updateProfile(payload: UpdateProfilePayload): Promise<AuthUser> {

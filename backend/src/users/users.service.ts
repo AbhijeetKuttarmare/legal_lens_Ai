@@ -29,6 +29,7 @@ export class UsersService {
         gender: dto.gender,
         dob: new Date(dto.dob),
         name: `${dto.firstName} ${dto.lastName}`,
+        ...(dto.occupation !== undefined ? { occupation: dto.occupation } : {}),
       },
     });
 

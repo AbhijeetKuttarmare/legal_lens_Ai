@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, clearSession, deleteAccount, getStoredUser, setStoredUser, updateProfile } from '../api';
+import OccupationPicker from '../OccupationPicker';
 
 type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
@@ -15,6 +16,7 @@ export default function Profile() {
   const [day, setDay] = useState(existingDob ? String(existingDob.getDate()) : '');
   const [month, setMonth] = useState(existingDob ? String(existingDob.getMonth() + 1) : '');
   const [year, setYear] = useState(existingDob ? String(existingDob.getFullYear()) : '');
+  const [occupation, setOccupation] = useState(user?.occupation || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,13 @@ export default function Profile() {
     setError(null);
     try {
       const dob = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      const updated = await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim(), gender, dob });
+      const updated = await updateProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        gender,
+        dob,
+        occupation: occupation || undefined,
+      });
       setStoredUser(updated);
       setSaved(true);
     } catch (err) {
@@ -124,6 +132,13 @@ export default function Profile() {
               value={year}
               onChange={(e) => setYear(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
             />
+          </div>
+
+          <label className="cw-field-label" style={{ color: 'var(--cw-dark-text)' }}>
+            Occupation <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional)</span>
+          </label>
+          <div style={{ marginBottom: 16 }}>
+            <OccupationPicker value={occupation} onChange={setOccupation} />
           </div>
 
           <button type="submit" className="cw-btn cw-btn-gold" disabled={saving || !isValid}>

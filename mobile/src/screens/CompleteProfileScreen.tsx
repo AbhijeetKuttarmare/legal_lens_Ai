@@ -9,6 +9,7 @@ import { setAuthenticated } from '../store/authSlice';
 import { TOKEN_KEY } from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppTheme } from '../theme/ThemeContext';
+import OccupationPicker from '../components/OccupationPicker';
 
 const LOGO = require('../../assets/Logo.png');
 // Fixed brand chrome (navy page, white card), matching PhoneAuthScreen —
@@ -27,6 +28,7 @@ export default function CompleteProfileScreen() {
   const [day, setDay] = useState('');
   const [month, setMonth] = useState('');
   const [year, setYear] = useState('');
+  const [occupation, setOccupation] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +61,7 @@ export default function CompleteProfileScreen() {
         lastName: lastName.trim(),
         gender,
         dob,
+        occupation: occupation || undefined,
       });
       const token = await AsyncStorage.getItem(TOKEN_KEY);
       if (token) {
@@ -153,6 +156,9 @@ export default function CompleteProfileScreen() {
             onChangeText={(v) => setYear(v.replace(/[^0-9]/g, ''))}
           />
         </View>
+
+        <Text style={styles.fieldLabel}>Occupation (optional)</Text>
+        <OccupationPicker value={occupation} onChange={setOccupation} light />
 
         {error && <Text style={styles.errorText}>{error}</Text>}
 

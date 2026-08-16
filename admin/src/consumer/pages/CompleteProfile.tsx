@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, setStoredUser, updateProfile } from '../api';
 import { ShieldIcon } from '../../icons';
+import OccupationPicker from '../OccupationPicker';
 
 type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
@@ -13,6 +14,7 @@ export default function CompleteProfile() {
   const [day, setDay] = useState('');
   const [month, setMonth] = useState('');
   const [year, setYear] = useState('');
+  const [occupation, setOccupation] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -41,7 +43,13 @@ export default function CompleteProfile() {
     setError(null);
     try {
       const dob = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      const updatedUser = await updateProfile({ firstName: firstName.trim(), lastName: lastName.trim(), gender, dob });
+      const updatedUser = await updateProfile({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        gender,
+        dob,
+        occupation: occupation || undefined,
+      });
       setStoredUser(updatedUser);
       navigate('/app', { replace: true });
     } catch (err) {
@@ -118,6 +126,13 @@ export default function CompleteProfile() {
               value={year}
               onChange={(e) => setYear(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
             />
+          </div>
+
+          <label className="cw-field-label">
+            Occupation <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional)</span>
+          </label>
+          <div style={{ marginBottom: 16 }}>
+            <OccupationPicker value={occupation} onChange={setOccupation} />
           </div>
 
           <button type="submit" className="cw-btn cw-btn-gold" disabled={loading || !isValid} style={{ marginTop: 12 }}>

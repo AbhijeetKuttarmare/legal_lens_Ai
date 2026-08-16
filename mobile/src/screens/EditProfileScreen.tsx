@@ -11,6 +11,7 @@ import { persistSession } from '../auth/session';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setAuthenticated } from '../store/authSlice';
 import { useAppTheme, AppTheme } from '../theme/ThemeContext';
+import OccupationPicker from '../components/OccupationPicker';
 
 interface Props {
   navigation: NavigationProp<RootNavigationParamList>;
@@ -32,6 +33,7 @@ export default function EditProfileScreen({ navigation }: Props) {
   const [day, setDay] = useState(existingDob ? String(existingDob.getDate()) : '');
   const [month, setMonth] = useState(existingDob ? String(existingDob.getMonth() + 1) : '');
   const [year, setYear] = useState(existingDob ? String(existingDob.getFullYear()) : '');
+  const [occupation, setOccupation] = useState(user?.occupation || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,6 +66,7 @@ export default function EditProfileScreen({ navigation }: Props) {
         lastName: lastName.trim(),
         gender,
         dob,
+        occupation: occupation || undefined,
       });
       const token = await AsyncStorage.getItem(TOKEN_KEY);
       if (token) {
@@ -155,6 +158,9 @@ export default function EditProfileScreen({ navigation }: Props) {
             onChangeText={(v) => setYear(v.replace(/[^0-9]/g, ''))}
           />
         </View>
+
+        <Text style={styles.fieldLabel}>Occupation</Text>
+        <OccupationPicker value={occupation} onChange={setOccupation} />
 
         <View style={styles.readOnlyRow}>
           <Text style={styles.readOnlyLabel}>Phone</Text>

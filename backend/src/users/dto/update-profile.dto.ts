@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, IsString, MinLength } from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 
 export enum GenderDto {
   MALE = 'MALE',
@@ -20,4 +20,8 @@ export class UpdateProfileDto {
 
   @IsDateString()
   dob: string;
+
+  @IsOptional()
+  @IsString()
+  occupation?: string;
 }

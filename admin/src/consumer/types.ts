@@ -7,6 +7,7 @@ export interface AuthUser {
   lastName: string | null;
   gender: 'MALE' | 'FEMALE' | 'OTHER' | null;
   dob: string | null;
+  occupation: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
   documentCredits: number;
   profileComplete: boolean;
@@ -123,4 +124,18 @@ export interface TeamSubscriptionOrder {
   organizationId: string;
   razorpaySubscriptionId: string;
   keyId: string;
+}
+
+export interface PersonalTemplateField {
+  key: string;
+  label: string;
+  originalValue: string;
+}
+
+export interface PersonalTemplateSummary {
+  id: string;
+  name: string;
+  sourceFileName: string;
+  fields: PersonalTemplateField[];
+  createdAt: string;
 }
