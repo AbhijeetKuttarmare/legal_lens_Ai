@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { ListQueryDto } from './dto/list-query.dto';
@@ -6,6 +6,7 @@ import { SetTrialLimitDto } from './dto/set-trial-limit.dto';
 import { SetFeatureTrialDto } from './dto/set-feature-trial.dto';
 import { BanUserDto } from './dto/ban-user.dto';
 import { SetPlanDto } from './dto/set-plan.dto';
+import { GrantTeamDto } from './dto/grant-team.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 
 @Controller('admin')
@@ -83,6 +84,20 @@ export class AdminController {
     @Body() dto: SetPlanDto,
   ) {
     return this.adminService.setPlanOverride(admin.userId, targetUserId, dto.plan, dto.days);
+  }
+
+  @Post('users/:id/grant-team')
+  grantTestTeam(
+    @CurrentUser() admin: { userId: string },
+    @Param('id') targetUserId: string,
+    @Body() dto: GrantTeamDto,
+  ) {
+    return this.adminService.grantTestTeam(admin.userId, targetUserId, dto.seatTier, dto.seatCount);
+  }
+
+  @Delete('users/:id/team')
+  revokeTestTeam(@CurrentUser() admin: { userId: string }, @Param('id') targetUserId: string) {
+    return this.adminService.revokeTestTeam(admin.userId, targetUserId);
   }
 
   @Get('otp-log')

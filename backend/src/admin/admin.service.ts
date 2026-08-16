@@ -1,10 +1,12 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { FeatureTrialKey } from './dto/set-feature-trial.dto';
 import { PlanKey } from './dto/set-plan.dto';
+import { SeatTierKey } from './dto/grant-team.dto';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
@@ -431,6 +433,18 @@ export class AdminService {
           chatTrialUntil: true,
           createdAt: true,
           _count: { select: { documents: true } },
+          ownedOrganization: {
+            select: {
+              id: true,
+              name: true,
+              seatTier: true,
+              subscription: { select: { status: true, seatCount: true, razorpayPlanId: true } },
+              members: { select: { id: true } },
+            },
+          },
+          organizationMember: {
+            select: { organizationId: true, role: true, organization: { select: { name: true } } },
+          },
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
@@ -440,6 +454,82 @@ export class AdminService {
     ]);
 
     return { data, total, page, pageSize };
+  }
+
+  // Admin-only bypass of Razorpay for demoing/testing the team plan without
+  // a real charge. razorpayPlanId is set to a sentinel so it's obviously
+  // distinguishable from a genuine subscription in the DB/audit log.
+  async grantTestTeam(adminUserId: string, targetUserId: string, seatTier: SeatTierKey, seatCount: number) {
+    const existingMembership = await this.prisma.organizationMember.findUnique({ where: { userId: targetUserId } });
+    if (existingMembership) {
+      throw new ConflictException('This user is already part of a team. Revoke it first.');
+    }
+
+    const [admin, target] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: adminUserId } }),
+      this.prisma.user.findUnique({ where: { id: targetUserId } }),
+    ]);
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    const org = await this.prisma.organization.create({
+      data: {
+        name: `${target.name || target.email || target.phone || 'Test'} Team (admin-granted)`,
+        ownerId: targetUserId,
+        seatTier: seatTier as any,
+        members: { create: { userId: targetUserId, role: 'OWNER' } },
+        subscription: {
+          create: {
+            razorpaySubscriptionId: `admin_grant_${crypto.randomUUID()}`,
+            razorpayPlanId: 'ADMIN_GRANTED',
+            seatTier: seatTier as any,
+            seatCount,
+            status: 'ACTIVE',
+          },
+        },
+      },
+      include: { subscription: true },
+    });
+
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action: 'GRANT_TEST_TEAM',
+      targetType: 'Organization',
+      targetId: org.id,
+      metadata: { targetUserId, seatTier, seatCount },
+    });
+
+    return org;
+  }
+
+  async revokeTestTeam(adminUserId: string, targetUserId: string) {
+    const [admin, org] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: adminUserId } }),
+      this.prisma.organization.findUnique({ where: { ownerId: targetUserId } }),
+    ]);
+    if (!org) {
+      throw new NotFoundException('This user does not own a team.');
+    }
+
+    // Cascades to OrganizationMember and TeamSubscription rows (schema
+    // onDelete: Cascade), fully freeing the owner and every member to be
+    // re-granted or join another team.
+    await this.prisma.organization.delete({ where: { id: org.id } });
+
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action: 'REVOKE_TEST_TEAM',
+      targetType: 'Organization',
+      targetId: org.id,
+      metadata: { targetUserId, orgName: org.name },
+    });
+
+    return { success: true as const };
   }
 
   async setTrialLimit(adminUserId: string, targetUserId: string, trialDocumentLimit: number | null | undefined) {

@@ -148,6 +148,14 @@ export interface AdminSubscription {
   chatTrialUntil: string | null;
   createdAt: string;
   _count: { documents: number };
+  ownedOrganization: {
+    id: string;
+    name: string;
+    seatTier: 'STANDARD' | 'PREMIUM';
+    subscription: { status: string; seatCount: number; razorpayPlanId: string } | null;
+    members: { id: string }[];
+  } | null;
+  organizationMember: { organizationId: string; role: string; organization: { name: string } } | null;
 }
 
 export function fetchSubscriptions(params: { page?: number; pageSize?: number; search?: string } = {}) {
@@ -168,6 +176,19 @@ export function setPlan(userId: string, plan: 'FREE' | 'PRO' | 'ENTERPRISE', day
     method: 'PATCH',
     body: JSON.stringify({ plan, days }),
   });
+}
+
+// Bypasses Razorpay entirely — creates a real, active Organization +
+// TeamSubscription directly, for demoing/testing the team plan for free.
+export function grantTestTeam(userId: string, seatTier: 'STANDARD' | 'PREMIUM', seatCount: number) {
+  return request<{ id: string }>(`/admin/users/${userId}/grant-team`, {
+    method: 'POST',
+    body: JSON.stringify({ seatTier, seatCount }),
+  });
+}
+
+export function revokeTestTeam(userId: string) {
+  return request<{ success: true }>(`/admin/users/${userId}/team`, { method: 'DELETE' });
 }
 
 export type FeatureTrialKey = 'COMPARE' | 'TEMPLATES' | 'EXPORT' | 'CHAT';

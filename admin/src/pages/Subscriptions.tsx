@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { AdminSubscription, ApiError, FeatureTrialKey, fetchSubscriptions, setFeatureTrial, setPlan, setTrialLimit } from '../api';
+import {
+  AdminSubscription,
+  ApiError,
+  FeatureTrialKey,
+  fetchSubscriptions,
+  grantTestTeam,
+  revokeTestTeam,
+  setFeatureTrial,
+  setPlan,
+  setTrialLimit,
+} from '../api';
 import Pagination from '../components/Pagination';
 
 const PAGE_SIZE = 25;
@@ -54,6 +64,8 @@ export default function Subscriptions() {
   const [durations, setDurations] = useState<Record<string, number>>({});
   const [planDrafts, setPlanDrafts] = useState<Record<string, 'FREE' | 'PRO' | 'ENTERPRISE'>>({});
   const [planDurations, setPlanDurations] = useState<Record<string, number>>({});
+  const [teamSeatTiers, setTeamSeatTiers] = useState<Record<string, 'STANDARD' | 'PREMIUM'>>({});
+  const [teamSeatCounts, setTeamSeatCounts] = useState<Record<string, number>>({});
 
   function load() {
     fetchSubscriptions({ page, pageSize: PAGE_SIZE, search })
@@ -92,6 +104,31 @@ export default function Subscriptions() {
       load();
     } catch (err) {
       window.alert(err instanceof ApiError ? err.message : 'Could not set this plan.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function grantTeam(userId: string, seatTier: 'STANDARD' | 'PREMIUM', seatCount: number) {
+    setBusyId(`${userId}:team`);
+    try {
+      await grantTestTeam(userId, seatTier, seatCount);
+      load();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : 'Could not grant a team.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function revokeTeam(userId: string, orgName: string) {
+    if (!window.confirm(`Revoke "${orgName}"? This removes every member from the team immediately.`)) return;
+    setBusyId(`${userId}:team`);
+    try {
+      await revokeTestTeam(userId);
+      load();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : 'Could not revoke this team.');
     } finally {
       setBusyId(null);
     }
@@ -158,6 +195,7 @@ export default function Subscriptions() {
                 <th>User</th>
                 <th>Plan</th>
                 <th>Set plan</th>
+                <th>Team</th>
                 <th>Docs used</th>
                 <th>Trial status</th>
                 <th>Grant document trial</th>
@@ -170,6 +208,7 @@ export default function Subscriptions() {
                 const busy = busyId === s.id;
                 const duration = durations[s.id] ?? 7;
                 const planBusy = busyId === `${s.id}:plan`;
+                const teamBusy = busyId === `${s.id}:team`;
                 const planDaysLeft = daysLeft(s.planExpiresAt);
                 const draftPlan = planDrafts[s.id] ?? s.plan;
                 const draftPlanDuration = planDurations[s.id] ?? 3;
@@ -221,6 +260,60 @@ export default function Subscriptions() {
                           {planBusy ? '…' : 'Apply'}
                         </button>
                       </div>
+                    </td>
+                    <td>
+                      {s.ownedOrganization ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 160 }}>
+                          <span className="cell-sub">
+                            Owner · {s.ownedOrganization.members.length}/{s.ownedOrganization.subscription?.seatCount ?? 0} seats
+                          </span>
+                          <span
+                            style={{
+                              fontSize: 10.5,
+                              fontWeight: 700,
+                              color: s.ownedOrganization.subscription?.status === 'ACTIVE' ? '#16A34A' : '#B45309',
+                            }}
+                          >
+                            {s.ownedOrganization.subscription?.status}
+                            {s.ownedOrganization.subscription?.razorpayPlanId === 'ADMIN_GRANTED' && ' (test)'}
+                          </span>
+                          <button
+                            className="icon-button danger"
+                            disabled={teamBusy}
+                            onClick={() => revokeTeam(s.id, s.ownedOrganization!.name)}
+                          >
+                            {teamBusy ? '…' : 'Revoke'}
+                          </button>
+                        </div>
+                      ) : s.organizationMember ? (
+                        <span className="cell-sub">Member of {s.organizationMember.organization.name}</span>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 150 }}>
+                          <select
+                            value={teamSeatTiers[s.id] ?? 'STANDARD'}
+                            onChange={(e) => setTeamSeatTiers((d) => ({ ...d, [s.id]: e.target.value as 'STANDARD' | 'PREMIUM' }))}
+                            style={{ padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11.5 }}
+                          >
+                            <option value="STANDARD">Standard</option>
+                            <option value="PREMIUM">Premium</option>
+                          </select>
+                          <input
+                            type="number"
+                            min={2}
+                            max={150}
+                            value={teamSeatCounts[s.id] ?? 6}
+                            onChange={(e) => setTeamSeatCounts((d) => ({ ...d, [s.id]: Number(e.target.value) }))}
+                            style={{ width: 70, padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12.5 }}
+                          />
+                          <button
+                            className="icon-button"
+                            disabled={teamBusy}
+                            onClick={() => grantTeam(s.id, teamSeatTiers[s.id] ?? 'STANDARD', teamSeatCounts[s.id] ?? 6)}
+                          >
+                            {teamBusy ? '…' : 'Grant test team'}
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td>{s._count.documents}</td>
                     <td>
