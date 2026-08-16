@@ -19,7 +19,7 @@ const FAQS = [
   },
   {
     q: 'What does the Free plan include?',
-    a: 'The Free plan includes 3 documents, Clauzera summaries, and document history. Upgrade to Pro for unlimited uploads and full features from the Subscription page.',
+    a: 'The Free plan includes 1 document, Clauzera summaries, and document history. Upgrade to Pro for unlimited uploads and full features from the Subscription page.',
   },
   {
     q: 'How do I delete a document?',

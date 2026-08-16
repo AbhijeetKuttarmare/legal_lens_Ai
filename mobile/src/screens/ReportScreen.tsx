@@ -50,8 +50,8 @@ export default function ReportScreen({ route, navigation }: Props) {
   const onExport = async () => {
     if (!isPremium) {
       Alert.alert(
-        'Premium feature',
-        'Exporting and downloading reports is available on the Premium plan.',
+        'Max feature',
+        'Exporting and downloading reports is available on the Max plan.',
         [
           { text: 'Not now', style: 'cancel' },
           {
@@ -352,7 +352,7 @@ export default function ReportScreen({ route, navigation }: Props) {
             />
           )}
           <Text style={styles.exportButtonText}>
-            {isPremium ? 'Export / Download Report' : 'Export Report (Premium)'}
+            {isPremium ? 'Export / Download Report' : 'Export Report (Max)'}
           </Text>
         </Pressable>
 

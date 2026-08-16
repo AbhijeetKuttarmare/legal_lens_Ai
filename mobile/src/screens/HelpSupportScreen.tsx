@@ -22,7 +22,7 @@ const FAQS = [
   },
   {
     q: 'Why can I only upload 1 document?',
-    a: 'The Free plan allows 1 active document at a time. You can delete your existing document to upload a new one, or upgrade to Pro or Premium for unlimited uploads from the Subscription tab.',
+    a: 'The Free plan allows 1 active document at a time. You can delete your existing document to upload a new one, or upgrade to Pro or Max for unlimited uploads from the Subscription tab.',
   },
   {
     q: 'How do I delete a document?',

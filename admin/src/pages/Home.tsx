@@ -131,7 +131,7 @@ const FAQS = [
   },
   {
     q: 'How much does it cost?',
-    a: 'Free to start with 3 documents. Pro is ₹299/month for unlimited uploads and full features. Enterprise plans are available for teams.',
+    a: 'Free to start with 1 document. Pro is ₹2,000/month for unlimited uploads and full features. Max and team plans are also available for power users and organizations.',
   },
 ];
 

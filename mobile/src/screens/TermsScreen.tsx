@@ -24,7 +24,7 @@ const SECTIONS = [
   },
   {
     heading: '6. Subscription Plans',
-    body: 'Clauzera AI offers Free, Pro, and Premium plans with different document limits and features, as shown on the Subscription screen. Plan prices and features may change; we will make reasonable efforts to notify you of material changes.',
+    body: 'Clauzera AI offers Free, Pro, and Max plans with different document limits and features, as shown on the Subscription screen. Plan prices and features may change; we will make reasonable efforts to notify you of material changes.',
   },
   {
     heading: '7. Acceptable Use',

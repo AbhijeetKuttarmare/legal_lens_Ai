@@ -24,13 +24,15 @@ interface Plan {
   highlight?: boolean;
 }
 
+// Kept in sync with admin/src/consumer/pages/Subscription.tsx's PLANS —
+// same prices, names, and feature lists on both platforms.
 function buildPlans(accent: string): Plan[] {
   return [
     {
       id: 'FREE',
       name: 'Free',
       price: '₹0',
-      features: ['1 document', 'Clauzera summary', 'Document history'],
+      features: ['1 document', 'Clauzera summary', '5 questions per document', 'Document history'],
       icon: 'send-outline',
       iconBg: '#DBEAFE',
       iconColor: '#2563EB',
@@ -39,9 +41,17 @@ function buildPlans(accent: string): Plan[] {
     {
       id: 'PRO',
       name: 'Pro',
-      price: '₹299',
+      price: '₹2,000',
       period: '/month',
-      features: ['Unlimited uploads', 'Unlimited Clauzera chat', 'Risk detection'],
+      features: [
+        'Unlimited uploads',
+        'Unlimited Clauzera chat',
+        'Risk detection',
+        'Clause comparison',
+        'Multi-language support',
+        'Export PDF report',
+        'Priority support',
+      ],
       icon: 'diamond-stone',
       iconBg: '#FFF7E0',
       iconColor: accent,
@@ -49,22 +59,15 @@ function buildPlans(accent: string): Plan[] {
     },
     {
       id: 'ENTERPRISE',
-      name: 'Premium',
-      price: '₹599',
+      name: 'Max',
+      price: '₹11,999',
       period: '/month',
       highlight: true,
       icon: 'crown',
       iconBg: 'rgba(212,175,55,0.2)',
       iconColor: accent,
       decoration: 'shield-check',
-      features: [
-        'Unlimited uploads',
-        'Unlimited Clauzera chat',
-        'Risk detection',
-        'Priority support',
-        'Advanced Clauzera insights',
-        'Export & download reports',
-      ],
+      features: ['Everything in Pro', 'Highest priority processing', 'Dedicated support'],
     },
   ];
 }
