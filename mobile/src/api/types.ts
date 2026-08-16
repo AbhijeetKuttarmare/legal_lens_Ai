@@ -9,6 +9,7 @@ export interface AuthUser {
   dob: string | null;
   occupation: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+  planExpiresAt?: string | null;
   documentCredits: number;
   profileComplete: boolean;
 }

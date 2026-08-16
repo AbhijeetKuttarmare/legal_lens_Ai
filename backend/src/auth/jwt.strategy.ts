@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: { sub: string }) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      select: { id: true, isBanned: true },
+      select: { id: true, isBanned: true, plan: true, planExpiresAt: true },
     });
     if (!user) {
       throw new UnauthorizedException('Account not found');
@@ -28,6 +28,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException(
         'Your account has been suspended by the organization. Contact support if you believe this is a mistake.',
       );
+    }
+    // Admin-granted temporary plans (e.g. a 3-day Pro trial) revert to Free
+    // the moment they expire — checked here rather than a cron job so it
+    // takes effect on the user's very next request, same as the ban check.
+    if (user.planExpiresAt && user.planExpiresAt.getTime() <= Date.now() && user.plan !== 'FREE') {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { plan: 'FREE', planExpiresAt: null },
+      });
     }
     return { userId: payload.sub };
   }

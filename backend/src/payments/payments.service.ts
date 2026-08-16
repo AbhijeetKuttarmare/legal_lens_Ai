@@ -211,7 +211,7 @@ export class PaymentsService {
     if (event?.event === 'payment.captured' && payment?.notes?.userId && payment?.notes?.plan) {
       await this.prisma.user.update({
         where: { id: payment.notes.userId },
-        data: { plan: payment.notes.plan },
+        data: { plan: payment.notes.plan, planExpiresAt: null },
       });
 
       if (payment.order_id) {
@@ -295,7 +295,8 @@ export class PaymentsService {
 
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: { plan: order.plan },
+      // A real payment always wins over any admin-granted temporary plan.
+      data: { plan: order.plan, planExpiresAt: null },
     });
 
     this.auditLog.record({

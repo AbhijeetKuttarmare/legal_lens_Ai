@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { FeatureTrialKey } from './dto/set-feature-trial.dto';
+import { PlanKey } from './dto/set-plan.dto';
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
@@ -422,6 +423,7 @@ export class AdminService {
           phone: true,
           name: true,
           plan: true,
+          planExpiresAt: true,
           trialDocumentLimit: true,
           compareTrialUntil: true,
           templatesTrialUntil: true,
@@ -521,6 +523,50 @@ export class AdminService {
       metadata: {
         targetLabel: updated.name || updated.email || updated.phone,
         feature,
+        days: normalizedDays,
+        expiresAt,
+      },
+    });
+
+    return updated;
+  }
+
+  async setPlanOverride(
+    adminUserId: string,
+    targetUserId: string,
+    plan: PlanKey,
+    days: number | null | undefined,
+  ) {
+    const normalizedDays = days === undefined ? null : days;
+    // Free never needs an expiry; Pro/Enterprise get one only if a duration
+    // was given — omitting it grants a permanent, admin-comped plan.
+    const expiresAt = plan !== 'FREE' && normalizedDays ? new Date(Date.now() + normalizedDays * 24 * 60 * 60 * 1000) : null;
+
+    const [admin, target] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: adminUserId } }),
+      this.prisma.user.findUnique({ where: { id: targetUserId } }),
+    ]);
+
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: targetUserId },
+      data: { plan, planExpiresAt: expiresAt },
+      select: { id: true, plan: true, planExpiresAt: true, name: true, email: true, phone: true },
+    });
+
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action: 'SET_PLAN_OVERRIDE',
+      targetType: 'User',
+      targetId: targetUserId,
+      metadata: {
+        targetLabel: updated.name || updated.email || updated.phone,
+        plan,
         days: normalizedDays,
         expiresAt,
       },

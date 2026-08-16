@@ -140,6 +140,7 @@ export interface AdminSubscription {
   phone: string | null;
   name: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+  planExpiresAt: string | null;
   trialDocumentLimit: number | null;
   compareTrialUntil: string | null;
   templatesTrialUntil: string | null;
@@ -158,6 +159,14 @@ export function setTrialLimit(userId: string, trialDocumentLimit: number | null)
   return request<{ id: string; trialDocumentLimit: number | null }>(`/admin/users/${userId}/trial`, {
     method: 'PATCH',
     body: JSON.stringify({ trialDocumentLimit }),
+  });
+}
+
+// days: null/omitted grants a permanent plan (no auto-revert), N reverts to Free after N days
+export function setPlan(userId: string, plan: 'FREE' | 'PRO' | 'ENTERPRISE', days?: number | null) {
+  return request<{ id: string; plan: string; planExpiresAt: string | null }>(`/admin/users/${userId}/plan`, {
+    method: 'PATCH',
+    body: JSON.stringify({ plan, days }),
   });
 }
 

@@ -73,6 +73,11 @@ model User {
   dob          DateTime?
   occupation   String?
   plan         PlanTier  @default(FREE)
+  // Set when an admin grants plan directly with a time limit (e.g. a 3-day
+  // Pro trial). null = permanent (default Free, or a real paid plan — the
+  // Razorpay payment flow always clears this). Checked/enforced lazily in
+  // JwtStrategy on every authenticated request, same pattern as isBanned.
+  planExpiresAt DateTime?
   isAdmin      Boolean   @default(false)
   isBanned     Boolean   @default(false)
   bannedAt     DateTime?

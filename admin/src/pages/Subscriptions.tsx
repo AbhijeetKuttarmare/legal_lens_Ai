@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminSubscription, ApiError, FeatureTrialKey, fetchSubscriptions, setFeatureTrial, setTrialLimit } from '../api';
+import { AdminSubscription, ApiError, FeatureTrialKey, fetchSubscriptions, setFeatureTrial, setPlan, setTrialLimit } from '../api';
 import Pagination from '../components/Pagination';
 
 const PAGE_SIZE = 25;
@@ -12,6 +12,19 @@ const FEATURE_TRIALS: { key: FeatureTrialKey; field: keyof AdminSubscription; la
 ];
 
 const DURATIONS = [7, 14, 30];
+
+const PLAN_OPTIONS: { key: 'FREE' | 'PRO' | 'ENTERPRISE'; label: string }[] = [
+  { key: 'FREE', label: 'Free' },
+  { key: 'PRO', label: 'Pro' },
+  { key: 'ENTERPRISE', label: 'Max' },
+];
+
+// 0 is a sentinel for "no expiry" (permanent) — mapped to days: null before the API call.
+const PLAN_DURATIONS = [3, 7, 14, 30, 0];
+
+function planDurationLabel(d: number) {
+  return d === 0 ? 'No expiry' : `${d} days`;
+}
 
 function ownerLabel(s: AdminSubscription) {
   return s.name || s.email || s.phone || 'Unknown';
@@ -39,6 +52,8 @@ export default function Subscriptions() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [draftLimits, setDraftLimits] = useState<Record<string, string>>({});
   const [durations, setDurations] = useState<Record<string, number>>({});
+  const [planDrafts, setPlanDrafts] = useState<Record<string, 'FREE' | 'PRO' | 'ENTERPRISE'>>({});
+  const [planDurations, setPlanDurations] = useState<Record<string, number>>({});
 
   function load() {
     fetchSubscriptions({ page, pageSize: PAGE_SIZE, search })
@@ -65,6 +80,18 @@ export default function Subscriptions() {
       load();
     } catch {
       // no-op — row simply won't update; the controls remain actionable
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function applyPlan(userId: string, plan: 'FREE' | 'PRO' | 'ENTERPRISE', days: number | null) {
+    setBusyId(`${userId}:plan`);
+    try {
+      await setPlan(userId, plan, days);
+      load();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : 'Could not set this plan.');
     } finally {
       setBusyId(null);
     }
@@ -130,6 +157,7 @@ export default function Subscriptions() {
               <tr>
                 <th>User</th>
                 <th>Plan</th>
+                <th>Set plan</th>
                 <th>Docs used</th>
                 <th>Trial status</th>
                 <th>Grant document trial</th>
@@ -141,6 +169,10 @@ export default function Subscriptions() {
                 const label = trialLabel(s.trialDocumentLimit);
                 const busy = busyId === s.id;
                 const duration = durations[s.id] ?? 7;
+                const planBusy = busyId === `${s.id}:plan`;
+                const planDaysLeft = daysLeft(s.planExpiresAt);
+                const draftPlan = planDrafts[s.id] ?? s.plan;
+                const draftPlanDuration = planDurations[s.id] ?? 3;
                 return (
                   <tr key={s.id}>
                     <td>
@@ -149,6 +181,46 @@ export default function Subscriptions() {
                     </td>
                     <td>
                       <span className={`badge badge-${s.plan.toLowerCase()}`}>{s.plan}</span>
+                      {planDaysLeft !== null && (
+                        <div className="cell-sub" style={{ marginTop: 4 }}>
+                          Admin-granted · {planDaysLeft}d left
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 170 }}>
+                        <select
+                          value={draftPlan}
+                          onChange={(e) => setPlanDrafts((d) => ({ ...d, [s.id]: e.target.value as 'FREE' | 'PRO' | 'ENTERPRISE' }))}
+                          style={{ padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11.5 }}
+                        >
+                          {PLAN_OPTIONS.map((p) => (
+                            <option key={p.key} value={p.key}>
+                              {p.label}
+                            </option>
+                          ))}
+                        </select>
+                        {draftPlan !== 'FREE' && (
+                          <select
+                            value={draftPlanDuration}
+                            onChange={(e) => setPlanDurations((d) => ({ ...d, [s.id]: Number(e.target.value) }))}
+                            style={{ padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 11.5 }}
+                          >
+                            {PLAN_DURATIONS.map((d) => (
+                              <option key={d} value={d}>
+                                {planDurationLabel(d)}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        <button
+                          className="icon-button"
+                          disabled={planBusy}
+                          onClick={() => applyPlan(s.id, draftPlan, draftPlan === 'FREE' ? null : draftPlanDuration || null)}
+                        >
+                          {planBusy ? '…' : 'Apply'}
+                        </button>
+                      </div>
                     </td>
                     <td>{s._count.documents}</td>
                     <td>

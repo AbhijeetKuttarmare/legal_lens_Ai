@@ -263,6 +263,13 @@ export default function Subscription() {
         Unlock unlimited documents and deeper Clauzera insight.
       </p>
 
+      {user?.planExpiresAt && new Date(user.planExpiresAt).getTime() > Date.now() && (
+        <div style={{ background: '#FEF3C7', color: '#92400E', fontSize: 12.5, padding: '10px 12px', borderRadius: 10, marginBottom: 16 }}>
+          Your {user.plan === 'ENTERPRISE' ? 'Max' : 'Pro'} access is a trial and reverts to Free on{' '}
+          {new Date(user.planExpiresAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}.
+        </div>
+      )}
+
       <div className="cw-plan-tabs">
         <span className={tab === 'individual' ? 'active' : ''} onClick={() => setTab('individual')}>
           Individual
