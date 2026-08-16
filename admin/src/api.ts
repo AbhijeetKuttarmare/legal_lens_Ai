@@ -108,6 +108,7 @@ export interface AdminUser {
   lastName: string | null;
   plan: 'FREE' | 'PRO' | 'ENTERPRISE';
   isAdmin: boolean;
+  isBanned: boolean;
   createdAt: string;
   _count: { documents: number };
 }
@@ -120,6 +121,17 @@ export function toggleAdmin(userId: string) {
   return request<{ id: string; isAdmin: boolean }>(`/admin/users/${userId}/toggle-admin`, {
     method: 'PATCH',
   });
+}
+
+export function toggleBan(userId: string, reason?: string) {
+  return request<{ id: string; isBanned: boolean }>(`/admin/users/${userId}/toggle-ban`, {
+    method: 'PATCH',
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export function deleteUser(userId: string) {
+  return request<{ success: true }>(`/admin/users/${userId}`, { method: 'DELETE' });
 }
 
 export interface AdminSubscription {

@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import * as fs from 'fs';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -60,6 +61,7 @@ export class AdminService {
           lastName: true,
           plan: true,
           isAdmin: true,
+          isBanned: true,
           createdAt: true,
           _count: { select: { documents: true } },
         },
@@ -313,6 +315,87 @@ export class AdminService {
     });
 
     return updated;
+  }
+
+  async toggleBanStatus(adminUserId: string, targetUserId: string, reason?: string) {
+    if (adminUserId === targetUserId) {
+      throw new BadRequestException('Cannot ban your own account');
+    }
+
+    const [admin, target] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: adminUserId } }),
+      this.prisma.user.findUnique({ where: { id: targetUserId } }),
+    ]);
+
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+    if (target.isAdmin) {
+      throw new BadRequestException('Cannot ban another admin — revoke their admin access first');
+    }
+
+    const willBan = !target.isBanned;
+    const updated = await this.prisma.user.update({
+      where: { id: targetUserId },
+      data: {
+        isBanned: willBan,
+        bannedAt: willBan ? new Date() : null,
+        banReason: willBan ? reason?.trim() || null : null,
+      },
+      select: { id: true, isBanned: true, name: true, email: true, phone: true },
+    });
+
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action: updated.isBanned ? 'BAN_USER' : 'UNBAN_USER',
+      targetType: 'User',
+      targetId: targetUserId,
+      metadata: { targetLabel: updated.name || updated.email || updated.phone, reason },
+    });
+
+    return updated;
+  }
+
+  async deleteUser(adminUserId: string, targetUserId: string) {
+    if (adminUserId === targetUserId) {
+      throw new BadRequestException('Cannot delete your own account');
+    }
+
+    const [admin, target] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: adminUserId } }),
+      this.prisma.user.findUnique({ where: { id: targetUserId } }),
+    ]);
+
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+    if (target.isAdmin) {
+      throw new BadRequestException('Cannot delete another admin — revoke their admin access first');
+    }
+
+    const documents = await this.prisma.document.findMany({
+      where: { userId: targetUserId },
+      select: { storagePath: true },
+    });
+
+    await this.prisma.user.delete({ where: { id: targetUserId } });
+    for (const doc of documents) {
+      fs.unlink(doc.storagePath, () => {});
+    }
+
+    await this.auditLog.record({
+      actorType: 'ADMIN',
+      actorId: adminUserId,
+      actorLabel: admin?.name || admin?.email || admin?.phone || adminUserId,
+      action: 'DELETE_USER',
+      targetType: 'User',
+      targetId: targetUserId,
+      metadata: { targetLabel: target.name || target.email || target.phone },
+    });
+
+    return { success: true as const };
   }
 
   async listSubscriptions(params: { page?: number; pageSize?: number; search?: string }) {

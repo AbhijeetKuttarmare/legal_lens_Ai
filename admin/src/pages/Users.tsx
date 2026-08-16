@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminUser, ApiError, fetchUsers, getIdentity, toggleAdmin } from '../api';
+import { AdminUser, ApiError, deleteUser, fetchUsers, getIdentity, toggleAdmin, toggleBan } from '../api';
 import Pagination from '../components/Pagination';
 
 const PAGE_SIZE = 25;
@@ -43,6 +43,49 @@ export default function Users() {
     } catch {
       // no-op — row simply won't update; the button remains actionable
     } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleToggleBan(u: AdminUser) {
+    const label = u.name || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || u.phone || 'this user';
+    if (u.isBanned) {
+      if (!window.confirm(`Unban ${label}? They will be able to sign in again immediately.`)) return;
+      setBusyId(u.id);
+      try {
+        await toggleBan(u.id);
+        load();
+      } catch (err) {
+        window.alert(err instanceof ApiError ? err.message : 'Could not unban this user.');
+      } finally {
+        setBusyId(null);
+      }
+      return;
+    }
+
+    if (!window.confirm(`Ban ${label}? They will be signed out and blocked from using the app immediately.`)) return;
+    const reason = window.prompt('Reason for ban (optional, shown in audit log only):') || undefined;
+    setBusyId(u.id);
+    try {
+      await toggleBan(u.id, reason);
+      load();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : 'Could not ban this user.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleDelete(u: AdminUser) {
+    const label = u.name || [u.firstName, u.lastName].filter(Boolean).join(' ') || u.email || u.phone || 'this user';
+    if (!window.confirm(`Delete ${label}? This permanently removes their account and all documents. This cannot be undone.`)) return;
+    if (!window.confirm('Are you absolutely sure? This is your last chance to cancel.')) return;
+    setBusyId(u.id);
+    try {
+      await deleteUser(u.id);
+      load();
+    } catch (err) {
+      window.alert(err instanceof ApiError ? err.message : 'Could not delete this user.');
       setBusyId(null);
     }
   }
@@ -118,6 +161,11 @@ export default function Users() {
                               Admin
                             </span>
                           )}
+                          {u.isBanned && (
+                            <span className="badge" style={{ marginLeft: 6, background: '#FEE2E2', color: '#DC2626' }}>
+                              Banned
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -135,13 +183,34 @@ export default function Users() {
                     {u.id === selfId ? (
                       <span className="cell-sub">You</span>
                     ) : (
-                      <button
-                        className="icon-button"
-                        disabled={busyId === u.id}
-                        onClick={() => handleToggleAdmin(u.id)}
-                      >
-                        {busyId === u.id ? '…' : u.isAdmin ? 'Revoke admin' : 'Make admin'}
-                      </button>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <button
+                          className="icon-button"
+                          disabled={busyId === u.id}
+                          onClick={() => handleToggleAdmin(u.id)}
+                        >
+                          {busyId === u.id ? '…' : u.isAdmin ? 'Revoke admin' : 'Make admin'}
+                        </button>
+                        {!u.isAdmin && (
+                          <>
+                            <button
+                              className="icon-button"
+                              disabled={busyId === u.id}
+                              onClick={() => handleToggleBan(u)}
+                            >
+                              {busyId === u.id ? '…' : u.isBanned ? 'Unban' : 'Ban'}
+                            </button>
+                            <button
+                              className="icon-button"
+                              style={{ color: '#DC2626', borderColor: '#DC2626' }}
+                              disabled={busyId === u.id}
+                              onClick={() => handleDelete(u)}
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
                   </td>
                 </tr>

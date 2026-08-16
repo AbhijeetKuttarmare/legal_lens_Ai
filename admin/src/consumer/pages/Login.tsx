@@ -1,6 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ApiError, requestOtp, setStoredUser, setToken, verifyOtp } from '../api';
+import { ApiError, requestOtp, setStoredUser, setToken, takeLogoutReason, verifyOtp } from '../api';
 import { ShieldIcon } from '../../icons';
 
 export default function Login() {
@@ -8,7 +8,7 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => takeLogoutReason());
   const [loading, setLoading] = useState(false);
 
   function friendlyError(err: unknown) {

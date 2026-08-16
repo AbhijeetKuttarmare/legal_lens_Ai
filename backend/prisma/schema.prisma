@@ -74,6 +74,9 @@ model User {
   occupation   String?
   plan         PlanTier  @default(FREE)
   isAdmin      Boolean   @default(false)
+  isBanned     Boolean   @default(false)
+  bannedAt     DateTime?
+  banReason    String?
   // Admin testing override for documents.service upload limit checks.
   // null = no override (use plan limit); -1 = unlimited; N = exact cap.
   trialDocumentLimit Int?

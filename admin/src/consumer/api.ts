@@ -37,9 +37,19 @@ export function setStoredUser(user: AuthUser) {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
+const LOGOUT_REASON_KEY = 'legallens_logout_reason';
+
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+}
+
+// Read once by the login screen, then cleared — surfaces *why* a 401 kicked
+// the user out (e.g. a ban) instead of silently dropping them at login.
+export function takeLogoutReason(): string | null {
+  const reason = localStorage.getItem(LOGOUT_REASON_KEY);
+  localStorage.removeItem(LOGOUT_REASON_KEY);
+  return reason;
 }
 
 export class ApiError extends Error {
@@ -61,8 +71,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (!res.ok) {
-    if (res.status === 401) clearSession();
     const body = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      if (body.message) localStorage.setItem(LOGOUT_REASON_KEY, body.message);
+      clearSession();
+    }
     throw new ApiError(res.status, body.message || `Request failed (${res.status})`);
   }
 
@@ -317,8 +330,11 @@ export async function streamAskQuestion(
   });
 
   if (!res.ok) {
-    if (res.status === 401) clearSession();
     const body = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      if (body.message) localStorage.setItem(LOGOUT_REASON_KEY, body.message);
+      clearSession();
+    }
     throw new ApiError(res.status, body.message || `Request failed (${res.status})`);
   }
 
