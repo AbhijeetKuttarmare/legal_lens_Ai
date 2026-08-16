@@ -52,12 +52,13 @@ export default function Templates() {
       .catch(() => {});
   }, []);
 
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
   useEffect(() => {
-    if (!isPaid) return;
     listTemplateTypes()
       .then(setTypes)
       .catch(() => setError('Could not load template types.'));
-  }, [isPaid]);
+  }, []);
 
   function selectType(key: string) {
     setSelectedType(key);
@@ -65,10 +66,15 @@ export default function Templates() {
     setContent(null);
     setError(null);
     setConsent(false);
+    setShowUpgrade(false);
   }
 
   async function onGenerate() {
     if (!selectedType || !consent) return;
+    if (!isPaid) {
+      setShowUpgrade(true);
+      return;
+    }
     setError(null);
     setContent(null);
     setLoading(true);
@@ -95,20 +101,16 @@ export default function Templates() {
         Document Templates
       </div>
 
-      {isPaid && (
-        <div className="cw-plan-tabs" style={{ marginBottom: 20 }}>
-          <span className={mode === 'ai' ? 'active' : ''} onClick={() => setMode('ai')}>
-            AI Templates
-          </span>
-          <span className={mode === 'personal' ? 'active' : ''} onClick={() => setMode('personal')}>
-            My Templates
-          </span>
-        </div>
-      )}
+      <div className="cw-plan-tabs" style={{ marginBottom: 20 }}>
+        <span className={mode === 'ai' ? 'active' : ''} onClick={() => setMode('ai')}>
+          AI Templates
+        </span>
+        <span className={mode === 'personal' ? 'active' : ''} onClick={() => setMode('personal')}>
+          My Templates
+        </span>
+      </div>
 
-      {!isPaid && <UpgradeGate feature="Document Templates" />}
-
-      {isPaid && mode === 'ai' && (
+      {mode === 'ai' && (
         <AiTemplatesPanel
           types={types}
           selectedType={selectedType}
@@ -126,10 +128,12 @@ export default function Templates() {
             onDownload(types?.find((t) => t.key === selectedType)?.label || 'Document', `ClauzeraAI-${selectedType}`)
           }
           onEditDetails={() => setContent(null)}
+          showUpgrade={showUpgrade}
+          onBackFromUpgrade={() => setShowUpgrade(false)}
         />
       )}
 
-      {isPaid && mode === 'personal' && <PersonalTemplatesPanel />}
+      {mode === 'personal' && <PersonalTemplatesPanel isPaid={isPaid} />}
     </div>
   );
 }
@@ -149,6 +153,8 @@ function AiTemplatesPanel({
   onGenerate,
   onDownload,
   onEditDetails,
+  showUpgrade,
+  onBackFromUpgrade,
 }: {
   types: TemplateTypeOption[] | null;
   selectedType: string;
@@ -164,7 +170,19 @@ function AiTemplatesPanel({
   onGenerate: () => void;
   onDownload: () => void;
   onEditDetails: () => void;
+  showUpgrade: boolean;
+  onBackFromUpgrade: () => void;
 }) {
+  if (showUpgrade) {
+    return (
+      <>
+        <button className="cw-link-btn" style={{ marginBottom: 12, padding: 0, color: 'var(--cw-gold-bright)' }} onClick={onBackFromUpgrade}>
+          ← Back to details
+        </button>
+        <UpgradeGate feature="Document Templates" />
+      </>
+    );
+  }
   return (
     <>
       <p style={{ color: 'var(--cw-dark-text-muted)', fontSize: 13.5, marginTop: -6, marginBottom: 22 }}>
@@ -270,9 +288,9 @@ function AiTemplatesPanel({
   );
 }
 
-type PersonalMode = 'list' | 'upload' | 'fill' | 'result';
+type PersonalMode = 'list' | 'upload' | 'fill' | 'result' | 'upgrade';
 
-function PersonalTemplatesPanel() {
+function PersonalTemplatesPanel({ isPaid }: { isPaid: boolean }) {
   const [mode, setMode] = useState<PersonalMode>('list');
   const [templates, setTemplates] = useState<PersonalTemplateSummary[] | null>(null);
   const [active, setActive] = useState<PersonalTemplateSummary | null>(null);
@@ -312,6 +330,10 @@ function PersonalTemplatesPanel() {
   }
 
   function openFillMode(template: PersonalTemplateSummary) {
+    if (!isPaid) {
+      setMode('upgrade');
+      return;
+    }
     setActive(template);
     const initial: Record<string, string> = {};
     for (const f of template.fields) initial[f.key] = f.originalValue;
@@ -358,7 +380,7 @@ function PersonalTemplatesPanel() {
         <button
           className="cw-card"
           style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', width: '100%', textAlign: 'left', border: '1.5px dashed var(--cw-dark-border)' }}
-          onClick={() => setMode('upload')}
+          onClick={() => setMode(isPaid ? 'upload' : 'upgrade')}
         >
           <div className="cw-action-icon" style={{ marginBottom: 0 }}>
             <UploadIcon />
@@ -398,6 +420,17 @@ function PersonalTemplatesPanel() {
             ))}
           </div>
         )}
+      </>
+    );
+  }
+
+  if (mode === 'upgrade') {
+    return (
+      <>
+        <button className="cw-link-btn" style={{ marginBottom: 12, padding: 0, color: 'var(--cw-gold-bright)' }} onClick={() => setMode('list')}>
+          ← Back
+        </button>
+        <UpgradeGate feature="Personal Templates" />
       </>
     );
   }
