@@ -249,6 +249,18 @@ export default function SubscriptionScreen({ navigation }: Props) {
           <MaterialCommunityIcons name="arrow-right" size={18} color={t.text} />
         </Pressable>
       </View>
+
+      <Text style={styles.legalNote}>
+        Pro and Max renew monthly at the price shown until cancelled. By subscribing, you agree to our{' '}
+        <Text style={styles.legalLink} onPress={() => navigation.navigate('Terms' as never)}>
+          Terms of Service
+        </Text>{' '}
+        and{' '}
+        <Text style={styles.legalLink} onPress={() => navigation.navigate('PrivacyPolicy' as never)}>
+          Privacy Policy
+        </Text>
+        .
+      </Text>
     </ScrollView>
   );
 }
@@ -395,4 +407,13 @@ const makeStyles = (t: AppTheme) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
+    legalNote: {
+      color: t.textMuted,
+      fontSize: 11.5,
+      lineHeight: 17,
+      textAlign: 'center',
+      marginTop: 18,
+      marginHorizontal: 32,
+    },
+    legalLink: { color: t.accent, fontWeight: '700' },
   });
