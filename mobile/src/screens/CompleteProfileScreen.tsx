@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { Button, SegmentedButtons, Text, TextInput } from 'react-native-paper';
 import { updateProfile } from '../api/users';
 import { extractErrorMessage } from '../api/client';
@@ -10,6 +10,7 @@ import { TOKEN_KEY } from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppTheme } from '../theme/ThemeContext';
 import OccupationPicker from '../components/OccupationPicker';
+import KeyboardAwareForm from '../components/KeyboardAwareForm';
 
 const LOGO = require('../../assets/Logo.png');
 // Fixed brand chrome (navy page, white card), matching PhoneAuthScreen —
@@ -76,10 +77,7 @@ export default function CompleteProfileScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.page}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAwareForm style={styles.page}>
       <View style={styles.brandArea}>
         <View style={styles.logoTile}>
           <Image source={LOGO} style={styles.logo} resizeMode="contain" />
@@ -176,7 +174,7 @@ export default function CompleteProfileScreen() {
           Continue
         </Button>
       </View>
-    </KeyboardAvoidingView>
+    </KeyboardAwareForm>
   );
 }
 

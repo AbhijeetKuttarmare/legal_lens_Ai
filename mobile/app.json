@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.legallensai.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "infoPlist": {
         "NSCameraUsageDescription": "Clauzera AI needs camera access so you can scan a physical document for AI analysis.",
         "ITSAppUsesNonExemptEncryption": false

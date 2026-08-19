@@ -20,6 +20,7 @@ import { TemplateTypeOption, PersonalTemplateSummary } from '../api/types';
 import { useAppTheme, AppTheme } from '../theme/ThemeContext';
 import { useAppSelector } from '../store/hooks';
 import UpgradeGate from '../components/UpgradeGate';
+import KeyboardAwareForm from '../components/KeyboardAwareForm';
 
 const FIELD_SETS: Record<string, string[]> = {
   RENTAL_AGREEMENT: [
@@ -191,7 +192,7 @@ function AiTemplatesTab() {
   }
 
   return (
-    <ScrollView style={styles.page} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+    <KeyboardAwareForm style={styles.page} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
       <Text style={styles.subtitle}>
         Generate a draft document from a template. This is a starting point, not a final legal document.
       </Text>
@@ -278,7 +279,7 @@ function AiTemplatesTab() {
           </Button>
         </View>
       )}
-    </ScrollView>
+    </KeyboardAwareForm>
   );
 }
 
@@ -401,7 +402,7 @@ function PersonalTemplatesTab() {
 
   if (mode === 'fill' && active) {
     return (
-      <ScrollView style={styles.page} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+      <KeyboardAwareForm style={styles.page} contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
         <Pressable onPress={() => setMode('list')}>
           <Text style={styles.backLink}>← Back to My Templates</Text>
         </Pressable>
@@ -437,7 +438,7 @@ function PersonalTemplatesTab() {
             Generate Document
           </Button>
         </View>
-      </ScrollView>
+      </KeyboardAwareForm>
     );
   }
 
