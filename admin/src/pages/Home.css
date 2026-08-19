@@ -4,10 +4,19 @@
   --site-navy-700: #16223B;
   --site-gold: #B08D57;
   --site-gold-soft: rgba(176, 141, 87, 0.14);
-  --site-bg: #F8FAFC;
-  --site-text: #111827;
-  --site-text-muted: #5B6472;
-  --site-border: #E5E8EF;
+  /* Whole site now matches the hero's dark theme, not just the top —
+     was a light #F8FAFC page with a dark hero band, which read as two
+     different products stitched together. */
+  --site-bg: #0A101E;
+  --site-text: #F5F7FA;
+  --site-text-muted: #9AA5B8;
+  --site-border: rgba(255, 255, 255, 0.1);
+
+  /* Liquid glass — translucent frosted panels for cards (Services,
+     Steps, FAQ, pricing) that used to be plain white boxes. */
+  --site-glass-surface: color-mix(in srgb, var(--site-text) 6%, transparent);
+  --site-glass-border: color-mix(in srgb, var(--site-text) 14%, transparent);
+  --site-glass-blur: blur(24px) saturate(180%);
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: var(--site-text);
@@ -561,7 +570,7 @@
 }
 
 .section-alt {
-  background: white;
+  background: var(--site-navy-800);
 }
 
 .section-dark {
@@ -605,7 +614,7 @@
   font-weight: 800;
   letter-spacing: -0.01em;
   margin: 0;
-  color: var(--site-navy);
+  color: var(--site-text);
 }
 
 .light-heading {
@@ -628,8 +637,10 @@
 
 .service-card {
   position: relative;
-  background: white;
-  border: 1px solid var(--site-border);
+  background: var(--site-glass-surface);
+  backdrop-filter: var(--site-glass-blur);
+  -webkit-backdrop-filter: var(--site-glass-blur);
+  border: 1px solid var(--site-glass-border);
   border-radius: 18px;
   padding: 26px 22px 24px;
   overflow: hidden;
@@ -638,7 +649,7 @@
 
 .service-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 16px 32px rgba(11, 18, 32, 0.08);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
 }
 
 .service-n {
@@ -664,13 +675,13 @@
 .service-icon-svg {
   width: 22px;
   height: 22px;
-  color: var(--site-navy);
+  color: var(--site-gold);
 }
 
 .service-card h3 {
   font-size: 15.5px;
   font-weight: 700;
-  color: var(--site-navy);
+  color: var(--site-text);
   margin: 0 0 8px;
 }
 
@@ -690,8 +701,10 @@
 }
 
 .step-card {
-  background: white;
-  border: 1px solid var(--site-border);
+  background: var(--site-glass-surface);
+  backdrop-filter: var(--site-glass-blur);
+  -webkit-backdrop-filter: var(--site-glass-blur);
+  border: 1px solid var(--site-glass-border);
   border-radius: 16px;
   padding: 28px 24px;
 }
@@ -711,7 +724,7 @@
   font-size: 17px;
   font-weight: 700;
   margin: 0 0 8px;
-  color: var(--site-navy);
+  color: var(--site-text);
 }
 
 .step-card p {
@@ -739,7 +752,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: var(--site-navy);
+  background: var(--site-gold-soft);
+  border: 1px solid var(--site-glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -756,7 +770,7 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 8px;
-  color: var(--site-navy);
+  color: var(--site-text);
 }
 
 .feature-card p {
@@ -775,16 +789,18 @@
 }
 
 .usecase-card {
-  border: 1px solid var(--site-border);
+  border: 1px solid var(--site-glass-border);
   border-radius: 14px;
   padding: 22px 20px;
-  background: white;
+  background: var(--site-glass-surface);
+  backdrop-filter: var(--site-glass-blur);
+  -webkit-backdrop-filter: var(--site-glass-blur);
 }
 
 .usecase-card h3 {
   font-size: 15px;
   font-weight: 700;
-  color: var(--site-navy);
+  color: var(--site-text);
   margin: 0 0 8px;
 }
 
@@ -827,8 +843,10 @@
 
 .price-card {
   position: relative;
-  background: white;
-  border: 1.5px solid var(--site-border);
+  background: var(--site-glass-surface);
+  backdrop-filter: var(--site-glass-blur);
+  -webkit-backdrop-filter: var(--site-glass-blur);
+  border: 1.5px solid var(--site-glass-border);
   border-radius: 18px;
   padding: 30px 26px;
   display: flex;
@@ -836,10 +854,10 @@
 }
 
 .price-card-highlight {
-  background: var(--site-navy);
-  border-color: var(--site-navy);
+  background: color-mix(in srgb, var(--site-gold) 10%, var(--site-navy-800));
+  border-color: var(--site-gold);
   transform: scale(1.03);
-  box-shadow: 0 20px 40px rgba(11, 18, 32, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
 }
 
 .price-badge {
@@ -860,7 +878,7 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 10px;
-  color: var(--site-navy);
+  color: var(--site-text);
 }
 
 .price-card-highlight h3 {
@@ -870,7 +888,7 @@
 .price-value {
   font-size: 34px;
   font-weight: 800;
-  color: var(--site-navy);
+  color: var(--site-text);
   margin-bottom: 22px;
 }
 
@@ -930,8 +948,10 @@
 }
 
 .faq-item {
-  background: white;
-  border: 1px solid var(--site-border);
+  background: var(--site-glass-surface);
+  backdrop-filter: var(--site-glass-blur);
+  -webkit-backdrop-filter: var(--site-glass-blur);
+  border: 1px solid var(--site-glass-border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -947,7 +967,7 @@
   padding: 18px 20px;
   font-size: 14.5px;
   font-weight: 600;
-  color: var(--site-navy);
+  color: var(--site-text);
   text-align: left;
   cursor: pointer;
 }
