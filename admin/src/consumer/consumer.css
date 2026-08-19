@@ -30,6 +30,19 @@
   --cw-gold-bright: var(--cw-user-accent, #E8A93D);
   --cw-btn-bg: var(--cw-user-btn-color, var(--cw-gold-bright));
 
+  /* Liquid glass — translucent frosted layers for chrome/containers
+     (sidebar, cards, dropdowns). Kept separate from --cw-dark-surface,
+     which stays opaque since it's reused inside light/white cards
+     (Login, Complete Profile) where a translucent fill would wash out.
+     Mixed from --cw-dark-text rather than a fixed white so the frost
+     tint auto-flips (white-on-dark / dark-on-light) with the light
+     mode toggle in theme.ts, instead of going invisible in light mode. */
+  --cw-glass-surface: color-mix(in srgb, var(--cw-dark-text) 6%, transparent);
+  --cw-glass-surface-2: color-mix(in srgb, var(--cw-dark-text) 4%, transparent);
+  --cw-glass-border: color-mix(in srgb, var(--cw-dark-text) 16%, transparent);
+  --cw-glass-blur: blur(28px) saturate(180%);
+  --cw-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.16), inset 0 1px 0 color-mix(in srgb, var(--cw-dark-text) 10%, transparent);
+
   min-height: 100vh;
   background: var(--cw-bg);
   color: var(--cw-text);
@@ -54,17 +67,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 20% 20%, var(--cw-navy-800) 0%, var(--cw-navy) 55%);
+  background:
+    radial-gradient(500px circle at 12% 15%, color-mix(in srgb, var(--cw-gold-bright) 30%, transparent), transparent 60%),
+    radial-gradient(550px circle at 88% 20%, rgba(99, 102, 241, 0.28), transparent 60%),
+    radial-gradient(600px circle at 80% 90%, rgba(16, 185, 129, 0.2), transparent 60%),
+    radial-gradient(circle at 20% 20%, var(--cw-navy-800) 0%, var(--cw-navy) 55%);
   padding: 24px;
 }
 
 .cw-auth-card {
-  background: white;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
   padding: 36px 32px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .cw-auth-brand {
@@ -195,9 +215,11 @@
   display: inline-flex;
   gap: 4px;
   margin-bottom: 24px;
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
-  border-radius: 10px;
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
+  border-radius: 12px;
   padding: 4px;
 }
 
@@ -274,8 +296,10 @@
 }
 
 .cw-fix-box {
-  background: var(--cw-dark-surface-2);
-  border: 1px solid var(--cw-dark-border);
+  background: var(--cw-glass-surface-2);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
   border-radius: 12px;
   padding: 12px 14px;
   margin-top: 8px;
@@ -383,16 +407,34 @@
 /* ---------- Shell: sidebar + main ---------- */
 
 .cw-shell {
+  position: relative;
   display: flex;
   min-height: 100vh;
   background: var(--cw-dark-bg);
+  overflow: hidden;
+}
+
+.cw-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(600px circle at 12% 18%, color-mix(in srgb, var(--cw-gold-bright) 20%, transparent), transparent 60%),
+    radial-gradient(650px circle at 85% 12%, rgba(99, 102, 241, 0.2), transparent 60%),
+    radial-gradient(700px circle at 78% 88%, rgba(16, 185, 129, 0.14), transparent 60%),
+    radial-gradient(500px circle at 8% 92%, rgba(236, 72, 153, 0.12), transparent 60%);
 }
 
 .cw-sidebar {
+  z-index: 1;
   width: 260px;
   flex-shrink: 0;
-  background: var(--cw-dark-bg);
-  border-right: 1px solid var(--cw-dark-border);
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border-right: 1px solid var(--cw-glass-border);
   display: flex;
   flex-direction: column;
   padding: 22px 16px;
@@ -421,8 +463,10 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
   color: var(--cw-dark-text-muted);
   align-items: center;
   justify-content: center;
@@ -435,8 +479,10 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
   color: var(--cw-dark-text);
   align-items: center;
   justify-content: center;
@@ -452,7 +498,9 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: var(--cw-dark-surface);
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
   border: 1px solid var(--cw-gold-bright);
   display: flex;
   align-items: center;
@@ -535,10 +583,13 @@
 }
 
 .cw-sidebar-plan-card {
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
-  border-radius: 12px;
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
+  border-radius: 14px;
   padding: 14px;
+  box-shadow: var(--cw-glass-shadow);
 }
 
 .cw-sidebar-plan-label {
@@ -589,7 +640,10 @@
   align-items: center;
   gap: 10px;
   padding: 8px;
-  border: 1px solid var(--cw-dark-border);
+  border: 1px solid var(--cw-glass-border);
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
   border-radius: 12px;
 }
 
@@ -636,7 +690,7 @@
   gap: 9px;
   width: 100%;
   background: transparent;
-  border: 1px solid var(--cw-dark-border);
+  border: 1px solid var(--cw-glass-border);
   color: var(--cw-dark-text-muted);
   padding: 10px 12px;
   border-radius: 9px;
@@ -656,6 +710,8 @@
 }
 
 .cw-main {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
 }
@@ -665,15 +721,17 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 44px 0;
-  background: var(--cw-dark-bg);
+  background: transparent;
 }
 
 .cw-bell-btn {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -701,13 +759,15 @@
   position: absolute;
   right: 0;
   top: 46px;
-  background: white;
-  border: 1px solid var(--cw-border);
+  background: var(--cw-glass-surface-2);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
   border-radius: 12px;
   padding: 14px 16px;
   font-size: 13px;
-  color: var(--cw-text-muted);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  color: var(--cw-dark-text-muted);
+  box-shadow: var(--cw-glass-shadow);
   white-space: nowrap;
   z-index: 20;
 }
@@ -719,11 +779,13 @@
   right: 0;
   top: 46px;
   width: 240px;
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
-  border-radius: 14px;
+  background: var(--cw-glass-surface-2);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
+  border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--cw-glass-shadow);
   z-index: 20;
 }
 
@@ -1053,12 +1115,15 @@
 }
 
 .cw-card {
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
-  border-radius: 16px;
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
+  border-radius: 20px;
   padding: 18px;
   margin-bottom: 16px;
   color: var(--cw-dark-text);
+  box-shadow: var(--cw-glass-shadow);
 }
 
 /* ---------- Overview stats ---------- */
@@ -1077,10 +1142,13 @@
 }
 
 .cw-stat-card {
-  background: var(--cw-dark-surface);
-  border: 1px solid var(--cw-dark-border);
-  border-radius: 16px;
+  background: var(--cw-glass-surface);
+  backdrop-filter: var(--cw-glass-blur);
+  -webkit-backdrop-filter: var(--cw-glass-blur);
+  border: 1px solid var(--cw-glass-border);
+  border-radius: 18px;
   padding: 16px;
+  box-shadow: var(--cw-glass-shadow);
 }
 
 .cw-stat-icon {
